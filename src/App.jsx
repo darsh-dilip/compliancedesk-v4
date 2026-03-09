@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from './firebase.js'
 import { useAuth } from './hooks/useAuth.js'
 import { useCollection } from './hooks/useFirestore.js'
@@ -42,6 +42,7 @@ export default function App() {
 
   const login  = (email, password) => signInWithEmailAndPassword(auth, email, password)
   const logout = () => signOut(auth)
+  const createUser  = (email, password) => createUserWithEmailAndPassword(auth, email, password)
 
   const navigatePending = useCallback((bucket) => {
     setNavFilter(bucket === 'all' ? null : bucket)
@@ -136,7 +137,7 @@ export default function App() {
       case 'audit':
         return isMgr ? <AuditLogPage users={users} currentUser={currentUser}/> : null
       case 'users':
-        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser}/> : null
+        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser}/> : null
       default:
         return <DashboardPage
           tasks={visibleTasks} user={currentUser} users={users} clients={clients}
