@@ -19,11 +19,16 @@ const fmtTs = ts => {
 }
 
 export const AuditLogPage = ({ users, clients }) => {
-  const [logs,         setLogs]         = useState([])
-  const [loading,      setLoading]      = useState(true)
-  const [fAction,      setFAction]      = useState('')
-  const [fClient,      setFClient]      = useState('')
-  const [search,       setSearch]       = useState('')
+  const [logs,       setLogs]       = useState([])
+  const [loading,    setLoading]    = useState(true)
+  const [fAction,    setFAction]    = useState('')
+  const [fClient,    setFClient]    = useState('')
+  const [fMember,    setFMember]    = useState('')
+  const [fStatusFrom,setFStatusFrom]= useState('')
+  const [fStatusTo,  setFStatusTo]  = useState('')
+  const [fDateFrom,  setFDateFrom]  = useState('')
+  const [fDateTo,    setFDateTo]    = useState('')
+  const [search,     setSearch]     = useState('')
 
   useEffect(()=>{
     const unsub = subscribeLogs(data=>{ setLogs(data); setLoading(false) }, ()=>setLoading(false), 500)
@@ -31,9 +36,21 @@ export const AuditLogPage = ({ users, clients }) => {
   },[])
 
   const filtered = logs.filter(l=>{
-    if (fAction && l.action!==fAction) return false
-    if (fClient && l.clientId!==fClient) return false
-    if (search && !`${l.entityName} ${l.clientName} ${l.by?.name} ${l.note}`.toLowerCase().includes(search.toLowerCase())) return false
+    if (fAction  && l.action!==fAction)          return false
+    if (fClient  && l.clientId!==fClient)        return false
+    if (fMember  && l.by?.id!==fMember)          return false
+    if (fStatusFrom && l.oldValue!==fStatusFrom) return false
+    if (fStatusTo   && l.newValue!==fStatusTo)   return false
+    if (fDateFrom) {
+      const d = l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||0)
+      if (d < new Date(fDateFrom)) return false
+    }
+    if (fDateTo) {
+      const d = l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||0)
+      const to = new Date(fDateTo); to.setHours(23,59,59)
+      if (d > to) return false
+    }
+    if (search && !`${l.entityName} ${l.clientName} ${l.by?.name} ${l.note} ${l.oldValue} ${l.newValue}`.toLowerCase().includes(search.toLowerCase())) return false
     return true
   })
 
@@ -45,12 +62,16 @@ export const AuditLogPage = ({ users, clients }) => {
     return acc
   },{})
 
+  const hasFilters = fAction||fClient||fMember||fStatusFrom||fStatusTo||fDateFrom||fDateTo||search
+  const clearAll = () => { setFAction(''); setFClient(''); setFMember(''); setFStatusFrom(''); setFStatusTo(''); setFDateFrom(''); setFDateTo(''); setSearch('') }
+
   return (
     <div className="fade-up" style={{ padding:'24px 28px',maxWidth:900 }}>
       <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Audit Log</div>
       <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>Every action — status changes, reassignments, client updates — timestamped and attributed.</div>
 
-      <div style={{ display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr',gap:8,marginBottom:14 }}>
+      {/* Filter row 1 */}
+      <div style={{ display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr',gap:8,marginBottom:8 }}>
         <input placeholder="🔍  Search…" value={search} onChange={e=>setSearch(e.target.value)}/>
         <select value={fAction} onChange={e=>setFAction(e.target.value)}>
           <option value="">All Actions</option>
@@ -60,6 +81,22 @@ export const AuditLogPage = ({ users, clients }) => {
           <option value="">All Clients</option>
           {clients.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
+      </div>
+      {/* Filter row 2 */}
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr auto',gap:8,marginBottom:14 }}>
+        <select value={fMember} onChange={e=>setFMember(e.target.value)}>
+          <option value="">All Members</option>
+          {users.map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
+        </select>
+        <input type="text" placeholder="Status from (e.g. pending)" value={fStatusFrom} onChange={e=>setFStatusFrom(e.target.value)}/>
+        <input type="text" placeholder="Status to (e.g. filed)" value={fStatusTo} onChange={e=>setFStatusTo(e.target.value)}/>
+        <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:6 }}>
+          <input type="date" value={fDateFrom} onChange={e=>setFDateFrom(e.target.value)} title="From date"/>
+          <input type="date" value={fDateTo}   onChange={e=>setFDateTo(e.target.value)}   title="To date"/>
+        </div>
+        {hasFilters && (
+          <button className="btn btn-ghost btn-sm" onClick={clearAll} style={{ fontSize:11,whiteSpace:'nowrap' }}>✕ Clear</button>
+        )}
       </div>
 
       <div style={{ fontSize:12,color:'var(--text3)',marginBottom:16 }}>{loading?'Loading…':`${filtered.length} entries`}</div>
