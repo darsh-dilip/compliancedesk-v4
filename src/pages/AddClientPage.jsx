@@ -79,6 +79,8 @@ export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
           <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:12 }}>📋 Basic Information</div>
           <div className="grid-2" style={{ gap:10 }}>
             <div style={{ gridColumn:'1/-1' }}><Label>Client / Business Name *</Label><input placeholder="e.g. Sharma Enterprises Pvt Ltd" value={form.name} onChange={e=>set('name',e.target.value)}/></div>
+            <div><Label>Phone Number *</Label><input placeholder="+91 98765 43210" type="tel" value={form.phone} onChange={e=>set('phone',e.target.value)}/></div>
+            <div><Label>Email ID *</Label><input placeholder="contact@business.com" type="email" value={form.email} onChange={e=>set('email',e.target.value)}/></div>
             <div><Label>Constitution *</Label>
               <select value={form.constitution} onChange={e=>set('constitution',e.target.value)}>
                 {CONSTITUTIONS.map(c=><option key={c}>{c}</option>)}
