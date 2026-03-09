@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS } from '../constants.js'
+import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS } , CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
 import { getBucket, fmtDate } from '../utils/dates.js'
 import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
 
@@ -44,17 +44,30 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ marginBottom:10 }}>
           {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
         </select>
-        <div style={{ display:'flex',flexDirection:'column',gap:2,maxHeight:'calc(100vh - 280px)',overflow:'auto' }}>
-          {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(c=>(
-            <button key={c.id} onClick={()=>setSelClient(c.id)}
-              style={{ width:'100%',textAlign:'left',padding:'8px 12px',borderRadius:7,border:'none',cursor:'pointer',
-                background:selClient===c.id?'var(--surface3)':'transparent',
-                color:selClient===c.id?'var(--text)':'var(--text2)',
-                fontWeight:selClient===c.id?700:400,fontSize:12,
-                borderLeft:selClient===c.id?'2px solid var(--accent)':'2px solid transparent' }}>
-              {c.name}
-            </button>
-          ))}
+        <div style={{ display:'flex',flexDirection:'column',gap:4,maxHeight:'calc(100vh - 280px)',overflow:'auto' }}>
+          {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(cl=>{
+            const isActive = selClient===cl.id
+            const initials = cl.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()
+            const cst = cl.clientStatus||'active'
+            const stColor = cst==='discontinued'?'#f43f5e':cst==='on_hold'?'#f59e0b':'#22c55e'
+            return (
+              <button key={cl.id} onClick={()=>setSelClient(cl.id)}
+                style={{ width:'100%',textAlign:'left',padding:'9px 12px',borderRadius:9,cursor:'pointer',
+                  background:isActive?'var(--surface3)':'var(--surface)',
+                  border:`1px solid ${isActive?'var(--accent)30':'var(--border)'}`,
+                  borderLeft:`3px solid ${isActive?'var(--accent)':'transparent'}`,transition:'all .12s' }}>
+                <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+                  <div style={{ width:28,height:28,borderRadius:6,background:isActive?'var(--accent)':'var(--surface2)',border:`1px solid ${stColor}50`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:isActive?'#fff':'var(--text3)',flexShrink:0 }}>
+                    {initials}
+                  </div>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <div style={{ fontWeight:isActive?700:500,fontSize:12,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{cl.name}</div>
+                    <div style={{ fontSize:9,color:stColor,fontWeight:600 }}>{cst==='on_hold'?'On Hold':cst==='discontinued'?'Discontinued':'Active'}</div>
+                  </div>
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
 
