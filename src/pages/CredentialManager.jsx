@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { CRED_SERVICES } from '../constants.js'
+import { CRED_SERVICES, CLIENT_CATEGORIES } from '../constants.js'
 import { getClientCredentials, upsertCredential } from '../hooks/useFirestore.js'
 import { Label, Alert } from '../components/UI.jsx'
 import { ROLES, ROLE_CLR } from '../constants.js'
@@ -211,8 +211,10 @@ export const CredentialManager = ({ clients, currentUser }) => {
   const [editCred,         setEditCred]         = useState(null)
   const [showBulk,         setShowBulk]         = useState(false)
   const [search,           setSearch]           = useState('')
+  const [fCat,             setFCat]             = useState('')
   const [showPwds,         setShowPwds]         = useState({})
   const [copied,           setCopied]           = useState('')
+  const [fCat,             setFCat]             = useState('')
 
   useEffect(()=>{
     if (!selectedClientId) { setCreds([]); return }
