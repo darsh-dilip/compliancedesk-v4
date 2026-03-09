@@ -148,7 +148,7 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
 
   /* Page margins */
   @page {
-    margin: 15mm 10mm;
+    margin: 0;
     size: A4;
   }
 }
