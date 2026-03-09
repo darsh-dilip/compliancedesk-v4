@@ -33,7 +33,6 @@ export const generateTasks = (client, assignedTo, fy='2025-26', complianceStartY
         const {m,y}=fyMon(i,fyS); const nm=nextMon(m,y)
         const period=`${MONTHS[m]} ${y}`; const pym=ymStr(y,m)
         push(task('GSTR-1',period,clamp(nm.y,nm.m,11),pym))
-        push(task('GSTR-2B Reconciliation',period,clamp(nm.y,nm.m,15),pym))
         push(task('GSTR-3B',period,clamp(nm.y,nm.m,20),pym))
       }
     } else {
@@ -41,7 +40,6 @@ export const generateTasks = (client, assignedTo, fy='2025-26', complianceStartY
        {p:'Q3 (Oct–Dec)',pm:9,dy:fyE,dm:0},{p:'Q4 (Jan–Mar)',pm:0,dy:fyE,dm:3}].forEach(q=>{
         const pym=`${q.dm<3?fyE:fyS}-${String(q.pm+1).padStart(2,'0')}`
         push(task('GSTR-1 (Quarterly)',q.p,clamp(q.dy,q.dm,13),pym))
-        push(task('GSTR-2B Reconciliation',q.p,clamp(q.dy,q.dm,15),pym))
         push(task('GSTR-3B (Quarterly)',q.p,clamp(q.dy,q.dm,22),pym))
       })
     }
