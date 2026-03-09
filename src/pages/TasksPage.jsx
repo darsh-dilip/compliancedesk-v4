@@ -394,7 +394,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           <div style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
             {STATUS_KANBAN_COLS.map(col=>(
               <KanbanCol key={`${col.key}-${refreshK}`} col={col} tasks={statusGroups[col.key]||[]}
-                users={users} clients={clients} onTask={onTask} currentUser={user}
+                allTasks={visible} users={users} clients={clients} onTask={onTask} currentUser={user}
                 onMoved={refresh} kanbanType="status"
               />
             ))}
@@ -408,7 +408,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           <div style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
             {urgencyCols.map(col=>(
               <KanbanCol key={`${col.key}-${refreshK}`} col={col} tasks={urgencyGroups[col.key]||[]}
-                users={users} clients={clients} onTask={onTask} currentUser={user}
+                allTasks={visible} users={users} clients={clients} onTask={onTask} currentUser={user}
                 onMoved={refresh} kanbanType="urgency"
               />
             ))}
