@@ -214,7 +214,6 @@ export const CredentialManager = ({ clients, currentUser }) => {
   const [fCat,             setFCat]             = useState('')
   const [showPwds,         setShowPwds]         = useState({})
   const [copied,           setCopied]           = useState('')
-  const [fCat,             setFCat]             = useState('')
 
   useEffect(()=>{
     if (!selectedClientId) { setCreds([]); return }
