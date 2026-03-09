@@ -6,7 +6,7 @@ import { getBucket, getStatusKanbanCol, daysDiff, fmtDate, isTaskPending } from 
 import { getVisibleUserIds } from '../utils/hierarchy.js'
 import { updateTask, deleteTask } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged } from '../utils/auditLog.js'
-import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal, PrintButton, PrintHeader } from '../components/UI.jsx'
+import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal, PrintButton } from '../components/UI.jsx'
 import { arrayUnion } from 'firebase/firestore'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
@@ -334,13 +334,13 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
   },[visible,clientStatusMap])
 
   const urgencyCols = [
-    { key:'overdue',    label:'🔴 Overdue',        color:'#f43f5e' },
-    { key:'today',      label:'🟠 Today',           color:'#fb923c' },
-    { key:'soon3',      label:'🟡 3 Days',          color:'#f59e0b' },
-    { key:'soon7',      label:'🔵 7 Days',          color:'#5b8dee' },
-    { key:'this_month', label:'🩵 This Month',      color:'#38bdf8' },
-    { key:'hold',       label:'⏸ Hold / Refused',  color:'#a78bfa' },
-    { key:'completed',  label:'✅ Completed',        color:'#22c55e' },
+    { key:'overdue',    label:'Overdue',        color:'#f43f5e' },
+    { key:'today',      label:'Today',           color:'#fb923c' },
+    { key:'soon3',      label:'3 Days',          color:'#f59e0b' },
+    { key:'soon7',      label:'7 Days',          color:'#5b8dee' },
+    { key:'this_month', label:'This Month',      color:'#38bdf8' },
+    { key:'hold',       label:'Hold / Refused',  color:'#a78bfa' },
+    { key:'completed',  label:'Completed',        color:'#22c55e' },
   ]
 
   const refresh = () => setRefreshK(k=>k+1)
@@ -353,6 +353,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           {showPendingOnly?'Pending Tasks':'All Tasks'}
           {initialBucket&&<span style={{ fontSize:13,color:'var(--text3)',fontWeight:400,marginLeft:8 }}>· {initialBucket}</span>}
         </div>
+        <PrintButton title={showPendingOnly?'Pending Tasks':'All Tasks'}/>
         <div style={{ display:'flex',gap:3,background:'var(--surface2)',borderRadius:8,padding:3,border:'1px solid var(--border)' }}>
           {[['list','≡ List'],['status','⊞ Status'],['urgency','⏱ Urgency']].map(([v,l])=>(
             <button key={v} onClick={()=>{ setView(v==='list'?'list':'kanban'); if(v!=='list') setKanbanType(v) }}
@@ -406,7 +407,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
       {/* ── List View ──────────────────────────────── */}
       {view==='list'&&(
         <>
-          <div style={{ display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr 150px 110px 20px',gap:12,padding:'4px 16px 8px' }}>
+          <div style={{ display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr 150px 110px 20px',gap:12,padding:'4px 16px 8px',position:'sticky',top:0,zIndex:10,background:'var(--bg)',borderBottom:'1px solid var(--border2)' }}>
             {['Task / Client','Due Date','Assigned To','Status','Urgency',''].map((h,i)=>(
               <div key={i} style={{ fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'0.05em' }}>{h}</div>
             ))}
