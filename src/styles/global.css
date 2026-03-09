@@ -43,6 +43,13 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
 
 /* ── Print Styles ─────────────────────────────────── */
 @media print {
+  /* Preserve colors exactly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
   /* Hide everything non-content */
   .no-print,
   .sidebar-root,
@@ -52,18 +59,8 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
     display: none !important;
   }
 
-  /* White background, black text */
-  * {
-    background: #fff !important;
-    color: #111 !important;
-    border-color: #ddd !important;
-    box-shadow: none !important;
-    text-shadow: none !important;
-    animation: none !important;
-  }
-
+  /* Keep dark theme — just remove overscroll */
   html, body, #root {
-    background: #fff !important;
     height: auto !important;
     overflow: visible !important;
   }
