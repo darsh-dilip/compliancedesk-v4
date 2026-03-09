@@ -137,3 +137,35 @@ export const BucketSection = ({ label, tasks, color, users, clients, onTask, def
     </div>
   )
 }
+
+// ── Print Button ────────────────────────────────────────────
+export const PrintButton = ({ label = '⬇ Download PDF', title = '', subtitle = '' }) => {
+  const handlePrint = () => {
+    // Set a temporary document title for the PDF filename
+    const prev = document.title
+    if (title) document.title = title
+    window.print()
+    document.title = prev
+  }
+  return (
+    <button
+      className="btn btn-ghost btn-sm no-print"
+      onClick={handlePrint}
+      style={{ fontSize: 12, gap: 5 }}
+      title="Download as PDF"
+    >
+      ⬇ {label}
+    </button>
+  )
+}
+
+// ── Print Header (visible only on print) ────────────────────
+export const PrintHeader = ({ title, subtitle }) => (
+  <div className="print-header" style={{ display: 'none' }}>
+    <div style={{ fontWeight: 800, fontSize: 18 }}>⚖️ ComplianceDesk — {title}</div>
+    {subtitle && <div style={{ fontSize: 12, marginTop: 4 }}>{subtitle}</div>}
+    <div style={{ fontSize: 11, marginTop: 4, color: '#555' }}>
+      Printed: {new Date().toLocaleString('en-IN', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })}
+    </div>
+  </div>
+)
