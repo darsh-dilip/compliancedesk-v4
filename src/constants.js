@@ -5,8 +5,8 @@ export const ROLES = {
 }
 export const ROLE_ORDER = { partner:0, hod:1, team_leader:2, executive:3, intern:4 }
 export const ROLE_CLR   = {
-  partner:'#f59e0b', hod:'#7b6cf6', team_leader:'#34d399',
-  executive:'#5b8dee', intern:'#8892b0',
+  partner:'#f59e0b', hod:'#ec4899', team_leader:'#34d399',
+  executive:'#5b8dee', intern:'#fde68a',
 }
 
 // ── FINANCIAL YEARS ──────────────────────────────────────────
@@ -243,6 +243,9 @@ export const URGENCY_KANBAN_COLS = [
 
 // ── MISC ─────────────────────────────────────────────────────
 export const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+export const CLIENT_CATEGORIES = ['A+','A','B','C','D']
+export const CAT_CLR = { 'A+':'#22c55e','A':'#5b8dee','B':'#f59e0b','C':'#fb923c','D':'#f43f5e' }
+
 export const CONSTITUTIONS = [
   'Private Limited','LLP','Public Limited','Partnership Firm',
   'Proprietorship','Trust / Section 8','HUF',
@@ -276,3 +279,5 @@ export const CRED_SERVICES = [
 export const getCredForTask = (service) => {
   return CRED_SERVICES.filter(cs => cs.tasks.includes(service))
 }
+
+export const DEPARTMENTS = ['CC','RR','FF','SS','HR','MM','LL']
