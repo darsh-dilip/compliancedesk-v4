@@ -168,7 +168,15 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
         </div>
         <div style={{ display:'flex',gap:8 }}>
           {['partner','hod'].includes(currentUser.role) && (
-            <button className="btn btn-ghost btn-sm" onClick={()=>setShowEditClient(true)}>✏️ Edit</button>
+            <>
+              <button className="btn btn-ghost btn-sm" onClick={()=>setShowEditClient(true)}>✏️ Edit</button>
+              <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)' }}
+                onClick={async()=>{
+                  if (!window.confirm(`Permanently delete "${client.name}"? All their tasks will remain but the client record will be removed. This cannot be undone.`)) return
+                  await deleteClient(client.id)
+                  onBack()
+                }}>🗑 Delete</button>
+            </>
           )}
           <button className="btn btn-primary btn-sm" onClick={()=>onAddAdhoc(client)}>+ Ad-hoc Task</button>
           <button className="btn btn-ghost btn-sm" onClick={()=>setReassigning(!reassigning)}>↔ Reassign All</button>
