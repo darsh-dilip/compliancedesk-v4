@@ -439,5 +439,6 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
         </div>
       )}
     </div>
+  </div>
   )
 }
