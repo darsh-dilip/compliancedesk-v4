@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { MONTHS, DONE_STATUSES, getStatusObj } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
 
-const GST_SVCS = ['GSTR-1','GSTR-1 (Quarterly)','GSTR-2B Reconciliation','GSTR-3B','GSTR-3B (Quarterly)']
+const GST_SVCS = ['GSTR-1','GSTR-1 (Quarterly)','GSTR-3B','GSTR-3B (Quarterly)']
 const FY_MONTHS = [3,4,5,6,7,8,9,10,11,0,1,2]
 
 const periodToMonth = period => {
@@ -16,7 +16,8 @@ const Cell = ({ task, onClick }) => {
   const st  = getStatusObj(task.service, task.status)
   const ov  = getBucket(task)==='overdue'
   return (
-    <div onClick={()=>onClick(task)} title={`${st.l} — ${task.period}`} style={{ height:26,borderRadius:4,background:st.bg,border:`1px solid ${st.c}40`,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:700,color:st.c,outline:ov?`2px solid #f43f5e`:'none' }}
+    <div onClick={()=>onClick(task)} title={`${st.l} — ${task.period}`}
+      style={{ height:26,borderRadius:4,background:st.bg,border:`1px solid ${st.c}40`,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,fontWeight:700,color:st.c,outline:ov?`2px solid #f43f5e`:'none' }}
       onMouseEnter={e=>e.currentTarget.style.transform='scale(1.08)'}
       onMouseLeave={e=>e.currentTarget.style.transform='scale(1)'}>
       {st.l.slice(0,6)}
@@ -55,7 +56,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
   return (
     <div className="fade-up" style={{ padding:'24px 28px' }}>
       <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>GST Dashboard</div>
-      <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>GSTR-1 · GSTR-2B · GSTR-3B — all clients, Apr–Mar</div>
+      <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>GSTR-1 · GSTR-3B — all clients, Apr–Mar</div>
 
       <div className="grid-4" style={{ marginBottom:20 }}>
         {[
@@ -99,10 +100,10 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
                 <th style={{ padding:'8px 12px',textAlign:'left',color:'var(--text3)',fontWeight:600,fontSize:11,textTransform:'uppercase',position:'sticky',left:0,background:'var(--bg)',zIndex:2,minWidth:170 }}>Client</th>
                 <th style={{ padding:'8px 6px',color:'var(--text3)',fontWeight:600,fontSize:10,minWidth:30 }}>Freq</th>
                 {FY_MONTHS.map(m=>(
-                  <th key={m} style={{ padding:'6px 2px',color:'var(--text3)',fontWeight:600,fontSize:10,textAlign:'center',minWidth:84 }} colSpan={3}>
+                  <th key={m} style={{ padding:'6px 2px',color:'var(--text3)',fontWeight:600,fontSize:10,textAlign:'center',minWidth:56 }} colSpan={2}>
                     {MONTHS[m]}
-                    <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:2,marginTop:3 }}>
-                      {['G1','2B','3B'].map(s=><div key={s} style={{ fontSize:8,color:'var(--text3)',textAlign:'center' }}>{s}</div>)}
+                    <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:2,marginTop:3 }}>
+                      {['G1','3B'].map(s=><div key={s} style={{ fontSize:8,color:'var(--text3)',textAlign:'center' }}>{s}</div>)}
                     </div>
                   </th>
                 ))}
@@ -124,7 +125,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
                       <span style={{ fontSize:9,color:client.gstFreq==='monthly'?'#38bdf8':'#a78bfa',fontWeight:700 }}>{client.gstFreq==='monthly'?'M':'Q'}</span>
                     </td>
                     {FY_MONTHS.map(m=>(
-                      [sG1,'GSTR-2B Reconciliation',sG3].map(svc=>(
+                      [sG1,sG3].map(svc=>(
                         <td key={`${m}-${svc}`} style={{ padding:'2px 1px' }}>
                           <Cell task={cm[svc]?.[m]} onClick={onTask}/>
                         </td>
@@ -160,7 +161,8 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
                 {gt.slice(0,50).map(t=>{
                   const st=getStatusObj(t.service,t.status)
                   return (
-                    <div key={t.id} onClick={()=>onTask(t)} className="hover-lift" style={{ display:'grid',gridTemplateColumns:'2fr 1.5fr 120px 100px',gap:12,padding:'10px 14px',background:'var(--surface2)',borderRadius:8,border:'1px solid var(--border)',cursor:'pointer',marginBottom:4,alignItems:'center' }}>
+                    <div key={t.id} onClick={()=>onTask(t)} className="hover-lift"
+                      style={{ display:'grid',gridTemplateColumns:'2fr 1.5fr 120px 100px',gap:12,padding:'10px 14px',background:'var(--surface2)',borderRadius:8,border:'1px solid var(--border)',cursor:'pointer',marginBottom:4,alignItems:'center' }}>
                       <div>
                         <div style={{ fontWeight:600,fontSize:13,color:'var(--text)' }}>{t.clientName}</div>
                         <div style={{ fontSize:11,color:'var(--text2)' }}>{t.service} · {t.period}</div>
