@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { arrayUnion } from 'firebase/firestore'
-import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS } from '../constants.js'
+import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask, CRED_SERVICES } from '../constants.js'
 import { fmtDate } from '../utils/dates.js'
-import { updateTask, addTaskComment, deleteTask } from '../hooks/useFirestore.js'
+import { updateTask, addTaskComment, deleteTask, getClientCredentials } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged, logTaskReassigned, logCommentAdded } from '../utils/auditLog.js'
 import { Modal, Label, Avatar, Divider, Alert, ConfirmModal } from './UI.jsx'
 
@@ -24,6 +24,8 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const [error,      setError]      = useState('')
   const [tab,        setTab]        = useState('status')
   const [editDue,    setEditDue]    = useState(task.dueDate||'')
+  const [creds,      setCreds]      = useState([])
+  const [showPwds,   setShowPwds]   = useState({})
   const [editNotes,  setEditNotes]  = useState(task.statusNote||'')
   const [editDesc,   setEditDesc]   = useState(task.period||'')
   const [editSaving, setEditSaving] = useState(false)
@@ -34,6 +36,15 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const cBadge     = CLIENT_STATUS[cst]
   const selectedSt = statuses.find(x=>x.v===status)||{}
   const canDelete  = ['partner','hod'].includes(currentUser.role) || (task.isAdhoc && task.assignedTo===currentUser.id)
+  const relevantCredSvcs = getCredForTask(task.service)
+
+  useEffect(()=>{
+    if (!task.clientId || !relevantCredSvcs.length) return
+    const unsub = getClientCredentials(task.clientId, data=>{
+      setCreds(data.filter(c=>relevantCredSvcs.some(rs=>rs.v===c.service)))
+    })
+    return unsub
+  },[task.clientId])
 
   const save = async () => {
     setSaving(true); setError('')
@@ -116,7 +127,7 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
         </div>
 
         <div style={{ display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid var(--border)',paddingBottom:10,flexWrap:'wrap' }}>
-          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History']].map(([t,l])=>(
+          {[['status','✏️ Status'],['edit','🖊 Edit'],['creds','🔐 Credentials'],['comments','💬 Comments'],['history','📋 History']].map(([t,l])=>(
             <button key={t} onClick={()=>setTab(t)} style={tabSt(tab===t)}>{l}</button>
           ))}
           <button onClick={()=>setReassigning(!reassigning)} style={{ ...tabSt(reassigning),marginLeft:'auto' }}>↔ Reassign</button>
@@ -160,6 +171,46 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
             <div><Label>Internal Note (optional)</Label><textarea placeholder="Add an internal note…" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{ resize:'vertical' }}/></div>
             {error&&<Alert message={error}/>}
             <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?'Saving…':'Save Status Update'}</button>
+          </div>
+        )}
+
+        {tab==='creds'&&(
+          <div>
+            {relevantCredSvcs.length===0&&(
+              <div style={{ textAlign:'center',padding:24,color:'var(--text3)',fontSize:12 }}>No credentials linked to this service type.</div>
+            )}
+            {relevantCredSvcs.map(rs=>{
+              const cred = creds.find(c=>c.service===rs.v)
+              const showPwd = showPwds[rs.v]
+              return (
+                <div key={rs.v} style={{ background:'var(--surface2)',borderRadius:10,padding:'12px 14px',marginBottom:10,border:'1px solid var(--border)' }}>
+                  <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:8 }}>
+                    <span style={{ fontSize:16 }}>{rs.icon}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontWeight:700,fontSize:13,color:'var(--text)' }}>{rs.l}</div>
+                      {rs.url&&<a href={rs.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:10,color:'var(--accent)',textDecoration:'none' }}>🔗 Open Portal</a>}
+                    </div>
+                  </div>
+                  {cred ? (
+                    <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8 }}>
+                      <div>
+                        <div style={{ fontSize:9,color:'var(--text3)',marginBottom:2 }}>LOGIN ID</div>
+                        <div style={{ fontSize:11,fontFamily:'var(--mono)',color:'var(--text)',background:'var(--surface)',borderRadius:5,padding:'4px 8px' }}>{cred.loginId||'—'}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize:9,color:'var(--text3)',marginBottom:2 }}>PASSWORD</div>
+                        <div style={{ fontSize:11,fontFamily:'var(--mono)',color:'var(--text)',background:'var(--surface)',borderRadius:5,padding:'4px 8px',display:'flex',alignItems:'center',gap:4 }}>
+                          <span style={{ flex:1 }}>{showPwd?(cred.password||'—'):(cred.password?'••••••••':'—')}</span>
+                          {cred.password&&<button onClick={()=>setShowPwds(p=>({...p,[rs.v]:!p[rs.v]}))} style={{ background:'none',border:'none',cursor:'pointer',fontSize:12,color:'var(--text3)',padding:0 }}>{showPwd?'🙈':'👁'}</button>}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize:12,color:'var(--text3)',fontStyle:'italic' }}>No credentials stored for this portal. Add them in Credential Manager.</div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
 
