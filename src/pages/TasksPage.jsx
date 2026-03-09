@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef } from 'react'
 import { getServiceStatuses, DONE_STATUSES, DONE_NIL, DONE_PROPER, HOLD_REFUSED,
-  PENDING_AT_CLIENT, STATUS_KANBAN_COLS, URGENCY_KANBAN_COLS, getStatusObj } from '../constants.js'
+  PENDING_AT_CLIENT, STATUS_KANBAN_COLS, URGENCY_KANBAN_COLS, getStatusObj, ROLE_CLR } from '../constants.js'
 import { getBucket, getStatusKanbanCol, daysDiff, fmtDate, isTaskPending } from '../utils/dates.js'
 import { getVisibleUserIds } from '../utils/hierarchy.js'
 import { updateTask, deleteTask } from '../hooks/useFirestore.js'
@@ -46,46 +46,123 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
     onMoved?.()
   }
 
-  const dueDateColor = ov ? '#f43f5e' : dDiff===0 ? '#fb923c' : dDiff!==null&&dDiff<=3 ? '#f59e0b' : 'var(--text3)'
+  const dueDateColor = ov ? '#f43f5e' : dDiff===0 ? '#fb923c' : dDiff!==null&&dDiff<=3 ? '#f59e0b' : dDiff!==null&&dDiff<=7 ? '#a3e635' : 'var(--text3)'
+  const dueLabelColor = ov ? '#f43f5e' : dDiff===0 ? '#fb923c' : dDiff!==null&&dDiff<=3 ? '#f59e0b' : '#6b7280'
+  const dueLabel = ov
+    ? `${Math.abs(dDiff)}d late`
+    : dDiff===0 ? 'Today'
+    : dDiff!==null&&dDiff<=7 ? `${dDiff}d left`
+    : null
 
   return (
     <div
       draggable
       onDragStart={e=>{ e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('taskService', task.service) }}
-      style={{ background:'var(--surface)',border:`1px solid ${ov?'#f43f5e40':'var(--border)'}`,borderRadius:10,padding:'10px 12px',marginBottom:6,cursor:'grab',outline:ov?`2px solid #f43f5e20`:'' }}
+      style={{
+        background:'var(--surface)',
+        border:`1px solid ${ov?'#f43f5e50':'var(--border)'}`,
+        borderLeft:`3px solid ${st.c}`,
+        borderRadius:8,
+        padding:'10px 10px 8px 10px',
+        marginBottom:6,
+        cursor:'grab',
+        width:'100%',
+        boxSizing:'border-box',
+      }}
     >
-      {/* Clickable area → open modal */}
-      <div onClick={onClick} style={{ cursor:'pointer' }}>
-        <div style={{ fontWeight:700,fontSize:12,color:'var(--text)',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>
-          {task.service}
-          {task.isAdhoc&&<span style={{ marginLeft:6,fontSize:9,color:'#f59e0b',fontWeight:700 }}> AD-HOC</span>}
+      {/* ── Top: left=client+period, right=service+date+overdue ── */}
+      <div onClick={onClick} style={{ display:'grid',gridTemplateColumns:'1fr auto',gap:8,cursor:'pointer',marginBottom:8 }}>
+
+        {/* Left: client name (2-line clamp) + period */}
+        <div style={{ minWidth:0 }}>
+          <div style={{
+            fontWeight:700, fontSize:12, color:'var(--text)', lineHeight:'1.35',
+            display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical',
+            overflow:'hidden', wordBreak:'break-word', marginBottom:3,
+          }}>
+            {task.clientName}
+            {task.isAdhoc&&<span style={{ marginLeft:4,fontSize:8,color:'#f59e0b',fontWeight:700,verticalAlign:'middle' }}> ★</span>}
+          </div>
+          <div style={{ fontSize:10,color:'var(--text3)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>
+            {task.period}
+          </div>
         </div>
-        <div style={{ fontSize:11,color:'var(--text2)',marginBottom:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{task.clientName}</div>
-        <div style={{ fontSize:10,color:'var(--text3)',marginBottom:8 }}>{task.period}</div>
-        <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:6 }}>
-          <span className="chip" style={{ background:st.bg,color:st.c,border:`1px solid ${st.c}35`,fontSize:10 }}>{st.l}</span>
-          {ov&&<span style={{ fontSize:9,color:'var(--danger)',fontWeight:700 }}>{Math.abs(dDiff)}d late</span>}
-        </div>
-        <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-          {assignee&&<Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={16}/>}
-          <span style={{ fontSize:10,color:dueDateColor,fontWeight:ov?700:400 }}>{task.dueDate?fmtDate(task.dueDate):'—'}</span>
+
+        {/* Right: service name + due date + overdue badge */}
+        <div style={{ textAlign:'right',flexShrink:0,maxWidth:90 }}>
+          <div style={{
+            fontSize:11,fontWeight:700,color:'var(--text2)',
+            overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
+            marginBottom:3,
+          }}>
+            {task.service}
+          </div>
+          {task.dueDate&&(
+            <div style={{ fontSize:10,color:dueDateColor,fontWeight:600,whiteSpace:'nowrap' }}>
+              {fmtDate(task.dueDate)}
+            </div>
+          )}
+          {dueLabel&&(
+            <div style={{ fontSize:9,fontWeight:700,color:dueLabelColor,marginTop:2,whiteSpace:'nowrap' }}>
+              {dueLabel}
+            </div>
+          )}
         </div>
       </div>
-      {/* Change Status */}
-      <div style={{ marginTop:8,paddingTop:8,borderTop:'1px solid var(--border)' }}>
-        <button onClick={()=>{ setShowMove(!showMove); setNewStatus(task.status) }}
-          style={{ fontSize:11,color:'var(--accent)',background:'none',border:'none',cursor:'pointer',padding:0,fontWeight:600 }}>
-          {showMove?'✕ Cancel':'→ Change Status'}
+
+      {/* ── Divider ── */}
+      <div style={{ height:1,background:'var(--border)',margin:'0 0 7px 0' }}/>
+
+      {/* ── Bottom: status pill + edit icon | assignee initials ── */}
+      <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+        {/* Status pill */}
+        <span style={{
+          fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:4,
+          background:st.bg,color:st.c,border:`1px solid ${st.c}40`,
+          whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:100,
+        }}>
+          {st.l}
+        </span>
+
+        {/* Edit / pencil toggle */}
+        <button
+          onClick={(e)=>{ e.stopPropagation(); setShowMove(!showMove); setNewStatus(task.status) }}
+          title="Change Status"
+          style={{ background:'none',border:'none',cursor:'pointer',padding:'1px 3px',color:showMove?'var(--accent)':'var(--text3)',fontSize:12,lineHeight:1,flexShrink:0 }}
+        >
+          ✏️
         </button>
-        {showMove&&(
-          <div style={{ marginTop:6,display:'flex',gap:6 }}>
-            <select value={newStatus} onChange={e=>setNewStatus(e.target.value)} style={{ fontSize:11,padding:'4px 6px',flex:1,minWidth:0 }}>
-              {moveStatuses.map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
-            </select>
-            <button className="btn btn-primary btn-sm" onClick={doMove} disabled={saving} style={{ fontSize:11 }}>{saving?'…':'✓'}</button>
+
+        {/* Spacer */}
+        <div style={{ flex:1 }}/>
+
+        {/* Assignee initials — rectangular badge */}
+        {assignee&&(
+          <div style={{
+            fontSize:9,fontWeight:700,
+            background:`${ROLE_CLR[assignee.role]||'#5b8dee'}20`,
+            color:ROLE_CLR[assignee.role]||'var(--accent)',
+            border:`1px solid ${ROLE_CLR[assignee.role]||'#5b8dee'}40`,
+            borderRadius:4,padding:'2px 6px',whiteSpace:'nowrap',flexShrink:0,
+          }}>
+            {assignee.init}
           </div>
         )}
       </div>
+
+      {/* ── Status change dropdown (shown when edit icon clicked) ── */}
+      {showMove&&(
+        <div style={{ marginTop:7,display:'flex',gap:5 }}>
+          <select value={newStatus} onChange={e=>setNewStatus(e.target.value)}
+            style={{ fontSize:10,padding:'3px 6px',flex:1,minWidth:0 }}>
+            {moveStatuses.map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
+          </select>
+          <button className="btn btn-primary btn-sm" onClick={doMove} disabled={saving}
+            style={{ fontSize:10,padding:'3px 8px',borderRadius:4 }}>
+            {saving?'…':'✓'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
