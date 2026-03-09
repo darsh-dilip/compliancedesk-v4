@@ -258,3 +258,21 @@ export const LOG_ACTIONS = {
   USER_CREATED:          'user_created',
   ADHOC_TASK_CREATED:    'adhoc_task_created',
 }
+
+// ── Credential Services ────────────────────────────────────
+export const CRED_SERVICES = [
+  { v:'gst',        l:'GST Portal',          url:'https://www.gst.gov.in/',                          icon:'🔐', tasks:['GSTR-1','GSTR-1 (Quarterly)','GSTR-3B','GSTR-3B (Quarterly)','GSTR-9 Annual Return'] },
+  { v:'incometax',  l:'Income Tax (e-Filing)',url:'https://www.incometax.gov.in/iec/foportal/',        icon:'📋', tasks:['Income Tax Filing','Advance Tax'] },
+  { v:'traces',     l:'TRACES (TDS)',         url:'https://www.tdscpc.gov.in/',                        icon:'🧾', tasks:['TDS Payment','TDS Return 24Q','TDS Return 26Q'] },
+  { v:'pt',         l:'PT Portal',            url:'https://mahagst.gov.in/',                           icon:'🏛️', tasks:['PT Payment (Maharashtra)','PT Return (Maharashtra)','PT Payment (Karnataka)','PT Return (Karnataka)'] },
+  { v:'mca',        l:'MCA / ROC',            url:'https://efiling.mca.gov.in/',                       icon:'🏢', tasks:[] },
+  { v:'zoho',       l:'Zoho Books',           url:'https://accounts.zoho.in/signin',                   icon:'📗', tasks:['Accounting'] },
+  { v:'tally',      l:'Tally (Desktop)',       url:null,                                                icon:'💽', tasks:['Accounting'] },
+  { v:'tallycloud', l:'Tally Cloud',           url:'https://in.cloudaccess.tallysolutions.com/login',  icon:'☁️', tasks:['Accounting'] },
+  { v:'odoo',       l:'Odoo',                  url:'https://www.odoo.com/web/login',                   icon:'🟣', tasks:['Accounting'] },
+  { v:'custom',     l:'Custom / Other',        url:null,                                                icon:'⚙️', tasks:[] },
+]
+
+export const getCredForTask = (service) => {
+  return CRED_SERVICES.filter(cs => cs.tasks.includes(service))
+}
