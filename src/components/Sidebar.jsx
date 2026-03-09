@@ -50,7 +50,7 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
   const isPartner = user.role==='partner'
 
   return (
-    <div style={{ width:214,flexShrink:0,background:'var(--surface)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',position:'sticky',top:0 }}>
+    <div className="sidebar-root" style={{ width:214,flexShrink:0,background:'var(--surface)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',position:'sticky',top:0 }}>
       <div style={{ padding:'18px 16px',borderBottom:'1px solid var(--border)' }}>
         <div style={{ fontSize:15,fontWeight:800,color:'var(--text)' }}>⚖️ ComplianceDesk</div>
         <div style={{ fontSize:10,color:'var(--text3)',marginTop:2,letterSpacing:'0.05em' }}>CA FIRM MANAGER</div>
