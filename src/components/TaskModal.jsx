@@ -27,9 +27,6 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const [editNotes,  setEditNotes]  = useState(task.statusNote||'')
   const [editDesc,   setEditDesc]   = useState(task.period||'')
   const [editSaving, setEditSaving] = useState(false)
-  const [editDueDate,setEditDueDate]= useState(task.dueDate||'')
-  const [editNotes,  setEditNotes]  = useState(task.notes||'')
-  const [editSaving, setEditSaving] = useState(false)
 
   const assignee   = users.find(u=>u.id===task.assignedTo)
   const client     = clients?.find(c=>c.id===task.clientId)
@@ -80,18 +77,9 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const saveEdit = async () => {
     setEditSaving(true); setError('')
     try {
-      await updateTask(task.id, { dueDate:editDueDate, notes:editNotes })
+      await updateTask(task.id, { dueDate:editDue, notes:editNotes })
       onClose()
     } catch(e){ setError(e.message) } finally { setEditSaving(false) }
-  }
-
-  const saveEdit = async () => {
-    setEditSaving(true)
-    const updates = { dueDate: editDue, statusNote: editNotes }
-    if (task.isAdhoc) updates.period = editDesc
-    await updateTask(task.id, updates)
-    setEditSaving(false)
-    onClose()
   }
 
   const tabSt = active => ({
@@ -172,21 +160,6 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
             <div><Label>Internal Note (optional)</Label><textarea placeholder="Add an internal note…" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{ resize:'vertical' }}/></div>
             {error&&<Alert message={error}/>}
             <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?'Saving…':'Save Status Update'}</button>
-          </div>
-        )}
-
-        {tab==='edit'&&(
-          <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
-            <div>
-              <Label>Due Date</Label>
-              <input type="date" value={editDueDate} onChange={e=>setEditDueDate(e.target.value)}/>
-            </div>
-            <div>
-              <Label>Notes / Instructions</Label>
-              <textarea placeholder="Any special instructions or context…" value={editNotes} onChange={e=>setEditNotes(e.target.value)} rows={4} style={{ resize:'vertical' }}/>
-            </div>
-            {error&&<Alert message={error}/>}
-            <button className="btn btn-primary" onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
           </div>
         )}
 
