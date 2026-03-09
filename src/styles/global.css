@@ -72,6 +72,7 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
   }
 
   /* Main content fills full width */
+  html, body { background: #080b12 !important; }
   .print-root {
     display: block !important;
     width: 100% !important;
@@ -148,7 +149,9 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
 
   /* Page margins */
   @page {
-    margin: 0;
+    margin: 12mm 10mm;
     size: A4;
+    background: #080b12;
   }
+  body { background: #080b12 !important; }
 }
