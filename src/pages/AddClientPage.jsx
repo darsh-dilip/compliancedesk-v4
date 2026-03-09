@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CONSTITUTIONS, ROLES, FINANCIAL_YEARS } from '../constants.js'
+import { CONSTITUTIONS, CLIENT_CATEGORIES, ROLES, FINANCIAL_YEARS } from '../constants.js'
 import { generateTasks } from '../utils/taskGenerator.js'
 import { addClient, bulkAddTasks } from '../hooks/useFirestore.js'
 import { logClientOnboarded } from '../utils/auditLog.js'
@@ -13,7 +13,7 @@ const FY_START_MONTHS = [
 
 export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
   const [form, setForm] = useState({
-    name:'', constitution:'Private Limited', gstin:'', pan:'', tan:'',
+    name:'', constitution:'Private Limited', category:'A', phone:'', email:'', gstin:'', pan:'', tan:'',
     gstApplicable:false, gstFreq:'monthly', tdsApplicable:false,
     ptMH:false, ptKA:false, itApplicable:false, auditCase:false,
     advanceTax:false, accounting:false,
@@ -45,6 +45,8 @@ export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
 
   const submit = async () => {
     if(!form.name.trim()){ setError('Client name is required.'); return }
+    if(!form.phone.trim()){ setError('Phone number is required.'); return }
+    if(!form.email.trim()){ setError('Email is required.'); return }
     if(!form.assignedTo){  setError('Please assign to a team member.'); return }
     setSaving(true); setError('')
     try {
