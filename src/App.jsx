@@ -29,6 +29,7 @@ import { DashboardMemberStatus }  from './pages/DashboardMemberStatus.jsx'
 import { DashboardClientStatus }  from './pages/DashboardClientStatus.jsx'
 import { ProfilePage }            from './pages/ProfilePage.jsx'
 import { BulkDueDatePage }        from './pages/BulkDueDatePage.jsx'
+import { BulkImportPage }         from './pages/BulkImportPage.jsx'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
 
@@ -159,7 +160,7 @@ export default function App() {
       case 'profile':
         return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
       case 'bulkimport':
-        return <BulkImportPage users={users} onBack={()=>setPage('clients')}/>
+        return <BulkImportPage users={users} clients={clients} onBack={()=>setPage('clients')}/>
       case 'bulkdate':
         return isMgr ? <BulkDueDatePage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
