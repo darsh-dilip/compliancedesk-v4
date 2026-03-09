@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { FINANCIAL_YEARS } from '../constants.js'
 import { getStatusObj, DONE_STATUSES } from '../constants.js'
 import { getBucket, fmtDate } from '../utils/dates.js'
 
@@ -15,13 +16,14 @@ const FUNNEL = [
 ]
 
 export const DashboardIT = ({ clients, tasks, users, onTask }) => {
+  const [fy,      setFY]      = useState('2025-26')
   const [fSvc,    setFSvc]    = useState('Income Tax Filing')
   const [fUser,   setFUser]   = useState('')
   const [search,  setSearch]  = useState('')
   const [sortBy,  setSortBy]  = useState('name')
 
   const itTasks = useMemo(()=>
-    tasks.filter(t=>IT_SVCS.includes(t.service)&&
+    tasks.filter(t=>IT_SVCS.includes(t.service)&&t.fy===fy&&
       (fSvc  ? t.service===fSvc : true)&&
       (fUser ? t.assignedTo===fUser : true)&&
       (search? t.clientName.toLowerCase().includes(search.toLowerCase()):true)
