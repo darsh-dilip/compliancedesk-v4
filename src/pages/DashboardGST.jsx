@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { FINANCIAL_YEARS } from '../constants.js'
 import { MONTHS, DONE_STATUSES, getStatusObj } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
 
@@ -27,6 +28,7 @@ const Cell = ({ task, onClick }) => {
 
 export const DashboardGST = ({ clients, tasks, users, onTask }) => {
   const [fFreq,   setFFreq]   = useState('')
+  const [fy,      setFY]      = useState('2025-26')
   const [fUser,   setFUser]   = useState('')
   const [search,  setSearch]  = useState('')
   const [view,    setView]    = useState('matrix')
