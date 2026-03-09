@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { initializeApp } from 'firebase/app'
 import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth'
-import { ROLES, ROLE_CLR, ROLE_ORDER } from '../constants.js'
+import { ROLES, ROLE_CLR, ROLE_ORDER, DEPARTMENTS } from '../constants.js'
 import { Avatar, Modal, Label, Alert } from '../components/UI.jsx'
 import { saveUser, updateUser } from '../hooks/useFirestore.js'
 import { logUserCreated } from '../utils/auditLog.js'
@@ -155,7 +155,7 @@ export const UsersPage = ({ users, currentUser, onViewProfile }) => {
                 {Object.entries(ROLES).filter(([k])=>k!=='partner').map(([k,v])=><option key={k} value={k}>{v}</option>)}
               </select>
             </div>
-            <div><Label>Department</Label><input placeholder="e.g. GST & Compliance" value={form.dept} onChange={e=>set('dept',e.target.value)}/></div>
+            <div><Label>Department</Label><select value={form.dept} onChange={e=>set('dept',e.target.value)}><option value="">-- Select Dept --</option>{DEPARTMENTS.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
             <div><Label>Reports To</Label>
               <select value={form.reportsTo} onChange={e=>set('reportsTo',e.target.value)}>
                 <option value="">-- Select Manager --</option>
@@ -185,7 +185,7 @@ export const UsersPage = ({ users, currentUser, onViewProfile }) => {
                 {Object.entries(ROLES).map(([k,v])=><option key={k} value={k}>{v}</option>)}
               </select>
             </div>
-            <div><Label>Department</Label><input value={form.dept} onChange={e=>set('dept',e.target.value)}/></div>
+            <div><Label>Department</Label><select value={form.dept} onChange={e=>set('dept',e.target.value)}><option value="">-- Select Dept --</option>{DEPARTMENTS.map(d=><option key={d} value={d}>{d}</option>)}</select></div>
             <div><Label>Reports To</Label>
               <select value={form.reportsTo} onChange={e=>set('reportsTo',e.target.value)}>
                 <option value="">-- None --</option>
