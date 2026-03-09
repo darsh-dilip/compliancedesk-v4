@@ -5,7 +5,7 @@ import { getBucket, getStatusKanbanCol, daysDiff, fmtDate, isTaskPending } from 
 import { getVisibleUserIds } from '../utils/hierarchy.js'
 import { updateTask, deleteTask } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged } from '../utils/auditLog.js'
-import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal } from '../components/UI.jsx'
+import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal, PrintButton, PrintHeader } from '../components/UI.jsx'
 import { arrayUnion } from 'firebase/firestore'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
@@ -332,7 +332,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
   const refresh = () => setRefreshK(k=>k+1)
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px' }}>
+    <div className="fade-up print-root" style={{ padding:'24px 28px' }}>
       <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:16 }}>
         <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>
           {showPendingOnly?'Pending Tasks':'All Tasks'}
@@ -391,7 +391,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
       {/* ── Status Kanban ──────────────────────────── */}
       {view==='kanban'&&kanbanType==='status'&&(
         <div>
-          <div style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
+          <div className="kanban-scroll" style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
             {STATUS_KANBAN_COLS.map(col=>(
               <KanbanCol key={`${col.key}-${refreshK}`} col={col} tasks={statusGroups[col.key]||[]}
                 allTasks={visible} users={users} clients={clients} onTask={onTask} currentUser={user}
@@ -405,7 +405,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
       {/* ── Urgency Kanban ─────────────────────────── */}
       {view==='kanban'&&kanbanType==='urgency'&&(
         <div>
-          <div style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
+          <div className="kanban-scroll" style={{ display:'flex',gap:8,overflowX:'auto',paddingBottom:12 }}>
             {urgencyCols.map(col=>(
               <KanbanCol key={`${col.key}-${refreshK}`} col={col} tasks={urgencyGroups[col.key]||[]}
                 allTasks={visible} users={users} clients={clients} onTask={onTask} currentUser={user}
