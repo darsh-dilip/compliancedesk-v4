@@ -9,11 +9,16 @@ export const useCollection = (name) => {
   const [loading, setLoading] = useState(true)
   useEffect(()=>{
     if(!name) return
-    const unsub = onSnapshot(query(collection(db,name)),
-      snap=>{ setData(snap.docs.map(d=>({id:d.id,...d.data()}))); setLoading(false) },
-      ()=>setLoading(false)
-    )
-    return unsub
+    let unsub
+    const subscribe = () => {
+      unsub = onSnapshot(
+        query(collection(db, name)),
+        snap => { setData(snap.docs.map(d=>({id:d.id,...d.data()}))); setLoading(false) },
+        err  => { console.error('Firestore listener error:', name, err); setLoading(false); setTimeout(subscribe, 3000) }
+      )
+    }
+    subscribe()
+    return () => unsub?.()
   },[name])
   return { data, loading }
 }
