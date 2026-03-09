@@ -3,7 +3,7 @@ import { Avatar } from './UI.jsx'
 
 const NAV_GROUPS = [
   {
-    label: 'My Tasks',
+    label: 'MY TASKS',
     items: [
       { id:'dashboard', icon:'◈',  label:'My Dashboard'   },
       { id:'tasks',     icon:'≡',  label:'All Tasks'      },
@@ -11,14 +11,14 @@ const NAV_GROUPS = [
     ]
   },
   {
-    label: 'Customers',
+    label: 'CUSTOMERS',
     items: [
       { id:'clients',  icon:'🏢', label:'Clients'            },
       { id:'creds',    icon:'🔐', label:'Credential Manager' },
     ]
   },
   {
-    label: 'Service Dashboards',
+    label: 'SERVICE DASHBOARDS',
     mgr: true,
     items: [
       { id:'gst',  icon:'📊', label:'GST'            },
@@ -27,7 +27,7 @@ const NAV_GROUPS = [
     ]
   },
   {
-    label: 'Status Reports',
+    label: 'STATUS REPORTS',
     mgr: true,
     items: [
       { id:'status',       icon:'📈', label:'Service Wise'      },
@@ -36,11 +36,12 @@ const NAV_GROUPS = [
     ]
   },
   {
-    label: 'Team',
+    label: 'TEAM',
     items: [
       { id:'users',    icon:'⚙️', label:'Manage Team',  partner:true },
       { id:'workload', icon:'👥', label:'Team Workload', mgr:true    },
       { id:'audit',    icon:'🔍', label:'Audit Log',     mgr:true    },
+      { id:'bulkdate', icon:'📅', label:'Bulk Due Dates', mgr:true    },
     ]
   },
 ]
@@ -51,12 +52,14 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
 
   return (
     <div className="sidebar-root" style={{ width:214,flexShrink:0,background:'var(--surface)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',position:'sticky',top:0 }}>
-      <div style={{ padding:'18px 16px',borderBottom:'1px solid var(--border)' }}>
+      {/* Logo / Brand */}
+      <div style={{ padding:'16px 16px 14px',borderBottom:'1px solid var(--border)' }}>
         <div style={{ fontSize:15,fontWeight:800,color:'var(--text)' }}>⚖️ ComplianceDesk</div>
         <div style={{ fontSize:10,color:'var(--text3)',marginTop:2,letterSpacing:'0.05em' }}>CA FIRM MANAGER</div>
       </div>
 
-      <nav style={{ padding:'8px 8px',flex:1,overflow:'auto' }}>
+      {/* Nav */}
+      <nav style={{ padding:'6px 8px',flex:1,overflow:'auto' }}>
         {NAV_GROUPS.map((group, gi) => {
           const visibleItems = group.items.filter(n => {
             if (n.partner && !isPartner) return false
@@ -65,12 +68,15 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
           })
           if (!visibleItems.length) return null
           return (
-            <div key={gi} style={{ marginBottom:4 }}>
-              <div style={{ fontSize:9,fontWeight:700,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'0.08em',padding:'8px 10px 4px' }}>
+            <div key={gi}>
+              {/* Divider BEFORE section label (except first group) */}
+              {gi > 0 && <div style={{ height:1,background:'var(--border)',margin:'6px 4px 0' }}/>}
+              {/* Section label */}
+              <div style={{ fontSize:9,fontWeight:700,color:'var(--text3)',letterSpacing:'0.09em',padding:'8px 10px 4px' }}>
                 {group.label}
               </div>
-              {gi > 0 && <div style={{ height:1,background:'var(--border)',margin:'4px 8px 8px' }}/>}
-          {visibleItems.map(n => {
+              {/* Items */}
+              {visibleItems.map(n => {
                 const active = page === n.id
                 return (
                   <button key={n.id} onClick={()=>setPage(n.id)}
@@ -94,10 +100,23 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
         })}
       </nav>
 
-      <div style={{ padding:'12px 16px',borderTop:'1px solid var(--border)' }}>
+      {/* BizExpress Logo */}
+      <div style={{ padding:'10px 16px',borderTop:'1px solid var(--border)',borderBottom:'1px solid var(--border)',display:'flex',justifyContent:'center' }}>
+        <div style={{ background:'#fff',borderRadius:8,padding:'6px 12px',display:'inline-flex',alignItems:'center' }}>
+          <img
+            src="https://bizexpress.in/wp-content/uploads/2021/08/BizE-Logo-HD.png"
+            alt="BizExpress"
+            style={{ height:22,objectFit:'contain',display:'block' }}
+            onError={e=>{ e.target.style.display='none' }}
+          />
+        </div>
+      </div>
+
+      {/* Profile footer */}
+      <div style={{ padding:'10px 16px' }}>
         <button onClick={()=>setPage('profile')}
           style={{ display:'flex',alignItems:'center',gap:8,marginBottom:8,width:'100%',background:'none',border:'none',cursor:'pointer',padding:'4px 0',borderRadius:8 }}>
-          <Avatar name={user.name} init={user.init} role={user.role} sz={30}/>
+          <Avatar name={user.name} init={user.init} role={user.role} sz={28}/>
           <div style={{ flex:1,minWidth:0,textAlign:'left' }}>
             <div style={{ fontWeight:600,fontSize:12,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{user.nickname||user.name}</div>
             <div style={{ fontSize:10,color:ROLE_CLR[user.role],fontWeight:600 }}>{ROLES[user.role]}</div>
