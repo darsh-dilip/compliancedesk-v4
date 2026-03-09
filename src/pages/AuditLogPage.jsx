@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { subscribeLogs } from '../utils/auditLog.js'
-import { Avatar } from '../components/UI.jsx'
+import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
 
 const ACTION_META = {
   client_onboarded:      { l:'Client Onboarded',      icon:'🏢', c:'#22c55e' },
@@ -66,8 +66,9 @@ export const AuditLogPage = ({ users, clients }) => {
   const clearAll = () => { setFAction(''); setFClient(''); setFMember(''); setFStatusFrom(''); setFStatusTo(''); setFDateFrom(''); setFDateTo(''); setSearch('') }
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:900 }}>
-      <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Audit Log</div>
+    <div className="fade-up print-root" style={{ padding:'24px 28px',maxWidth:900 }}>
+      <PrintHeader title="Audit Log"/>
+      <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Audit Log</div><PrintButton title="Audit Log"/></div>
       <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>Every action — status changes, reassignments, client updates — timestamped and attributed.</div>
 
       {/* Filter row 1 */}
