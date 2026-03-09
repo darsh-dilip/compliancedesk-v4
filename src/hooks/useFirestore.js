@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { collection, onSnapshot, query, doc, addDoc, updateDoc, setDoc,
+import { collection, onSnapshot, query, doc, addDoc, updateDoc, setDoc, where,
   writeBatch, serverTimestamp, arrayUnion, deleteDoc } from 'firebase/firestore'
 import { db } from '../firebase.js'
 import { ROLE_ORDER } from '../constants.js'
@@ -65,3 +65,20 @@ export const bulkReassignClientTasks = async (clientId, newAssigneeId, currentTa
   await b.commit()
   await updateClient(clientId,{assignedTo:newAssigneeId})
 }
+
+// ── Credentials ────────────────────────────────────────────
+export const getClientCredentials = (clientId, onData) => {
+  const q = query(collection(db,'credentials'), where('clientId','==',clientId))
+  return onSnapshot(q, snap => onData(snap.docs.map(d=>({id:d.id,...d.data()}))))
+}
+export const upsertCredential = async (clientId, service, data) => {
+  // Find existing doc for this client+service
+  const { getDocs } = await import('firebase/firestore')
+  const q = query(collection(db,'credentials'), where('clientId','==',clientId), where('service','==',service))
+  const snap = await getDocs(q)
+  if (!snap.empty) {
+    return updateDoc(doc(db,'credentials',snap.docs[0].id), {...data, updatedAt:serverTimestamp()})
+  }
+  return addDoc(collection(db,'credentials'), {...data, clientId, service, createdAt:serverTimestamp(), updatedAt:serverTimestamp()})
+}
+export const deleteCredential = id => deleteDoc(doc(db,'credentials',id))
