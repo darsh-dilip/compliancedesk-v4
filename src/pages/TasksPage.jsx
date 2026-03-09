@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef } from 'react'
 import { getServiceStatuses, DONE_STATUSES, DONE_NIL, DONE_PROPER, HOLD_REFUSED,
-  PENDING_AT_CLIENT, STATUS_KANBAN_COLS, URGENCY_KANBAN_COLS, getStatusObj, ROLE_CLR } from '../constants.js'
+  PENDING_AT_CLIENT, STATUS_KANBAN_COLS, URGENCY_KANBAN_COLS, getStatusObj, ROLE_CLR,
+  CLIENT_CATEGORIES } from '../constants.js'
 import { getBucket, getStatusKanbanCol, daysDiff, fmtDate, isTaskPending } from '../utils/dates.js'
 import { getVisibleUserIds } from '../utils/hierarchy.js'
 import { updateTask, deleteTask } from '../hooks/useFirestore.js'
@@ -293,7 +294,11 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
     if (fDateTo)   t = t.filter(x=>x.dueDate && x.dueDate <= fDateTo)
     if (search)    t = t.filter(x=>`${x.service} ${x.clientName} ${x.period}`.toLowerCase().includes(search.toLowerCase()))
     return t.sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate))
-  },[tasks,user,users,showPendingOnly,initialBucket,fClient,fService,fStatus,fAssignee,search])
+  },[
+  tasks,user,users,showPendingOnly,initialBucket,
+  fClient,fService,fStatus,fAssignee,fCat,
+  fDateFrom,fDateTo,search
+])
 
   const services     = [...new Set(tasks.map(t=>t.service))].sort()
   const visibleUsers = users.filter(u=>getVisibleUserIds(user,users).includes(u.id))
