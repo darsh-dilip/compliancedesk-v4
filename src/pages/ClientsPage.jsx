@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ROLES, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS, CONSTITUTIONS, FINANCIAL_YEARS, CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
-import { getVisibleClientIds, bulkReassignClientTasks, setClientStatus, updateClient } from '../hooks/useFirestore.js'
+import { getVisibleClientIds, bulkReassignClientTasks, setClientStatus, updateClient, deleteClient } from '../hooks/useFirestore.js'
 import { logClientStatusChanged, logClientReassigned } from '../utils/auditLog.js'
 import { Avatar, StatCard, BucketSection, Label, Alert } from '../components/UI.jsx'
 
@@ -219,10 +219,17 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
                 <div><Label>Phone</Label><input value={editForm.phone} onChange={e=>setEF('phone',e.target.value)} type="tel"/></div>
                 <div><Label>Email</Label><input value={editForm.email} onChange={e=>setEF('email',e.target.value)} type="email"/></div>
               </div>
-              <div><Label>Constitution</Label>
-                <select value={editForm.constitution} onChange={e=>setEF('constitution',e.target.value)}>
-                  {CONSTITUTIONS.map(x=><option key={x}>{x}</option>)}
-                </select>
+              <div className="grid-2" style={{ gap:10 }}>
+                <div><Label>Constitution</Label>
+                  <select value={editForm.constitution} onChange={e=>setEF('constitution',e.target.value)}>
+                    {CONSTITUTIONS.map(x=><option key={x}>{x}</option>)}
+                  </select>
+                </div>
+                <div><Label>Category</Label>
+                  <select value={editForm.category} onChange={e=>setEF('category',e.target.value)}>
+                    {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>Category {x}</option>)}
+                  </select>
+                </div>
               </div>
               <div className="grid-2" style={{ gap:10 }}>
                 <div><Label>GSTIN</Label><input value={editForm.gstin} onChange={e=>setEF('gstin',e.target.value.toUpperCase())}/></div>
@@ -282,6 +289,7 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
       <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:20 }}>
         <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Clients</div>
         <button className="btn btn-ghost btn-sm" onClick={()=>onAddAdhoc(null)}>+ Ad-hoc Task</button>
+        <button className="btn btn-ghost btn-sm" onClick={onBulkImport} style={{ marginRight:4 }}>📥 Bulk Import</button>
         <button className="btn btn-primary" onClick={onAdd}>+ Onboard New Client</button>
       </div>
       <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
