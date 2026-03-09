@@ -249,6 +249,7 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
   const [search,  setSearch]  = useState('')
   const [selected,setSelected]=useState(null)
   const [filter,  setFilter]  = useState('all')
+  const [fCat,    setFCat]    = useState('')
 
   // Visibility: executives/interns only see their assigned clients
   const visibleClientIds = getVisibleClientIds(currentUser, users, clients)
@@ -267,7 +268,8 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
   const filtered = visibleClients.filter(c=>{
     const ms=c.name.toLowerCase().includes(search.toLowerCase())||(c.gstin||'').includes(search)||(c.pan||'').includes(search)
     const mf=filter==='all'||(c.clientStatus||'active')===filter
-    return ms&&mf
+    const mc=!fCat||c.category===fCat
+    return ms&&mf&&mc
   })
 
   return (
@@ -278,7 +280,11 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
         <button className="btn btn-primary" onClick={onAdd}>+ Onboard New Client</button>
       </div>
       <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
-        <input placeholder="🔍 Search name, GSTIN, PAN…" value={search} onChange={e=>setSearch(e.target.value)} style={{ maxWidth:280 }}/>
+        <input placeholder="🔍 Search name, GSTIN, PAN…" value={search} onChange={e=>setSearch(e.target.value)} style={{ maxWidth:240 }}/>
+        <select value={fCat} onChange={e=>setFCat(e.target.value)} style={{ width:'auto' }}>
+          <option value="">All Categories</option>
+          {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>Category {x}</option>)}
+        </select>
         <div style={{ display:'flex',gap:4 }}>
           {[['all','All'],['active','Active'],['on_hold','On Hold'],['discontinued','Discontinued']].map(([v,l])=>(
             <button key={v} onClick={()=>setFilter(v)} style={{ padding:'6px 12px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:'1px solid var(--border2)',background:filter===v?'var(--surface3)':'transparent',color:filter===v?'var(--text)':'var(--text3)' }}>{l} ({counts[v]})</button>
