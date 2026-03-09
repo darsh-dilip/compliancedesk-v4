@@ -222,9 +222,11 @@ export const CredentialManager = ({ clients, currentUser }) => {
   }, [selectedClientId])
 
   const selectedClient = clients.find(c=>c.id===selectedClientId)
-  const filteredClients = search
-    ? clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()))
-    : clients
+  const filteredClients = clients.filter(cl => {
+    if (fCat && cl.category !== fCat) return false
+    if (search && !cl.name.toLowerCase().includes(search.toLowerCase())) return false
+    return true
+  })
 
   const buildCredLine = (cred) => {
     const svc = CRED_SERVICES.find(s=>s.v===cred.service)
