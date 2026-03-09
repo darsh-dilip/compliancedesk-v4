@@ -1,10 +1,26 @@
 import { useState } from 'react'
+import { initializeApp } from 'firebase/app'
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth'
 import { ROLES, ROLE_CLR, ROLE_ORDER } from '../constants.js'
 import { Avatar, Modal, Label, Alert } from '../components/UI.jsx'
 import { saveUser } from '../hooks/useFirestore.js'
 import { logUserCreated } from '../utils/auditLog.js'
 
-export const UsersPage = ({ users, currentUser, createFirebaseUser }) => {
+// Secondary app so creating a user does not sign out the current Partner
+const secondaryApp = initializeApp({
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+}, 'secondary')
+const secondaryAuth = getAuth(secondaryApp)
+
+const createFirebaseUser = (email, password) =>
+  createUserWithEmailAndPassword(secondaryAuth, email, password)
+
+export const UsersPage = ({ users, currentUser }) => {
   const [showAdd, setShowAdd] = useState(false)
   const [form,    setForm]    = useState({ name:'',email:'',role:'executive',dept:'',reportsTo:'',init:'' })
   const [pwd,     setPwd]     = useState('')
