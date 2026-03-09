@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS } from '../constants.js'
 import { getBucket, fmtDate } from '../utils/dates.js'
-import { Avatar } from '../components/UI.jsx'
+import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
 
 export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
   const [selClient, setSelClient] = useState('')
@@ -35,10 +35,10 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
   const overdue = clientTasks.filter(t => getBucket(t) === 'overdue').length
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
+    <div className="fade-up print-root" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
       {/* Client picker */}
       <div>
-        <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Client Wise</div>
+        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Client Wise</div><PrintButton title="Client Status"/></div>
         <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>All services for a client at a glance.</div>
         <input placeholder="🔍 Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:8 }}/>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ marginBottom:10 }}>
