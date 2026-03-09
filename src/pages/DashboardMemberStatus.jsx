@@ -86,23 +86,52 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
         </div>
       ) : (
         <div style={{ display:'flex',flexDirection:'column',overflow:'hidden' }}>
-          {/* Member header + filters */}
-          <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:16,flexWrap:'wrap' }}>
+          {/* Member header + filters (sticky) */}
+          <div style={{ position:'sticky',top:0,zIndex:50,background:'var(--bg)',paddingBottom:12,borderBottom:'1px solid var(--border)',marginBottom:14 }}>
+          <div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'nowrap' }}>
             <Avatar name={selectedMember.name} init={selectedMember.init} role={selectedMember.role} sz={36}/>
             <div style={{ flex:1 }}>
               <div style={{ fontWeight:700,fontSize:15,color:'var(--text)' }}>{selectedMember.name}</div>
               <div style={{ fontSize:11,color:ROLE_CLR[selectedMember.role],fontWeight:600 }}>{ROLES[selectedMember.role]}</div>
             </div>
-            <select value={selService} onChange={e=>setSelService(e.target.value)} style={{ fontSize:12 }}>
+            <div style={{ display:'flex',gap:8,alignItems:'center',marginLeft:'auto' }}>
+            <select value={selService} onChange={e=>setSelService(e.target.value)} style={{ fontSize:12,minWidth:160 }}>
               <option value="">All Services</option>
-              {SERVICE_OPTIONS.map(s=><option key={s} value={s}>{s}</option>)}
+              <optgroup label="GST">
+                <option value="GSTR-1">GSTR-1</option>
+                <option value="GSTR-1 (Quarterly)">GSTR-1 (Quarterly)</option>
+                <option value="GSTR-3B">GSTR-3B</option>
+                <option value="GSTR-3B (Quarterly)">GSTR-3B (Quarterly)</option>
+                <option value="GSTR-9 Annual Return">GSTR-9 Annual Return</option>
+              </optgroup>
+              <optgroup label="TDS">
+                <option value="TDS Payment">TDS Payment</option>
+                <option value="TDS Return 24Q">TDS Return 24Q</option>
+                <option value="TDS Return 26Q">TDS Return 26Q</option>
+              </optgroup>
+              <optgroup label="Professional Tax">
+                <option value="PT Payment (Maharashtra)">PT Payment (Maharashtra)</option>
+                <option value="PT Return (Maharashtra)">PT Return (Maharashtra)</option>
+                <option value="PT Payment (Karnataka)">PT Payment (Karnataka)</option>
+                <option value="PT Return (Karnataka)">PT Return (Karnataka)</option>
+              </optgroup>
+              <optgroup label="Income Tax">
+                <option value="Income Tax Filing">Income Tax Filing</option>
+                <option value="Advance Tax">Advance Tax</option>
+              </optgroup>
+              <optgroup label="Other">
+                <option value="Accounting">Accounting</option>
+                <option value="Ad-Hoc Tasks">Ad-Hoc Tasks</option>
+              </optgroup>
             </select>
-            <select value={fy} onChange={e=>setFY(e.target.value)} style={{ fontSize:12 }}>
+            <select value={fy} onChange={e=>setFY(e.target.value)} style={{ fontSize:12,minWidth:110 }}>
               {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
             </select>
+            </div>
           </div>
+          </div>{/* end sticky */}
 
-          {/* Summary chips */}
+          {/* Summary chips */
           <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
             {buckets.map(b=>(
               <div key={b.key} style={{ display:'flex',alignItems:'center',gap:6,background:`${b.color}12`,border:`1px solid ${b.color}30`,borderRadius:8,padding:'5px 12px' }}>
