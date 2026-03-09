@@ -21,10 +21,14 @@ export const logClientReassigned     = (c,oldN,newN,by) => writeLog({ action:LOG
 export const logCommentAdded         = (t,text,by) => writeLog({ action:LOG_ACTIONS.COMMENT_ADDED, by, entityId:t.id, entityName:`${t.service} — ${t.period}`, clientId:t.clientId, clientName:t.clientName, note:text })
 export const logUserCreated          = (u,by) => writeLog({ action:LOG_ACTIONS.USER_CREATED, by, entityName:u.name, newValue:u.role })
 
-export const subscribeLogs = (onData, count=300, filterClientId=null) => {
+export const subscribeLogs = (onData, onErr=null, count=300, filterClientId=null) => {
   const col = collection(db,'logs')
   const q = filterClientId
     ? query(col, where('clientId','==',filterClientId), orderBy('createdAt','desc'), limit(count))
     : query(col, orderBy('createdAt','desc'), limit(count))
-  return onSnapshot(q, snap => onData(snap.docs.map(d=>({id:d.id,...d.data()}))))
+  return onSnapshot(
+    q,
+    snap => onData(snap.docs.map(d=>({id:d.id,...d.data()}))),
+    err  => { console.error('subscribeLogs error:', err); onErr?.(err); onData([]) }
+  )
 }
