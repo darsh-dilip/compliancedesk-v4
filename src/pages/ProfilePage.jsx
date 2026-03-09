@@ -6,7 +6,7 @@ import { Label, Alert } from '../components/UI.jsx'
 
 const HOBBIES_LIST = ['Reading','Cricket','Football','Chess','Cooking','Travelling','Music','Photography','Gaming','Yoga','Cycling','Movies','Trekking','Painting','Coding']
 
-export const ProfilePage = ({ currentUser, onUpdated }) => {
+export const ProfilePage = ({ currentUser, onUpdated, onBack }) => {
   const [form, setForm] = useState({
     name:     currentUser.name     || '',
     nickname: currentUser.nickname || '',
@@ -51,10 +51,13 @@ export const ProfilePage = ({ currentUser, onUpdated }) => {
   const roleColor = ROLE_CLR[currentUser.role]
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:680 }}>
-      <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:20 }}>My Profile</div>
+    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:960 }}>
+      <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:20 }}>
+        <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>My Profile</div>
+        {onBack && <button className="btn btn-ghost btn-sm" onClick={onBack}>← Back to Dashboard</button>}
+      </div>
 
-      {/* Profile card header */}
+      {/* Profile card header — full width */}
       <div style={{ background:'var(--surface2)',borderRadius:16,padding:'24px',marginBottom:24,display:'flex',gap:20,alignItems:'center',border:'1px solid var(--border)',position:'relative',overflow:'hidden' }}>
         <div style={{ position:'absolute',top:0,left:0,right:0,height:4,background:`linear-gradient(90deg,${roleColor},${roleColor}80)` }}/>
         <Avatar name={form.name} init={currentUser.init} role={currentUser.role} sz={64}/>
@@ -74,6 +77,7 @@ export const ProfilePage = ({ currentUser, onUpdated }) => {
       {success && <Alert type="success" message="✓ Profile updated!"/>}
 
       <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:16 }}>
         {/* Basic info */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:14 }}>👤 Basic Info</div>
@@ -97,6 +101,8 @@ export const ProfilePage = ({ currentUser, onUpdated }) => {
           </div>
         </div>
 
+        </div>{/* end col 1 */}
+        <div style={{ display:'flex',flexDirection:'column',gap:16 }}>
         {/* Fun section */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:14 }}>🎉 The Fun Stuff</div>
@@ -126,6 +132,9 @@ export const ProfilePage = ({ currentUser, onUpdated }) => {
           </div>
         </div>
 
+        </div>{/* end fun card */}
+        </div>{/* end col 2 */}
+        </div>{/* end grid */}
         {/* Read-only info */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:14 }}>🔒 Account Info (read-only)</div>
