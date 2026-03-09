@@ -40,3 +40,118 @@ input:checked+.slider:before{transform:translateX(18px);background:var(--accent)
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
 .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+
+/* ── Print Styles ─────────────────────────────────── */
+@media print {
+  /* Hide everything non-content */
+  .no-print,
+  .sidebar-root,
+  button.btn,
+  nav,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  /* White background, black text */
+  * {
+    background: #fff !important;
+    color: #111 !important;
+    border-color: #ddd !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    animation: none !important;
+  }
+
+  html, body, #root {
+    background: #fff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Expand main scroll area */
+  .main-scroll {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Main content fills full width */
+  .print-root {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Expand ALL scrollable containers */
+  [style*="overflow"],
+  [style*="max-height"],
+  [style*="height"] {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* Convert inputs/selects to plain text appearance */
+  input, select, textarea {
+    border: none !important;
+    background: transparent !important;
+    padding: 2px 0 !important;
+    font-size: 11px !important;
+    pointer-events: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+
+  /* Remove toggle/pill/chip borders */
+  .chip {
+    border: 1px solid #999 !important;
+    padding: 1px 6px !important;
+  }
+
+  /* Tables */
+  table { border-collapse: collapse !important; width: 100% !important; }
+  th, td { border: 1px solid #ddd !important; padding: 6px 10px !important; font-size: 11px !important; }
+  thead { background: #f5f5f5 !important; }
+
+  /* Cards */
+  .card {
+    border: 1px solid #ddd !important;
+    border-radius: 0 !important;
+    margin-bottom: 8px !important;
+    page-break-inside: avoid;
+  }
+
+  /* Kanban columns — stack vertically on print */
+  .kanban-scroll {
+    display: block !important;
+    overflow: visible !important;
+  }
+  .kanban-col {
+    display: block !important;
+    width: 100% !important;
+    margin-bottom: 16px !important;
+    page-break-inside: avoid;
+  }
+
+  /* Page breaks */
+  .page-break { page-break-before: always; }
+
+  /* Print header */
+  .print-header {
+    display: block !important;
+    border-bottom: 2px solid #111;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 800;
+  }
+
+  /* Page margins */
+  @page {
+    margin: 15mm 10mm;
+    size: A4;
+  }
+}
