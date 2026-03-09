@@ -28,7 +28,7 @@ import { AuditLogPage }      from './pages/AuditLogPage.jsx'
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
 
 export default function App() {
-  const { user: authUser, loading: authLoading } = useAuth()
+  const { firebaseUser: authUser, loading: authLoading } = useAuth()
   const { data: users,   loading: uLoad } = useCollection('users')
   const { data: clients, loading: cLoad } = useCollection('clients')
   const { data: tasks,   loading: tLoad } = useCollection('tasks')
