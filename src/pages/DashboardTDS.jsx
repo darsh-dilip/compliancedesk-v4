@@ -30,7 +30,7 @@ const StatusChip = ({ service, status, compact=false }) => {
 }
 
 // TDS Payment Matrix (client × month)
-const TDSPaymentMatrix = ({ tasks, clients, users, fy }) => {
+const TDSPaymentMatrix = ({ tasks, clients, users, fy, onTask }) => {
   const [selAssignee, setSelAssignee] = useState('')
   const fyS = parseInt(fy)
 
@@ -108,7 +108,7 @@ const TDSPaymentMatrix = ({ tasks, clients, users, fy }) => {
                   {monthLabels.map(({period}) => {
                     const t = byMonth[period]
                     return (
-                      <td key={period} style={{ textAlign:'center',padding:'5px 4px',borderLeft:'1px solid var(--border)' }}>
+                      <td key={period} onClick={()=>t&&onTask&&onTask(t)} style={{ textAlign:'center',padding:'5px 4px',borderLeft:'1px solid var(--border)',cursor:t?'pointer':'default' }}>
                         {t ? <StatusChip service="TDS Payment" status={t.status} compact/> : <span style={{ color:'var(--text3)',fontSize:10 }}>—</span>}
                       </td>
                     )
@@ -124,7 +124,7 @@ const TDSPaymentMatrix = ({ tasks, clients, users, fy }) => {
 }
 
 // TDS Return Matrix (client × quarter, split 24Q / 26Q)
-const TDSReturnMatrix = ({ tasks, clients, users, fy }) => {
+const TDSReturnMatrix = ({ tasks, clients, users, fy, onTask }) => {
   const [selAssignee, setSelAssignee] = useState('')
   const [selForm,     setSelForm]     = useState('both') // 'both' | '24Q' | '26Q'
 
@@ -194,7 +194,7 @@ const TDSReturnMatrix = ({ tasks, clients, users, fy }) => {
                     const key = `${form}__${quarter}`
                     const t = byKey[key]
                     return (
-                      <td key={i} style={{ textAlign:'center',padding:'5px 4px',borderLeft:'1px solid var(--border)' }}>
+                      <td key={i} onClick={()=>t&&onTask&&onTask(t)} style={{ textAlign:'center',padding:'5px 4px',borderLeft:'1px solid var(--border)',cursor:t?'pointer':'default' }}>
                         {t ? <StatusChip service={form} status={t.status} compact/> : <span style={{ color:'var(--text3)',fontSize:10 }}>—</span>}
                       </td>
                     )
@@ -210,7 +210,7 @@ const TDSReturnMatrix = ({ tasks, clients, users, fy }) => {
 }
 
 // ── Main Export ────────────────────────────────────────────────
-export const DashboardTDS = ({ tasks, clients, users, user }) => {
+export const DashboardTDS = ({ tasks, clients, users, user, onTask }) => {
   const [fy, setFY] = useState('2025-26')
 
   const visibleIds = useMemo(() => getVisibleUserIds(user, users), [user, users])
@@ -252,8 +252,8 @@ export const DashboardTDS = ({ tasks, clients, users, user }) => {
         ))}
       </div>
 
-      <TDSPaymentMatrix tasks={visibleTasks} clients={visibleClients} users={users} fy={fy}/>
-      <TDSReturnMatrix  tasks={visibleTasks} clients={visibleClients} users={users} fy={fy}/>
+      <TDSPaymentMatrix tasks={visibleTasks} clients={visibleClients} users={users} fy={fy} onTask={onTask}/>
+      <TDSReturnMatrix  tasks={visibleTasks} clients={visibleClients} users={users} fy={fy} onTask={onTask}/>
     </div>
   )
 }
