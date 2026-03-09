@@ -23,6 +23,13 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const [confirmDel, setConfirmDel] = useState(false)
   const [error,      setError]      = useState('')
   const [tab,        setTab]        = useState('status')
+  const [editDue,    setEditDue]    = useState(task.dueDate||'')
+  const [editNotes,  setEditNotes]  = useState(task.statusNote||'')
+  const [editDesc,   setEditDesc]   = useState(task.period||'')
+  const [editSaving, setEditSaving] = useState(false)
+  const [editDueDate,setEditDueDate]= useState(task.dueDate||'')
+  const [editNotes,  setEditNotes]  = useState(task.notes||'')
+  const [editSaving, setEditSaving] = useState(false)
 
   const assignee   = users.find(u=>u.id===task.assignedTo)
   const client     = clients?.find(c=>c.id===task.clientId)
@@ -70,6 +77,23 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
     onClose()
   }
 
+  const saveEdit = async () => {
+    setEditSaving(true); setError('')
+    try {
+      await updateTask(task.id, { dueDate:editDueDate, notes:editNotes })
+      onClose()
+    } catch(e){ setError(e.message) } finally { setEditSaving(false) }
+  }
+
+  const saveEdit = async () => {
+    setEditSaving(true)
+    const updates = { dueDate: editDue, statusNote: editNotes }
+    if (task.isAdhoc) updates.period = editDesc
+    await updateTask(task.id, updates)
+    setEditSaving(false)
+    onClose()
+  }
+
   const tabSt = active => ({
     padding:'6px 14px',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',
     background:active?'var(--surface3)':'transparent',color:active?'var(--text)':'var(--text3)',
@@ -104,7 +128,7 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
         </div>
 
         <div style={{ display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid var(--border)',paddingBottom:10,flexWrap:'wrap' }}>
-          {[['status','✏️ Status'],['comments','💬 Comments'],['history','📋 History']].map(([t,l])=>(
+          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History']].map(([t,l])=>(
             <button key={t} onClick={()=>setTab(t)} style={tabSt(tab===t)}>{l}</button>
           ))}
           <button onClick={()=>setReassigning(!reassigning)} style={{ ...tabSt(reassigning),marginLeft:'auto' }}>↔ Reassign</button>
@@ -148,6 +172,41 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
             <div><Label>Internal Note (optional)</Label><textarea placeholder="Add an internal note…" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{ resize:'vertical' }}/></div>
             {error&&<Alert message={error}/>}
             <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?'Saving…':'Save Status Update'}</button>
+          </div>
+        )}
+
+        {tab==='edit'&&(
+          <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
+            <div>
+              <Label>Due Date</Label>
+              <input type="date" value={editDueDate} onChange={e=>setEditDueDate(e.target.value)}/>
+            </div>
+            <div>
+              <Label>Notes / Instructions</Label>
+              <textarea placeholder="Any special instructions or context…" value={editNotes} onChange={e=>setEditNotes(e.target.value)} rows={4} style={{ resize:'vertical' }}/>
+            </div>
+            {error&&<Alert message={error}/>}
+            <button className="btn btn-primary" onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
+          </div>
+        )}
+
+        {tab==='edit'&&(
+          <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
+            <div>
+              <Label>Due Date</Label>
+              <input type="date" value={editDue} onChange={e=>setEditDue(e.target.value)}/>
+            </div>
+            {task.isAdhoc&&(
+              <div>
+                <Label>Task Description / Subject</Label>
+                <input value={editDesc} onChange={e=>setEditDesc(e.target.value)} placeholder="Task description…"/>
+              </div>
+            )}
+            <div>
+              <Label>Internal Note</Label>
+              <textarea value={editNotes} onChange={e=>setEditNotes(e.target.value)} rows={3} style={{ resize:'vertical' }} placeholder="Add an internal note…"/>
+            </div>
+            <button className="btn btn-primary" onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
           </div>
         )}
 
