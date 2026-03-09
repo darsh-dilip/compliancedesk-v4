@@ -164,8 +164,6 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
         </div>
       )}
     </div>
-    </div>
-    </div>
   )
 }
 
