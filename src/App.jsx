@@ -125,7 +125,7 @@ export default function App() {
         />
       case 'add_client':
         return <AddClientPage
-          users={users} currentUser={currentUser}
+          users={users} clients={clients} currentUser={currentUser}
           onBack={() => setPage('clients')}
           onSuccess={() => setPage('clients')}
         />
