@@ -139,22 +139,31 @@ export const BucketSection = ({ label, tasks, color, users, clients, onTask, def
 }
 
 // ── Print Button ────────────────────────────────────────────
-export const PrintButton = ({ label = '⬇ Download PDF', title = '', subtitle = '' }) => {
+export const PrintButton = ({ title = 'ComplianceDesk' }) => {
   const handlePrint = () => {
-    // Set a temporary document title for the PDF filename
     const prev = document.title
-    if (title) document.title = title
+    document.title = title
     window.print()
     document.title = prev
   }
   return (
     <button
-      className="btn btn-ghost btn-sm no-print"
+      className="no-print"
       onClick={handlePrint}
-      style={{ fontSize: 12, gap: 5 }}
       title="Download as PDF"
+      style={{
+        position:'fixed', top:20, right:24, zIndex:1000,
+        width:'auto', height:36, borderRadius:20, padding:'0 16px',
+        background:'var(--accent)', color:'#fff',
+        border:'none', cursor:'pointer', fontSize:20,
+        display:'flex', alignItems:'center', justifyContent:'center',
+        boxShadow:'0 4px 20px rgba(91,141,238,.5)',
+        transition:'transform .15s, box-shadow .15s',
+      }}
+      onMouseEnter={e=>{ e.currentTarget.style.transform='scale(1.1)'; e.currentTarget.style.boxShadow='0 6px 28px rgba(91,141,238,.7)' }}
+      onMouseLeave={e=>{ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 4px 20px rgba(91,141,238,.5)' }}
     >
-      ⬇ {label}
+      ⬇ PDF
     </button>
   )
 }
