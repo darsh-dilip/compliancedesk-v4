@@ -115,7 +115,6 @@ const ClientRow = ({ client, users, tasks, onClick }) => {
           </div>
         )
       })()}
-      <div style={{ color:'var(--text3)' }}>›</div>
     </div>
   )
 }
