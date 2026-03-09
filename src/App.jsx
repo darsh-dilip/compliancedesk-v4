@@ -125,11 +125,11 @@ export default function App() {
       case 'team':
         return isMgr ? <TeamPage users={users} tasks={visibleTasks} clients={clients} user={currentUser} onTask={setSelectedTask}/> : null
       case 'workload':
-        return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask}/> : null
+        return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask} onNavigatePending={navigatePending}/> : null
       case 'gst':
         return isMgr ? <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
       case 'tds':
-        return isMgr ? <DashboardTDS tasks={visibleTasks} clients={clients} users={users} user={currentUser}/> : null
+        return isMgr ? <DashboardTDS tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
       case 'it':
         return isMgr ? <DashboardIT tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
       case 'status':
