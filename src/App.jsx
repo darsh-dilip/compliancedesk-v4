@@ -23,7 +23,11 @@ import { DashboardGST }      from './pages/DashboardGST.jsx'
 import { DashboardIT }       from './pages/DashboardIT.jsx'
 import { DashboardTDS }      from './pages/DashboardTDS.jsx'
 import { StatusDashboard }   from './pages/StatusDashboard.jsx'
-import { AuditLogPage }      from './pages/AuditLogPage.jsx'
+import { AuditLogPage }          from './pages/AuditLogPage.jsx'
+import { CredentialManager }      from './pages/CredentialManager.jsx'
+import { DashboardMemberStatus }  from './pages/DashboardMemberStatus.jsx'
+import { DashboardClientStatus }  from './pages/DashboardClientStatus.jsx'
+import { ProfilePage }            from './pages/ProfilePage.jsx'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
 
@@ -136,6 +140,14 @@ export default function App() {
         return isMgr ? <StatusDashboard tasks={visibleTasks} users={users} user={currentUser}/> : null
       case 'audit':
         return isMgr ? <AuditLogPage users={users} clients={clients} currentUser={currentUser}/> : null
+      case 'creds':
+        return <CredentialManager clients={clients} currentUser={currentUser}/>
+      case 'memberstatus':
+        return isMgr ? <DashboardMemberStatus tasks={visibleTasks} users={users} user={currentUser} onTask={setSelectedTask}/> : null
+      case 'clientstatus':
+        return isMgr ? <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/> : null
+      case 'profile':
+        return <ProfilePage currentUser={currentUser} onUpdated={()=>{}}/>
       case 'users':
         return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser}/> : null
       default:
