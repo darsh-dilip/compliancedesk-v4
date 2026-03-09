@@ -26,7 +26,7 @@ export const AuditLogPage = ({ users, clients }) => {
   const [search,       setSearch]       = useState('')
 
   useEffect(()=>{
-    const unsub = subscribeLogs(data=>{ setLogs(data); setLoading(false) }, 500)
+    const unsub = subscribeLogs(data=>{ setLogs(data); setLoading(false) }, ()=>setLoading(false), 500)
     return unsub
   },[])
 
