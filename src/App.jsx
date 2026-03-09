@@ -56,6 +56,13 @@ export default function App() {
     setPage('pending')
   }, [])
 
+  // Redirect to profile if phone not filled (hook MUST be before conditional returns)
+  useEffect(() => {
+    if (currentUser && !currentUser.phone && page !== 'profile') {
+      setPage('profile')
+    }
+  }, [currentUser?.id, currentUser?.phone])
+
   const goAddClient = () => setPage('add_client')
 
   const goAddAdhoc = (client) => {
@@ -91,13 +98,6 @@ export default function App() {
   const visibleIds   = getVisibleUserIds(currentUser, users)
   const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
   const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
-
-  // #5: Redirect to profile if phone not set
-  useEffect(() => {
-    if (currentUser && !currentUser.phone && page !== 'profile') {
-      setPage('profile')
-    }
-  }, [currentUser?.id])
 
   const renderPage = () => {
     switch (page) {
