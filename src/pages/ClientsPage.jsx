@@ -250,7 +250,7 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
   )
 }
 
-export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask, onAddAdhoc }) => {
+export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask, onAddAdhoc, onBulkImport }) => {
   const [search,  setSearch]  = useState('')
   const [selected,setSelected]=useState(null)
   const [filter,  setFilter]  = useState('all')
