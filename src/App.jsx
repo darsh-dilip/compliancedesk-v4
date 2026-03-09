@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from './firebase.js'
 import { useAuth } from './hooks/useAuth.js'
@@ -56,7 +56,7 @@ export default function App() {
     setPage('pending')
   }, [])
 
-  // Redirect to profile if phone not filled (hook MUST be before conditional returns)
+  // Redirect to profile if phone not filled
   useEffect(() => {
     if (currentUser && !currentUser.phone && page !== 'profile') {
       setPage('profile')
