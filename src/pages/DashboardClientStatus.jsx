@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS } , CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
+import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS, CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
 import { getBucket, fmtDate } from '../utils/dates.js'
 import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
 
@@ -7,6 +7,7 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
   const [selClient, setSelClient] = useState('')
   const [fy, setFY] = useState('2025-26')
   const [search, setSearch] = useState('')
+  const [fCat,   setFCat]   = useState('')
 
   const client = clients.find(c => c.id === selClient)
   const assignee = users.find(u => u.id === client?.assignedTo)
@@ -26,9 +27,11 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
     return g
   }, [clientTasks])
 
-  const filteredClients = search
-    ? clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
-    : clients
+  const filteredClients = clients.filter(c => {
+    if (fCat && c.category !== fCat) return false
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false
+    return true
+  })
 
   const done   = clientTasks.filter(t => DONE_STATUSES.includes(t.status)).length
   const total  = clientTasks.length
@@ -40,6 +43,10 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Client Wise</div><PrintButton title="Client Status"/></div>
         <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>All services for a client at a glance.</div>
+        <select value={fCat} onChange={e=>{setFCat(e.target.value);setSelClient('')}} style={{ width:'100%',marginBottom:6,fontSize:12 }}>
+          <option value="">All Categories</option>
+          {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>Category {x}</option>)}
+        </select>
         <input placeholder="🔍 Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:8 }}/>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ marginBottom:10 }}>
           {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
