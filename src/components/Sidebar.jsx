@@ -69,7 +69,8 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
               <div style={{ fontSize:9,fontWeight:700,color:'var(--text3)',textTransform:'uppercase',letterSpacing:'0.08em',padding:'8px 10px 4px' }}>
                 {group.label}
               </div>
-              {visibleItems.map(n => {
+              {gi > 0 && <div style={{ height:1,background:'var(--border)',margin:'4px 8px 8px' }}/>}
+          {visibleItems.map(n => {
                 const active = page === n.id
                 return (
                   <button key={n.id} onClick={()=>setPage(n.id)}
