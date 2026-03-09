@@ -19,7 +19,6 @@ const NAV_GROUPS = [
   },
   {
     label: 'SERVICE DASHBOARDS',
-    mgr: true,
     items: [
       { id:'gst',  icon:'📊', label:'GST'            },
       { id:'tds',  icon:'💰', label:'TDS & Accounting'},
@@ -28,7 +27,6 @@ const NAV_GROUPS = [
   },
   {
     label: 'STATUS REPORTS',
-    mgr: true,
     items: [
       { id:'status',       icon:'📈', label:'Service Wise'      },
       { id:'memberstatus', icon:'👤', label:'Team Member Wise'  },
@@ -40,8 +38,8 @@ const NAV_GROUPS = [
     items: [
       { id:'users',    icon:'⚙️', label:'Manage Team',  partner:true },
       { id:'workload', icon:'👥', label:'Team Workload', mgr:true    },
-      { id:'audit',    icon:'🔍', label:'Audit Log',     mgr:true    },
-      { id:'bulkdate', icon:'📅', label:'Bulk Due Dates', mgr:true    },
+      { id:'audit',    icon:'🔍', label:'Audit Log'                   },
+      { id:'bulkdate', icon:'📅', label:'Bulk Due Dates', mgr:true     },
     ]
   },
 ]
