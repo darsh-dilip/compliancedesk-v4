@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { ROLES, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS } from '../constants.js'
+import { ROLES, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS, CONSTITUTIONS, FINANCIAL_YEARS } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
-import { getVisibleClientIds, bulkReassignClientTasks, setClientStatus } from '../hooks/useFirestore.js'
+import { getVisibleClientIds, bulkReassignClientTasks, setClientStatus, updateClient } from '../hooks/useFirestore.js'
 import { logClientStatusChanged, logClientReassigned } from '../utils/auditLog.js'
 import { Avatar, StatCard, BucketSection, Label, Alert } from '../components/UI.jsx'
 
@@ -75,6 +75,9 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
   const [reassigning,setReassigning]=useState(false)
   const [newAssignee,setNewAssignee]=useState(client.assignedTo)
   const [saving,setSaving]=useState(false)
+  const [showEditClient,setShowEditClient]=useState(false)
+  const [editForm,setEditForm]=useState({name:client.name,gstin:client.gstin||'',pan:client.pan||'',tan:client.tan||'',constitution:client.constitution||'Private Limited',assignedTo:client.assignedTo||''})
+  const setEF=(k,v)=>setEditForm(f=>({...f,[k]:v}))
   const ct=tasks.filter(t=>t.clientId===client.id)
   const overdue=ct.filter(t=>getBucket(t)==='overdue')
   const today=ct.filter(t=>getBucket(t)==='today')
@@ -142,6 +145,40 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
       <BucketSection label="📋 Upcoming"       tasks={upcoming} color="#5b8dee" users={users} clients={[client]} onTask={onTask}/>
       <BucketSection label="⏸ Hold / Dropped" tasks={hold}     color="#a78bfa" users={users} clients={[client]} onTask={onTask} defaultOpen={false}/>
       <BucketSection label="✅ Completed"      tasks={done}     color="#22c55e" users={users} clients={[client]} onTask={onTask} defaultOpen={false}/>
+
+      {showEditClient&&(
+        <div style={{ position:'fixed',inset:0,background:'rgba(0,0,0,.55)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:20 }}>
+          <div style={{ background:'var(--surface)',borderRadius:14,border:'1px solid var(--border)',width:'100%',maxWidth:520,padding:24 }}>
+            <div style={{ fontWeight:800,fontSize:15,color:'var(--text)',marginBottom:16 }}>✏️ Edit Client — {client.name}</div>
+            <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
+              <div><Label>Client Name *</Label><input value={editForm.name} onChange={e=>setEF('name',e.target.value)}/></div>
+              <div><Label>Constitution</Label>
+                <select value={editForm.constitution} onChange={e=>setEF('constitution',e.target.value)}>
+                  {CONSTITUTIONS.map(x=><option key={x}>{x}</option>)}
+                </select>
+              </div>
+              <div className="grid-2" style={{ gap:10 }}>
+                <div><Label>GSTIN</Label><input value={editForm.gstin} onChange={e=>setEF('gstin',e.target.value.toUpperCase())}/></div>
+                <div><Label>PAN</Label><input value={editForm.pan} onChange={e=>setEF('pan',e.target.value.toUpperCase())}/></div>
+                <div><Label>TAN</Label><input value={editForm.tan} onChange={e=>setEF('tan',e.target.value.toUpperCase())}/></div>
+                <div><Label>Assign To</Label>
+                  <select value={editForm.assignedTo} onChange={e=>setEF('assignedTo',e.target.value)}>
+                    {users.filter(u=>['team_leader','executive','intern'].includes(u.role)).map(u=><option key={u.id} value={u.id}>{u.name}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div style={{ display:'flex',gap:8,marginTop:16 }}>
+              <button className="btn btn-primary" style={{ flex:1 }} onClick={async()=>{
+                setSaving(true)
+                await updateClient(client.id,{ name:editForm.name,gstin:editForm.gstin,pan:editForm.pan,tan:editForm.tan,constitution:editForm.constitution,assignedTo:editForm.assignedTo })
+                setSaving(false); setShowEditClient(false)
+              }} disabled={saving}>{saving?'Saving…':'Save Changes'}</button>
+              <button className="btn btn-ghost" onClick={()=>setShowEditClient(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
