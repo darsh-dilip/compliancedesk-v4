@@ -121,14 +121,17 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
   )
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:700 }}>
+    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1140 }}>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom:16 }}>← Back</button>
       <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Onboard New Client</div>
       <div style={{ fontSize:13,color:'var(--text2)',marginBottom:22 }}>Tasks for the selected period will be auto-created.</div>
 
       {success && <Alert type="success" message="✓ Client onboarded! Tasks created. Redirecting…"/>}
 
-      <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:18,alignItems:'start' }}>
+
+        {/* ══ LEFT COLUMN ══════════════════════════════════════ */}
+        <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
 
         {/* ── Basic Information ── */}
         <div className="card" style={{ padding:18 }}>
@@ -215,6 +218,11 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           </div>
         </div>
 
+        </div>{/* end left column */}
+
+        {/* ══ RIGHT COLUMN ═════════════════════════════════════ */}
+        <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+
         {/* ── Directors / Partners ── */}
         {FIRM_CONSTITUTIONS.includes(form.constitution) && (
           <div className="card" style={{ padding:18 }}>
@@ -288,6 +296,13 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           )}
         </div>
 
+        </div>{/* end right column */}
+
+      </div>{/* end 2-col grid */}
+
+      {/* ══ FULL WIDTH BOTTOM ════════════════════════════════ */}
+      <div style={{ display:'flex',flexDirection:'column',gap:14,marginTop:18 }}>
+
         {/* ── Task preview ── */}
         {taskCount() > 0 && (
           <div style={{ background:'#5b8dee15',border:'1px solid #5b8dee30',borderRadius:10,padding:'12px 16px' }}>
@@ -308,7 +323,8 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           </button>
           <button className="btn btn-ghost" onClick={onBack}>Cancel</button>
         </div>
-      </div>
+
+      </div>{/* end bottom section */}
     </div>
   )
 }
