@@ -43,7 +43,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
 
   const taskMap = useMemo(()=>{
     const map = {}
-    tasks.filter(t=>GST_SVCS.includes(t.service)).forEach(t=>{
+    tasks.filter(t=>t.fy===fy&&GST_SVCS.includes(t.service)).forEach(t=>{
       if (!map[t.clientId]) map[t.clientId]={}
       if (!map[t.clientId][t.service]) map[t.clientId][t.service]={}
       const mi = periodToMonth(t.period)
@@ -52,7 +52,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
     return map
   },[tasks])
 
-  const gstTasks = tasks.filter(t=>GST_SVCS.includes(t.service))
+  const gstTasks = tasks.filter(t=>t.fy===fy&&GST_SVCS.includes(t.service))
   const assignees = [...new Map(gstClients.map(c=>{ const u=users.find(x=>x.id===c.assignedTo); return u?[u.id,u]:null }).filter(Boolean)).values()]
 
   return (
@@ -76,6 +76,9 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
 
       <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap',alignItems:'center' }}>
         <input placeholder="🔍 Search client…" value={search} onChange={e=>setSearch(e.target.value)} style={{ width:200 }}/>
+        <select value={fy} onChange={e=>setFY(e.target.value)} style={{ width:120 }}>
+          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+        </select>
         <select value={fFreq} onChange={e=>setFFreq(e.target.value)} style={{ width:160 }}>
           <option value="">Monthly + Quarterly</option>
           <option value="monthly">Monthly only</option>
