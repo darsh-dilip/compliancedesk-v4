@@ -132,7 +132,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           </div>
           </div>{/* end sticky */}
 
-          {/* Summary chips */
+          {/* Summary chips */}
           <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
             {buckets.map(b=>(
               <div key={b.key} style={{ display:'flex',alignItems:'center',gap:6,background:`${b.color}12`,border:`1px solid ${b.color}30`,borderRadius:8,padding:'5px 12px' }}>
