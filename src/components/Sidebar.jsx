@@ -100,19 +100,7 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
         })}
       </nav>
 
-      {/* BizExpress Logo */}
-      <div style={{ padding:'10px 16px',borderTop:'1px solid var(--border)',borderBottom:'1px solid var(--border)',display:'flex',justifyContent:'center' }}>
-        <div style={{ background:'#fff',borderRadius:8,padding:'6px 12px',display:'inline-flex',alignItems:'center' }}>
-          <img
-            src="https://bizexpress.in/wp-content/uploads/2021/08/BizE-Logo-HD.png"
-            alt="BizExpress"
-            style={{ height:22,objectFit:'contain',display:'block' }}
-            onError={e=>{ e.target.style.display='none' }}
-          />
-        </div>
-      </div>
-
-      {/* Profile footer */}
+      {/* Profile footer */
       <div style={{ padding:'10px 16px' }}>
         <button onClick={()=>setPage('profile')}
           style={{ display:'flex',alignItems:'center',gap:8,marginBottom:8,width:'100%',background:'none',border:'none',cursor:'pointer',padding:'4px 0',borderRadius:8 }}>
@@ -123,6 +111,15 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
           </div>
         </button>
         <button className="btn btn-ghost btn-sm" style={{ width:'100%',justifyContent:'center' }} onClick={onLogout}>Sign Out</button>
+      </div>
+      {/* BizExpress Logo - full width below sign out */}
+      <div style={{ background:'#fff',padding:'10px 16px',display:'flex',alignItems:'center',justifyContent:'center',width:'100%' }}>
+        <img
+          src="https://bizexpress.in/wp-content/uploads/2021/08/BizE-Logo-HD.png"
+          alt="BizExpress"
+          style={{ height:20,objectFit:'contain',display:'block',maxWidth:'80%' }}
+          onError={e=>{ e.target.parentElement.style.display='none' }}
+        />
       </div>
     </div>
   )
