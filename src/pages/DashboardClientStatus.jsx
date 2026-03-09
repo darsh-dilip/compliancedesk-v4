@@ -1,0 +1,145 @@
+import { useState, useMemo } from 'react'
+import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS } from '../constants.js'
+import { getBucket, fmtDate } from '../utils/dates.js'
+import { Avatar } from '../components/UI.jsx'
+
+export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
+  const [selClient, setSelClient] = useState('')
+  const [fy, setFY] = useState('2025-26')
+  const [search, setSearch] = useState('')
+
+  const client = clients.find(c => c.id === selClient)
+  const assignee = users.find(u => u.id === client?.assignedTo)
+
+  const clientTasks = useMemo(() => {
+    if (!selClient) return []
+    return tasks.filter(t => t.clientId === selClient && t.fy === fy)
+  }, [tasks, selClient, fy])
+
+  // Group by service
+  const byService = useMemo(() => {
+    const g = {}
+    clientTasks.forEach(t => {
+      if (!g[t.service]) g[t.service] = []
+      g[t.service].push(t)
+    })
+    return g
+  }, [clientTasks])
+
+  const filteredClients = search
+    ? clients.filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    : clients
+
+  const done   = clientTasks.filter(t => DONE_STATUSES.includes(t.status)).length
+  const total  = clientTasks.length
+  const overdue = clientTasks.filter(t => getBucket(t) === 'overdue').length
+
+  return (
+    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
+      {/* Client picker */}
+      <div>
+        <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Client Wise</div>
+        <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>All services for a client at a glance.</div>
+        <input placeholder="🔍 Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:8 }}/>
+        <select value={fy} onChange={e=>setFY(e.target.value)} style={{ marginBottom:10 }}>
+          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+        </select>
+        <div style={{ display:'flex',flexDirection:'column',gap:2,maxHeight:'calc(100vh - 280px)',overflow:'auto' }}>
+          {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(c=>(
+            <button key={c.id} onClick={()=>setSelClient(c.id)}
+              style={{ width:'100%',textAlign:'left',padding:'8px 12px',borderRadius:7,border:'none',cursor:'pointer',
+                background:selClient===c.id?'var(--surface3)':'transparent',
+                color:selClient===c.id?'var(--text)':'var(--text2)',
+                fontWeight:selClient===c.id?700:400,fontSize:12,
+                borderLeft:selClient===c.id?'2px solid var(--accent)':'2px solid transparent' }}>
+              {c.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Dashboard */}
+      {!selClient ? (
+        <div style={{ display:'flex',alignItems:'center',justifyContent:'center',height:400,flexDirection:'column',gap:12,color:'var(--text3)' }}>
+          <span style={{ fontSize:40 }}>🏢</span>
+          <div>Select a client to see their full service dashboard</div>
+        </div>
+      ) : (
+        <div>
+          {/* Client header */}
+          <div style={{ background:'var(--surface2)',borderRadius:12,padding:'16px 20px',marginBottom:20,display:'flex',gap:16,alignItems:'center' }}>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:18,fontWeight:800,color:'var(--text)' }}>{client?.name}</div>
+              <div style={{ fontSize:12,color:'var(--text3)',marginTop:2 }}>{client?.constitution} · FY {fy}</div>
+              {assignee && (
+                <div style={{ display:'flex',alignItems:'center',gap:6,marginTop:6 }}>
+                  <Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={18}/>
+                  <span style={{ fontSize:12,color:'var(--text2)' }}>{assignee.name}</span>
+                </div>
+              )}
+            </div>
+            <div style={{ display:'flex',gap:12 }}>
+              {[
+                { l:'Total', v:total, c:'var(--accent)' },
+                { l:'Done',  v:done,  c:'#22c55e' },
+                { l:'Overdue',v:overdue,c:'#f43f5e' },
+              ].map(x=>(
+                <div key={x.l} style={{ textAlign:'center',background:'var(--surface)',borderRadius:10,padding:'10px 16px',border:'1px solid var(--border)' }}>
+                  <div style={{ fontSize:22,fontWeight:800,color:x.c }}>{x.v}</div>
+                  <div style={{ fontSize:10,color:'var(--text3)' }}>{x.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Service cards kanban */}
+          {Object.keys(byService).length === 0 ? (
+            <div style={{ textAlign:'center',padding:40,color:'var(--text3)' }}>No tasks for FY {fy}.</div>
+          ) : (
+            <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:10 }}>
+              {Object.entries(byService).map(([service, sts]) => {
+                const doneCount  = sts.filter(t=>DONE_STATUSES.includes(t.status)).length
+                const ovCount    = sts.filter(t=>getBucket(t)==='overdue').length
+                const pct        = sts.length ? Math.round((doneCount/sts.length)*100) : 0
+                return (
+                  <div key={service} className="card" style={{ padding:'12px 14px' }}>
+                    <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:8,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>
+                      {service}
+                    </div>
+                    {/* Progress bar */}
+                    <div style={{ height:4,background:'var(--surface3)',borderRadius:2,marginBottom:8 }}>
+                      <div style={{ height:'100%',width:`${pct}%`,background:'#22c55e',borderRadius:2,transition:'width .4s' }}/>
+                    </div>
+                    <div style={{ display:'flex',flexDirection:'column',gap:5 }}>
+                      {sts.sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate)).map(t => {
+                        const st = getStatusObj(t.service, t.status)
+                        const ov = getBucket(t) === 'overdue'
+                        const assigneeU = users.find(u=>u.id===t.assignedTo)
+                        return (
+                          <div key={t.id} onClick={()=>onTask?.(t)}
+                            style={{ background:'var(--surface2)',borderRadius:7,padding:'7px 10px',cursor:'pointer',border:`1px solid ${ov?'#f43f5e30':'var(--border)'}` }}
+                            className="hover-lift">
+                            <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:3 }}>
+                              <span style={{ fontSize:10,fontWeight:600,flex:1,color:'var(--text2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{t.period}</span>
+                              <span style={{ fontSize:9,padding:'1px 5px',borderRadius:8,background:st.bg,color:st.c,border:`1px solid ${st.c}30`,whiteSpace:'nowrap' }}>{st.l}</span>
+                            </div>
+                            <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between' }}>
+                              <span style={{ fontSize:9,color:ov?'var(--danger)':'var(--text3)',fontWeight:ov?700:400 }}>
+                                {t.dueDate ? fmtDate(t.dueDate) : '—'}
+                              </span>
+                              {assigneeU && <Avatar name={assigneeU.name} init={assigneeU.init} role={assigneeU.role} sz={16}/>}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
