@@ -38,7 +38,9 @@ export default function App() {
   const { data: tasks,   loading: tLoad } = useCollection('tasks')
 
   const [page,         setPage]         = useState('dashboard')
-  const [selectedTask, setSelectedTask] = useState(null)
+  const [selectedTask,  setSelectedTask]  = useState(null)
+  const [profileUser,   setProfileUser]    = useState(null)
+  const navTo = (p) => { if (p !== 'profile') setProfileUser(null); setPage(p) }
   const [navFilter,    setNavFilter]    = useState(null)
   const [adhocClient,  setAdhocClient]  = useState(null)
 
@@ -147,9 +149,9 @@ export default function App() {
       case 'clientstatus':
         return isMgr ? <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/> : null
       case 'profile':
-        return <ProfilePage currentUser={currentUser} onUpdated={()=>{}}/>
+        return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
       case 'users':
-        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser}/> : null
+        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }}/> : null
       default:
         return <DashboardPage
           tasks={visibleTasks} user={currentUser} users={users} clients={clients}
