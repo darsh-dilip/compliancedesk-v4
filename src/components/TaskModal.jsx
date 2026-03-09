@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { arrayUnion } from 'firebase/firestore'
-import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS } from '../constants.js'
+import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask } from '../constants.js'
 import { fmtDate } from '../utils/dates.js'
-import { updateTask, addTaskComment, deleteTask } from '../hooks/useFirestore.js'
+import { updateTask, addTaskComment, deleteTask, getClientCredentials } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged, logTaskReassigned, logCommentAdded } from '../utils/auditLog.js'
 import { Modal, Label, Avatar, Divider, Alert, ConfirmModal } from './UI.jsx'
 
@@ -23,6 +23,8 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
   const [confirmDel, setConfirmDel] = useState(false)
   const [error,      setError]      = useState('')
   const [tab,        setTab]        = useState('status')
+  const [taskCreds,  setTaskCreds]  = useState([])
+  const [credsLoaded,setCredsLoaded]= useState(false)
   const [editDue,    setEditDue]    = useState(task.dueDate||'')
   const [editNotes,  setEditNotes]  = useState(task.statusNote||'')
   const [editDesc,   setEditDesc]   = useState(task.period||'')
@@ -82,6 +84,16 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
     } catch(e){ setError(e.message) } finally { setEditSaving(false) }
   }
 
+  // Load credentials when creds tab is opened
+  const relevantPortals = getCredForTask(task.service)
+  const loadCreds = () => {
+    if (credsLoaded || !relevantPortals.length) return
+    setCredsLoaded(true)
+    getClientCredentials(task.clientId, data => {
+      setTaskCreds(data.filter(d => relevantPortals.some(p => p.v === d.service)))
+    })
+  }
+
   const tabSt = active => ({
     padding:'6px 14px',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',
     background:active?'var(--surface3)':'transparent',color:active?'var(--text)':'var(--text3)',
@@ -116,14 +128,48 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
         </div>
 
         <div style={{ display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid var(--border)',paddingBottom:10,flexWrap:'wrap' }}>
-          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History']].map(([t,l])=>(
-            <button key={t} onClick={()=>setTab(t)} style={tabSt(tab===t)}>{l}</button>
+          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History'],['creds','🔐 Credentials']].map(([t,l])=>(
+            <button key={t} onClick={()=>{ setTab(t); if(t==='creds') loadCreds() }} style={tabSt(tab===t)}>{l}</button>
           ))}
           <button onClick={()=>setReassigning(!reassigning)} style={{ ...tabSt(reassigning),marginLeft:'auto' }}>↔ Reassign</button>
           {canDelete&&(
             <button onClick={()=>setConfirmDel(true)} style={{ padding:'6px 12px',borderRadius:6,fontSize:12,fontWeight:600,cursor:'pointer',background:'#f43f5e15',color:'var(--danger)',border:'1px solid #f43f5e30' }}>🗑 Delete</button>
           )}
         </div>
+
+
+        {tab==='creds'&&(
+          <div>
+            {relevantPortals.length===0 ? (
+              <div style={{ color:'var(--text3)',fontSize:13,padding:'20px 0',textAlign:'center' }}>No portals linked to this service type.</div>
+            ) : taskCreds.length===0 ? (
+              <div style={{ color:'var(--text3)',fontSize:13,padding:'20px 0',textAlign:'center' }}>
+                No credentials saved for this client yet.<br/>
+                <span style={{ fontSize:11,marginTop:6,display:'block' }}>Add them in Credential Manager.</span>
+              </div>
+            ) : (
+              <div style={{ display:'flex',flexDirection:'column',gap:10 }}>
+                {taskCreds.map(cr=>{
+                  const svc = relevantPortals.find(p=>p.v===cr.service)
+                  return (
+                    <div key={cr.id} style={{ background:'var(--surface2)',borderRadius:10,padding:'12px 14px',border:'1px solid var(--border)' }}>
+                      <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:8 }}>
+                        <span style={{ fontSize:14 }}>{svc?.icon||'🔐'}</span>
+                        <div style={{ fontWeight:700,fontSize:13,color:'var(--text)' }}>{svc?.l||cr.service}</div>
+                        {svc?.url&&<a href={svc.url} target="_blank" rel="noopener noreferrer" style={{ fontSize:10,color:'var(--accent)',marginLeft:'auto' }}>Open Portal ↗</a>}
+                      </div>
+                      <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:6 }}>
+                        <div><Label>Login ID</Label><div style={{ fontSize:13,fontFamily:'var(--mono)',color:'var(--text)',background:'var(--surface3)',borderRadius:6,padding:'4px 8px',marginTop:2 }}>{cr.loginId||'—'}</div></div>
+                        <div><Label>Password</Label><div style={{ fontSize:13,fontFamily:'var(--mono)',color:'var(--text)',background:'var(--surface3)',borderRadius:6,padding:'4px 8px',marginTop:2 }}>{cr.password||'—'}</div></div>
+                      </div>
+                      {cr.notes&&<div style={{ marginTop:6,fontSize:11,color:'var(--text3)' }}>📝 {cr.notes}</div>}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {reassigning&&(
           <div style={{ background:'var(--surface2)',borderRadius:10,padding:12,marginBottom:14 }}>
