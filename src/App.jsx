@@ -141,21 +141,21 @@ export default function App() {
       case 'workload':
         return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask} onNavigatePending={navigatePending}/> : null
       case 'gst':
-        return isMgr ? <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
+        return <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'tds':
-        return isMgr ? <DashboardTDS tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
+        return <DashboardTDS tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'it':
-        return isMgr ? <DashboardIT tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
+        return <DashboardIT tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'status':
-        return isMgr ? <StatusDashboard tasks={visibleTasks} users={users} user={currentUser}/> : null
+        return <StatusDashboard tasks={visibleTasks} users={users} user={currentUser}/>
       case 'audit':
-        return isMgr ? <AuditLogPage users={users} clients={clients} currentUser={currentUser}/> : null
+        return <AuditLogPage users={users} clients={clients} currentUser={currentUser}/>
       case 'creds':
         return <CredentialManager clients={clients} currentUser={currentUser}/>
       case 'memberstatus':
-        return isMgr ? <DashboardMemberStatus tasks={visibleTasks} users={users} user={currentUser} onTask={setSelectedTask}/> : null
+        return <DashboardMemberStatus tasks={visibleTasks} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'clientstatus':
-        return isMgr ? <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/> : null
+        return <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/>
       case 'profile':
         return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
       case 'bulkdate':
