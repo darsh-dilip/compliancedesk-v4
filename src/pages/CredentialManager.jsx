@@ -244,7 +244,7 @@ export const CredentialManager = ({ clients, currentUser }) => {
   }
 
   return (
-    <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
+    <div className="fade-up print-root" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
       {showBulk && <BulkEditModal clients={clients} currentUser={currentUser} initialClientId={selectedClientId} onClose={()=>setShowBulk(false)}/>}
 
       {/* Left: client picker */}
