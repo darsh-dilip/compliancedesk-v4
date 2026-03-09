@@ -45,7 +45,8 @@ export const updateClient= (id, data) => updateDoc(doc(db,'clients',id), {...dat
 export const setClientStatus = (cid, st) => updateClient(cid, {clientStatus:st})
 export const addTask     = data => addDoc(collection(db,'tasks'), data)
 export const updateTask  = (id, data) => updateDoc(doc(db,'tasks',id), {...data, updatedAt:serverTimestamp()})
-export const deleteTask  = id => deleteDoc(doc(db,'tasks',id))
+export const deleteTask   = id => deleteDoc(doc(db,'tasks',id))
+export const deleteClient = id => deleteDoc(doc(db,'clients',id))
 export const addTaskComment = (tid, comment) => updateDoc(doc(db,'tasks',tid), {comments:arrayUnion(comment), updatedAt:serverTimestamp()})
 
 export const bulkAddTasks = async arr => {
