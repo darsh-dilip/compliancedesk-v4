@@ -88,13 +88,14 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
         <div style={{ display:'flex',flexDirection:'column',overflow:'hidden' }}>
           {/* Member header + filters (sticky) */}
           <div style={{ position:'sticky',top:0,zIndex:50,background:'var(--bg)',paddingBottom:12,borderBottom:'1px solid var(--border)',marginBottom:14 }}>
-          <div style={{ display:'flex',alignItems:'center',gap:10,flexWrap:'nowrap' }}>
+          <div style={{ display:'flex',alignItems:'center',gap:12,flexWrap:'nowrap' }}>
             <Avatar name={selectedMember.name} init={selectedMember.init} role={selectedMember.role} sz={36}/>
-            <div style={{ flex:1 }}>
-              <div style={{ fontWeight:700,fontSize:15,color:'var(--text)' }}>{selectedMember.name}</div>
+            <div style={{ minWidth:0,maxWidth:220 }}>
+              <div style={{ fontWeight:700,fontSize:15,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{selectedMember.name}</div>
               <div style={{ fontSize:11,color:ROLE_CLR[selectedMember.role],fontWeight:600 }}>{ROLES[selectedMember.role]}</div>
             </div>
-            <div style={{ display:'flex',gap:8,alignItems:'center',marginLeft:'auto' }}>
+            <div style={{ width:1,height:32,background:'var(--border2)',flexShrink:0 }}/>
+            <div style={{ display:'flex',gap:8,alignItems:'center' }}>
             <select value={selService} onChange={e=>setSelService(e.target.value)} style={{ fontSize:12,minWidth:160 }}>
               <option value="">All Services</option>
               <optgroup label="GST">
@@ -131,7 +132,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           </div>
           </div>{/* end sticky */}
 
-          {/* Summary chips */}
+          {/* Summary chips */
           <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
             {buckets.map(b=>(
               <div key={b.key} style={{ display:'flex',alignItems:'center',gap:6,background:`${b.color}12`,border:`1px solid ${b.color}30`,borderRadius:8,padding:'5px 12px' }}>
