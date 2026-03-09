@@ -123,11 +123,11 @@ export default function App() {
           onSuccess={() => setPage('clients')}
         />
       case 'team':
-        return isMgr ? <TeamPage users={users} tasks={visibleTasks} clients={clients} onTask={setSelectedTask}/> : null
+        return isMgr ? <TeamPage users={users} tasks={visibleTasks} clients={clients} user={currentUser} onTask={setSelectedTask}/> : null
       case 'workload':
         return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask}/> : null
       case 'gst':
-        return isMgr ? <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser}/> : null
+        return isMgr ? <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/> : null
       case 'tds':
         return isMgr ? <DashboardTDS tasks={visibleTasks} clients={clients} users={users} user={currentUser}/> : null
       case 'it':
@@ -135,7 +135,7 @@ export default function App() {
       case 'status':
         return isMgr ? <StatusDashboard tasks={visibleTasks} users={users} user={currentUser}/> : null
       case 'audit':
-        return isMgr ? <AuditLogPage users={users} currentUser={currentUser}/> : null
+        return isMgr ? <AuditLogPage users={users} clients={clients} currentUser={currentUser}/> : null
       case 'users':
         return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser}/> : null
       default:
