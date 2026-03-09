@@ -66,10 +66,13 @@ export const AuditLogPage = ({ users, clients }) => {
   const clearAll = () => { setFAction(''); setFClient(''); setFMember(''); setFStatusFrom(''); setFStatusTo(''); setFDateFrom(''); setFDateTo(''); setSearch('') }
 
   return (
-    <div className="fade-up print-root" style={{ padding:'24px 28px',maxWidth:900 }}>
-      <PrintHeader title="Audit Log"/>
-      <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Audit Log</div><PrintButton title="Audit Log"/></div>
-      <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>Every action — status changes, reassignments, client updates — timestamped and attributed.</div>
+    <div className="fade-up print-root" style={{ padding:'0',maxWidth:'none' }}>
+      <PrintButton title="Audit Log"/>
+      <div style={{ position:'sticky',top:0,zIndex:100,background:'var(--bg)',padding:'18px 28px 12px',borderBottom:'1px solid var(--border)' }}>
+        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
+          <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Audit Log</div>
+        </div>
+        <div style={{ fontSize:13,color:'var(--text2)',marginBottom:12 }}>Every action — status changes, reassignments, client updates — timestamped and attributed.</div>
 
       {/* Filter row 1 */}
       <div style={{ display:'grid',gridTemplateColumns:'1.5fr 1fr 1fr',gap:8,marginBottom:8 }}>
@@ -100,6 +103,8 @@ export const AuditLogPage = ({ users, clients }) => {
         )}
       </div>
 
+      </div>{/* end sticky */}
+      <div style={{ padding:'0 28px 24px' }}>
       <div style={{ fontSize:12,color:'var(--text3)',marginBottom:16 }}>{loading?'Loading…':`${filtered.length} entries`}</div>
 
       {Object.entries(grouped).map(([date,entries])=>(
@@ -144,6 +149,7 @@ export const AuditLogPage = ({ users, clients }) => {
           {logs.length?'No entries match your filters.':'No audit entries yet.'}
         </div>
       )}
+    </div>
     </div>
   )
 }
