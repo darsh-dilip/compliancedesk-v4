@@ -226,19 +226,32 @@ export const CredentialManager = ({ clients, currentUser }) => {
     ? clients.filter(c=>c.name.toLowerCase().includes(search.toLowerCase()))
     : clients
 
-  const copyOne = (cred) => {
+  const buildCredLine = (cred) => {
     const svc = CRED_SERVICES.find(s=>s.v===cred.service)
-    const msg = `Portal: ${svc?.l||cred.service}\nLink: ${svc?.url||'N/A'}\nID: ${cred.loginId||'—'}\nPass: ${cred.password||'—'}`
+    return `Portal: ${svc?.l||cred.service}\nLink: ${svc?.url||'N/A'}\nID: ${cred.loginId||'—'}\nPass: ${cred.password||'—'}`
+  }
+
+  const buildFooter = () => {
+    const name  = currentUser.name  || ''
+    const phone = currentUser.phone || '—'
+    const email = currentUser.email || '—'
+    return `\n—\nShared by: ${name}\nPhone: ${phone}\nEmail: ${email}`
+  }
+
+  const copyOne = (cred) => {
+    const client = clients.find(c=>c.id===selectedClientId)
+    const header = `Client: ${client?.name||''}\n`
+    const msg = header + buildCredLine(cred) + buildFooter()
     navigator.clipboard.writeText(msg)
     setCopied(cred.id); setTimeout(()=>setCopied(''), 1500)
   }
 
   const copyAll = () => {
     if (!creds.length) return
-    const msg = creds.map(c=>{
-      const svc = CRED_SERVICES.find(s=>s.v===c.service)
-      return `Portal: ${svc?.l||c.service}\nLink: ${svc?.url||'N/A'}\nID: ${c.loginId||'—'}\nPass: ${c.password||'—'}`
-    }).join('\n\n')
+    const client = clients.find(c=>c.id===selectedClientId)
+    const header = `Client: ${client?.name||''}\n\n`
+    const body   = creds.map(buildCredLine).join('\n\n')
+    const msg    = header + body + buildFooter()
     navigator.clipboard.writeText(msg)
     setCopied('all'); setTimeout(()=>setCopied(''), 1500)
   }
@@ -251,18 +264,34 @@ export const CredentialManager = ({ clients, currentUser }) => {
       <div>
         <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:4 }}>🔐 Credential Manager</div>
         <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>Select a client to view or update credentials.</div>
-        <input placeholder="🔍 Search clients…" value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:10 }}/>
-        <div style={{ display:'flex',flexDirection:'column',gap:2,maxHeight:'calc(100vh - 240px)',overflow:'auto' }}>
-          {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(c=>(
-            <button key={c.id} onClick={()=>{ setSelectedClientId(c.id); setShowForm(false); setEditCred(null) }}
-              style={{ width:'100%',textAlign:'left',padding:'9px 12px',borderRadius:8,border:'none',cursor:'pointer',
-                background:selectedClientId===c.id?'var(--surface3)':'transparent',
-                color:selectedClientId===c.id?'var(--text)':'var(--text2)',
-                fontWeight:selectedClientId===c.id?700:400,fontSize:12,
-                borderLeft:selectedClientId===c.id?'2px solid var(--accent)':'2px solid transparent' }}>
-              {c.name}
-            </button>
-          ))}
+        <select value={fCat} onChange={e=>{setFCat(e.target.value);setSelectedClientId('')}} style={{ width:'100%',marginBottom:6,fontSize:12 }}>
+          <option value="">All Categories</option>
+          {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>Category {x}</option>)}
+        </select>
+        <input placeholder="🔍 Search clients…"  value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:10 }}/>
+        <div style={{ display:'flex',flexDirection:'column',gap:4,maxHeight:'calc(100vh - 240px)',overflow:'auto' }}>
+          {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(cl=>{
+            const isActive = selectedClientId===cl.id
+            const initials = cl.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()
+            const credCount = 0 // could fetch but keep simple
+            return (
+              <button key={cl.id} onClick={()=>{ setSelectedClientId(cl.id); setShowForm(false); setEditCred(null) }}
+                style={{ width:'100%',textAlign:'left',padding:'9px 12px',borderRadius:9,cursor:'pointer',
+                  background:isActive?'var(--surface3)':'var(--surface)',
+                  border:`1px solid ${isActive?'var(--accent)30':'var(--border)'}`,
+                  borderLeft:`3px solid ${isActive?'var(--accent)':'transparent'}`,transition:'all .12s' }}>
+                <div style={{ display:'flex',alignItems:'center',gap:8 }}>
+                  <div style={{ width:28,height:28,borderRadius:6,background:isActive?'var(--accent)':'var(--surface2)',border:'1px solid var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,fontWeight:700,color:isActive?'#fff':'var(--text3)',flexShrink:0 }}>
+                    {initials}
+                  </div>
+                  <div style={{ flex:1,minWidth:0 }}>
+                    <div style={{ fontWeight:isActive?700:500,fontSize:12,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{cl.name}</div>
+                    <div style={{ fontSize:10,color:'var(--text3)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{cl.constitution||''}</div>
+                  </div>
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
 
