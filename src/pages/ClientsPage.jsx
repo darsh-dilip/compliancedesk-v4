@@ -35,14 +35,20 @@ const OverlayBadge = ({ clientStatus }) => {
 // Health score: 0-100 based on overdue%, completion%, recency
 const getHealthScore = (tasks) => {
   if (!tasks.length) return { score:100, label:'No Tasks', color:'#6b7280' }
-  const total    = tasks.length
-  const done     = tasks.filter(t=>allDone.includes(t.status)).length
-  const overdue  = tasks.filter(t=>getBucket(t)==='overdue').length
-  const pctDone  = done/total
-  const pctOv    = overdue/total
-  const score    = Math.round(Math.max(0, Math.min(100, (pctDone*60) - (pctOv*80) + 40)))
-  const label    = score>=80?'Healthy':score>=50?'Average':score>=25?'At Risk':'Critical'
-  const color    = score>=80?'#22c55e':score>=50?'#f59e0b':score>=25?'#fb923c':'#f43f5e'
+  const today = new Date(); today.setHours(0,0,0,0)
+  // Only count tasks whose due date has passed (or no due date = treat as overdue)
+  // Exclude hold/refused/dropped from denominator
+  const holdStatuses = ['hold','dropped','customer_refused','not_in_compliance']
+  const duePassed = tasks.filter(t => {
+    if (holdStatuses.includes(t.status)) return false
+    if (!t.dueDate) return true
+    return new Date(t.dueDate) < today
+  })
+  if (!duePassed.length) return { score:100, label:'On Track', color:'#22c55e' }
+  const done  = duePassed.filter(t => allDone.includes(t.status)).length
+  const score = Math.round((done / duePassed.length) * 100)
+  const label = score>=80?'Healthy':score>=50?'Average':score>=25?'At Risk':'Critical'
+  const color = score>=80?'#22c55e':score>=50?'#f59e0b':score>=25?'#fb923c':'#f43f5e'
   return { score, label, color }
 }
 
