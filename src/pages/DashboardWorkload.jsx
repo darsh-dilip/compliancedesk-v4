@@ -100,7 +100,7 @@ const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
   )
 }
 
-export const DashboardWorkload = ({ users, tasks, clients, user, onTask }) => {
+export const DashboardWorkload = ({ users, tasks, clients, user, onTask, onNavigatePending }) => {
   const [selected, setSelected] = useState(null)
   const team = useMemo(()=>{
     if (user.role==='partner') return users.filter(u=>u.id!==user.id)
@@ -115,8 +115,8 @@ export const DashboardWorkload = ({ users, tasks, clients, user, onTask }) => {
       <div style={{ fontSize:13,color:'var(--text2)',marginBottom:20 }}>Click any member to drill into their tasks.</div>
       <div className="grid-4" style={{ marginBottom:24 }}>
         <StatCard label="Team Members"  value={team.length}                                                       color="var(--accent)"/>
-        <StatCard label="Total Overdue" value={teamTasks.filter(t=>getBucket(t)==='overdue').length}              color="var(--danger)"/>
-        <StatCard label="Due Today"     value={teamTasks.filter(t=>getBucket(t)==='today').length}                color="var(--warn)"/>
+        <StatCard label="Total Overdue" value={teamTasks.filter(t=>getBucket(t)==='overdue').length}              color="var(--danger)"  onClick={()=>onNavigatePending?.('overdue')}/>
+        <StatCard label="Due Today"     value={teamTasks.filter(t=>getBucket(t)==='today').length}                color="var(--warn)"    onClick={()=>onNavigatePending?.('today')}/>
         <StatCard label="Done This FY"  value={teamTasks.filter(t=>DONE_STATUSES.includes(t.status)).length}      color="var(--success)"/>
       </div>
       <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:12 }}>
