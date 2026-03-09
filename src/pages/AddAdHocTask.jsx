@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { ADHOC_SERVICES, ROLES, FINANCIAL_YEARS } from '../constants.js'
 import { createAdhocTask } from '../utils/taskGenerator.js'
 import { addTask } from '../hooks/useFirestore.js'
-import { writeLog, LOG_ACTIONS } from '../utils/auditLog.js'
+import { writeLog } from '../utils/auditLog.js'
+import { LOG_ACTIONS } from '../constants.js'
 import { Label, Alert } from '../components/UI.jsx'
 
 export const AddAdHocTask = ({ clients, users, currentUser, onBack, onSuccess }) => {
