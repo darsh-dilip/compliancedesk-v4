@@ -19,6 +19,7 @@ export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
     advanceTax:false, accounting:false,
     assignedTo:'', fy:'2025-26', complianceStartMonth:'04',
   })
+  const [directors, setDirectors] = useState([]) // {name, includeITR}
   const [error,  setError]  = useState('')
   const [saving, setSaving] = useState(false)
   const [success,setSuccess]=useState(false)
@@ -40,6 +41,7 @@ export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
     if(form.tdsApplicable) n+=20
     if(form.ptMH) n+=13; if(form.ptKA) n+=2
     if(form.itApplicable) n+=1; if(form.advanceTax) n+=4; if(form.accounting) n+=1
+    n += directors.filter(d=>d.includeITR&&d.name.trim()).length // director ITRs
     return n
   }
 
@@ -53,6 +55,40 @@ export const AddClientPage = ({ users, currentUser, onBack, onSuccess }) => {
       const ref   = await addClient({ ...form, complianceStartYM })
       const tasks = generateTasks({ ...form, id:ref.id }, form.assignedTo, form.fy, complianceStartYM)
       await bulkAddTasks(tasks)
+
+      // Create individual client + ITR task for each director/partner
+      const fyE = parseInt(form.fy) + 1
+      const dirLabel = ['Partnership Firm','LLP'].includes(form.constitution) ? 'Partner' : 'Director'
+      for (const d of directors) {
+        if (!d.name.trim() || !d.includeITR) continue
+        const dirClient = {
+          name: d.name.trim(),
+          constitution: 'Individual',
+          category: form.category,
+          phone: '', email: '', gstin: '', pan: '', tan: '',
+          assignedTo: form.assignedTo,
+          fy: form.fy, complianceStartMonth: '04',
+          complianceStartYM: `${parseInt(form.fy)}-04`,
+          gstApplicable:false, tdsApplicable:false, ptMH:false, ptKA:false,
+          itApplicable:true, auditCase:false, advanceTax:false, accounting:false,
+          gstFreq:'monthly',
+          linkedFirm: ref.id, linkedFirmName: form.name, role: dirLabel,
+        }
+        const dirRef = await addClient(dirClient)
+        // ITR task: July 31 of assessment year (non-audit)
+        const dueDate = `${fyE}-07-31`
+        const ayLabel = `AY ${fyE}-${String(fyE+1).slice(2)}`
+        const itrTask = {
+          clientId: dirRef.id, clientName: d.name.trim(),
+          service: 'Income Tax Filing', period: ayLabel,
+          dueDate, assignedTo: form.assignedTo,
+          status:'pending', statusNote:'', arn:'', ref:'',
+          comments:[], history:[], fy: form.fy, periodYM:`${fyE}-04`,
+          isAdhoc:false, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString(),
+        }
+        await bulkAddTasks([itrTask])
+      }
+
       if(currentUser) await logClientOnboarded({ ...form, id:ref.id }, currentUser)
       setSuccess(true)
       setTimeout(()=>{ onSuccess?.(); onBack() },1400)
