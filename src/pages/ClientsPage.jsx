@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ROLES, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS, CONSTITUTIONS, FINANCIAL_YEARS } from '../constants.js'
+import { ROLES, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS, CONSTITUTIONS, FINANCIAL_YEARS, CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
 import { getVisibleClientIds, bulkReassignClientTasks, setClientStatus, updateClient } from '../hooks/useFirestore.js'
 import { logClientStatusChanged, logClientReassigned } from '../utils/auditLog.js'
@@ -31,6 +31,34 @@ const OverlayBadge = ({ clientStatus }) => {
   return <span style={{ display:'inline-flex',alignItems:'center',padding:'2px 8px',borderRadius:4,fontSize:10,fontWeight:800,letterSpacing:'0.07em',background:st.badgeBg,color:st.badgeColor,border:`1px solid ${st.badgeBorder}` }}>{st.badge}</span>
 }
 
+
+// Health score: 0-100 based on overdue%, completion%, recency
+const getHealthScore = (tasks) => {
+  if (!tasks.length) return { score:100, label:'No Tasks', color:'#6b7280' }
+  const total    = tasks.length
+  const done     = tasks.filter(t=>allDone.includes(t.status)).length
+  const overdue  = tasks.filter(t=>getBucket(t)==='overdue').length
+  const pctDone  = done/total
+  const pctOv    = overdue/total
+  const score    = Math.round(Math.max(0, Math.min(100, (pctDone*60) - (pctOv*80) + 40)))
+  const label    = score>=80?'Healthy':score>=50?'Average':score>=25?'At Risk':'Critical'
+  const color    = score>=80?'#22c55e':score>=50?'#f59e0b':score>=25?'#fb923c':'#f43f5e'
+  return { score, label, color }
+}
+
+const CategoryBadge = ({ cat }) => {
+  if (!cat) return null
+  const color = CAT_CLR[cat] || '#6b7280'
+  return (
+    <span style={{ display:'inline-flex',alignItems:'center',justifyContent:'center',
+      width:22,height:22,borderRadius:6,fontWeight:800,fontSize:11,
+      background:`${color}20`,color,border:`1px solid ${color}50`,flexShrink:0 }}>
+      {cat}
+    </span>
+  )
+}
+
+
 const ClientRow = ({ client, users, tasks, onClick }) => {
   const assignee=users.find(u=>u.id===client.assignedTo)
   const ct=tasks.filter(t=>t.clientId===client.id)
@@ -44,6 +72,7 @@ const ClientRow = ({ client, users, tasks, onClick }) => {
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           <div style={{ fontWeight:700,fontSize:14,color:'var(--text)' }}>{client.name}</div>
+          <CategoryBadge cat={client.category}/>
           <OverlayBadge clientStatus={cst}/>
         </div>
         <div style={{ fontSize:11,color:'var(--text3)',marginBottom:6 }}>{client.constitution} · {client.gstin||'—'}</div>
@@ -66,6 +95,20 @@ const ClientRow = ({ client, users, tasks, onClick }) => {
           </div>
         ))}
       </div>
+      {(() => {
+        const ct = tasks.filter(t=>t.clientId===client.id)
+        const h  = getHealthScore(ct)
+        return (
+          <div style={{ display:'flex',flexDirection:'column',alignItems:'center',gap:6,minWidth:52 }}>
+            <div style={{ textAlign:'center' }}>
+              <div style={{ width:38,height:38,borderRadius:'50%',border:`3px solid ${h.color}`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:12,color:h.color,background:`${h.color}12` }}>
+                {h.score}
+              </div>
+              <div style={{ fontSize:8,fontWeight:700,color:h.color,marginTop:3,whiteSpace:'nowrap' }}>{h.label}</div>
+            </div>
+          </div>
+        )
+      })()}
       <div style={{ color:'var(--text3)' }}>›</div>
     </div>
   )
@@ -76,7 +119,7 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
   const [newAssignee,setNewAssignee]=useState(client.assignedTo)
   const [saving,setSaving]=useState(false)
   const [showEditClient,setShowEditClient]=useState(false)
-  const [editForm,setEditForm]=useState({name:client.name,gstin:client.gstin||'',pan:client.pan||'',tan:client.tan||'',constitution:client.constitution||'Private Limited',assignedTo:client.assignedTo||''})
+  const [editForm,setEditForm]=useState({name:client.name,gstin:client.gstin||'',pan:client.pan||'',tan:client.tan||'',constitution:client.constitution||'Private Limited',assignedTo:client.assignedTo||'',category:client.category||'',phone:client.phone||'',email:client.email||''})
   const setEF=(k,v)=>setEditForm(f=>({...f,[k]:v}))
   const ct=tasks.filter(t=>t.clientId===client.id)
   const overdue=ct.filter(t=>getBucket(t)==='overdue')
@@ -102,11 +145,26 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
         <div style={{ flex:1 }}>
           <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:4 }}>
             <div style={{ fontSize:22,fontWeight:800,color:'var(--text)' }}>{client.name}</div>
+            <CategoryBadge cat={client.category}/>
             <OverlayBadge clientStatus={cst}/>
           </div>
-          <div style={{ fontSize:13,color:'var(--text2)' }}>{client.constitution} · GSTIN: {client.gstin||'—'} · PAN: {client.pan||'—'}</div>
+          <div style={{ fontSize:13,color:'var(--text2)',marginBottom:6 }}>{client.constitution} · GSTIN: {client.gstin||'—'} · PAN: {client.pan||'—'}{client.phone&&` · 📞 ${client.phone}`}{client.email&&` · ✉️ ${client.email}`}</div>
+          {(() => {
+            const h = getHealthScore(ct)
+            return (
+              <div style={{ display:'inline-flex',alignItems:'center',gap:6,marginTop:4 }}>
+                <div style={{ width:32,height:32,borderRadius:'50%',border:`3px solid ${h.color}`,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:800,fontSize:11,color:h.color,background:`${h.color}12` }}>
+                  {h.score}
+                </div>
+                <div style={{ fontSize:12,color:h.color,fontWeight:600 }}>{h.label}</div>
+              </div>
+            )
+          })()}
         </div>
         <div style={{ display:'flex',gap:8 }}>
+          {['partner','hod'].includes(currentUser.role) && (
+            <button className="btn btn-ghost btn-sm" onClick={()=>setShowEditClient(true)}>✏️ Edit</button>
+          )}
           <button className="btn btn-primary btn-sm" onClick={()=>onAddAdhoc(client)}>+ Ad-hoc Task</button>
           <button className="btn btn-ghost btn-sm" onClick={()=>setReassigning(!reassigning)}>↔ Reassign All</button>
         </div>
@@ -152,6 +210,10 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
             <div style={{ fontWeight:800,fontSize:15,color:'var(--text)',marginBottom:16 }}>✏️ Edit Client — {client.name}</div>
             <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
               <div><Label>Client Name *</Label><input value={editForm.name} onChange={e=>setEF('name',e.target.value)}/></div>
+              <div className="grid-2" style={{gridColumn:'1/-1'}}>
+                <div><Label>Phone</Label><input value={editForm.phone} onChange={e=>setEF('phone',e.target.value)} type="tel"/></div>
+                <div><Label>Email</Label><input value={editForm.email} onChange={e=>setEF('email',e.target.value)} type="email"/></div>
+              </div>
               <div><Label>Constitution</Label>
                 <select value={editForm.constitution} onChange={e=>setEF('constitution',e.target.value)}>
                   {CONSTITUTIONS.map(x=><option key={x}>{x}</option>)}
@@ -171,7 +233,7 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
             <div style={{ display:'flex',gap:8,marginTop:16 }}>
               <button className="btn btn-primary" style={{ flex:1 }} onClick={async()=>{
                 setSaving(true)
-                await updateClient(client.id,{ name:editForm.name,gstin:editForm.gstin,pan:editForm.pan,tan:editForm.tan,constitution:editForm.constitution,assignedTo:editForm.assignedTo })
+                await updateClient(client.id,{ name:editForm.name,gstin:editForm.gstin,pan:editForm.pan,tan:editForm.tan,constitution:editForm.constitution,assignedTo:editForm.assignedTo,category:editForm.category,phone:editForm.phone,email:editForm.email })
                 setSaving(false); setShowEditClient(false)
               }} disabled={saving}>{saving?'Saving…':'Save Changes'}</button>
               <button className="btn btn-ghost" onClick={()=>setShowEditClient(false)}>Cancel</button>
