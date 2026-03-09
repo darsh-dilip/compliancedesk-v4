@@ -28,6 +28,7 @@ import { CredentialManager }      from './pages/CredentialManager.jsx'
 import { DashboardMemberStatus }  from './pages/DashboardMemberStatus.jsx'
 import { DashboardClientStatus }  from './pages/DashboardClientStatus.jsx'
 import { ProfilePage }            from './pages/ProfilePage.jsx'
+import { BulkDueDatePage }        from './pages/BulkDueDatePage.jsx'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
 
@@ -91,6 +92,13 @@ export default function App() {
   const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
   const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
 
+  // #5: Redirect to profile if phone not set
+  useEffect(() => {
+    if (currentUser && !currentUser.phone && page !== 'profile') {
+      setPage('profile')
+    }
+  }, [currentUser?.id])
+
   const renderPage = () => {
     switch (page) {
       case 'dashboard':
@@ -150,6 +158,8 @@ export default function App() {
         return isMgr ? <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/> : null
       case 'profile':
         return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
+      case 'bulkdate':
+        return isMgr ? <BulkDueDatePage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
         return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }}/> : null
       default:
