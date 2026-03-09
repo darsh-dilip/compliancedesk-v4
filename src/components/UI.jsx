@@ -148,22 +148,11 @@ export const PrintButton = ({ title = 'ComplianceDesk' }) => {
   }
   return (
     <button
-      className="no-print"
+      className="no-print btn btn-ghost btn-sm"
       onClick={handlePrint}
-      title="Download as PDF"
-      style={{
-        position:'fixed', top:20, right:24, zIndex:1000,
-        width:'auto', height:36, borderRadius:20, padding:'0 16px',
-        background:'var(--accent)', color:'#fff',
-        border:'none', cursor:'pointer', fontSize:20,
-        display:'flex', alignItems:'center', justifyContent:'center',
-        boxShadow:'0 4px 20px rgba(91,141,238,.5)',
-        transition:'transform .15s, box-shadow .15s',
-      }}
-      onMouseEnter={e=>{ e.currentTarget.style.transform='scale(1.1)'; e.currentTarget.style.boxShadow='0 6px 28px rgba(91,141,238,.7)' }}
-      onMouseLeave={e=>{ e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='0 4px 20px rgba(91,141,238,.5)' }}
+      style={{ borderRadius:20, padding:'4px 14px', fontSize:12, fontWeight:600 }}
     >
-      ⬇ PDF
+      PDF
     </button>
   )
 }
