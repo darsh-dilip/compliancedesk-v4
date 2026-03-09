@@ -118,7 +118,7 @@ export default function App() {
           onTask={setSelectedTask}
         />
       case 'clients':
-        return <ClientsPage
+        return <ClientsPage onBulkImport={()=>setPage('bulkimport')}
           clients={clients} users={users} tasks={visibleTasks}
           currentUser={currentUser} onAdd={goAddClient}
           onTask={setSelectedTask} onAddAdhoc={goAddAdhoc}
@@ -158,6 +158,8 @@ export default function App() {
         return <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/>
       case 'profile':
         return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
+      case 'bulkimport':
+        return <BulkImportPage users={users} onBack={()=>setPage('clients')}/>
       case 'bulkdate':
         return isMgr ? <BulkDueDatePage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
