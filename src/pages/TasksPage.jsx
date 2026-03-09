@@ -52,54 +52,46 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
     <div
       draggable
       onDragStart={e=>{ e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('taskService', task.service) }}
-      style={{ background:'var(--surface)',border:`1px solid ${ov?'#f43f5e40':'var(--border)'}`,borderRadius:8,padding:'8px 10px',marginBottom:5,cursor:'grab',outline:ov?`1px solid #f43f5e25`:'' }}
+      style={{ background:'var(--surface)',border:`1px solid ${ov?'#f43f5e40':'var(--border)'}`,borderRadius:10,padding:'10px 12px',marginBottom:6,cursor:'grab',outline:ov?`2px solid #f43f5e20`:'' }}
     >
-      {/* Row 1: service + status chip + edit icon */}
-      <div style={{ display:'flex',alignItems:'flex-start',gap:6,marginBottom:3 }}>
-        <div style={{ flex:1,fontWeight:600,fontSize:11,color:'var(--text)',lineHeight:'1.3' }}>
+      {/* Clickable area → open modal */}
+      <div onClick={onClick} style={{ cursor:'pointer' }}>
+        <div style={{ fontWeight:700,fontSize:12,color:'var(--text)',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>
           {task.service}
-          {task.isAdhoc&&<span style={{ marginLeft:5,fontSize:9,color:'#f59e0b',fontWeight:700 }}>AD-HOC</span>}
+          {task.isAdhoc&&<span style={{ marginLeft:6,fontSize:9,color:'#f59e0b',fontWeight:700 }}> AD-HOC</span>}
         </div>
-        <div style={{ display:'flex',alignItems:'center',gap:4,flexShrink:0 }}>
-          <span className="chip" style={{ background:st.bg,color:st.c,border:`1px solid ${st.c}35`,fontSize:9,padding:'1px 5px' }}>{st.l}</span>
-          <button onClick={()=>{ setShowMove(!showMove); setNewStatus(task.status) }} title="Change Status"
-            style={{ background:'none',border:'none',cursor:'pointer',color:showMove?'var(--accent)':'var(--text3)',padding:'1px 2px',fontSize:12,lineHeight:1 }}>
-            ✏️
-          </button>
+        <div style={{ fontSize:11,color:'var(--text2)',marginBottom:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{task.clientName}</div>
+        <div style={{ fontSize:10,color:'var(--text3)',marginBottom:8 }}>{task.period}</div>
+        <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:6 }}>
+          <span className="chip" style={{ background:st.bg,color:st.c,border:`1px solid ${st.c}35`,fontSize:10 }}>{st.l}</span>
+          {ov&&<span style={{ fontSize:9,color:'var(--danger)',fontWeight:700 }}>{Math.abs(dDiff)}d late</span>}
         </div>
-      </div>
-
-      {/* Row 2: period + due date */}
-      <div style={{ display:'flex',alignItems:'center',gap:6,marginBottom:4 }}>
-        <div style={{ flex:1,fontSize:10,color:'var(--text2)' }}>{task.period}</div>
-        <div style={{ fontSize:9,color:dueDateColor,fontWeight:ov?700:400,flexShrink:0 }}>
-          {ov ? `${Math.abs(dDiff)}d late` : dDiff===0 ? 'Today' : task.dueDate ? fmtDate(task.dueDate) : '—'}
+        <div style={{ display:'flex',alignItems:'center',gap:6 }}>
+          {assignee&&<Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={16}/>}
+          <span style={{ fontSize:10,color:dueDateColor,fontWeight:ov?700:400 }}>{task.dueDate?fmtDate(task.dueDate):'—'}</span>
         </div>
       </div>
-
-      {/* Row 3: client name + assignee avatar */}
-      <div onClick={onClick} style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer' }}>
-        <div style={{ flex:1,fontSize:10,color:'var(--text3)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{task.clientName}</div>
-        {assignee&&<Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={18}/>}
-      </div>
-
-      {/* Change Status panel */}
-      {showMove&&(
-        <div style={{ marginTop:7,paddingTop:7,borderTop:'1px solid var(--border)' }}>
-          <div style={{ display:'flex',gap:5 }}>
-            <select value={newStatus} onChange={e=>setNewStatus(e.target.value)} style={{ fontSize:10,padding:'3px 6px',flex:1,minWidth:0 }}>
+      {/* Change Status */}
+      <div style={{ marginTop:8,paddingTop:8,borderTop:'1px solid var(--border)' }}>
+        <button onClick={()=>{ setShowMove(!showMove); setNewStatus(task.status) }}
+          style={{ fontSize:11,color:'var(--accent)',background:'none',border:'none',cursor:'pointer',padding:0,fontWeight:600 }}>
+          {showMove?'✕ Cancel':'→ Change Status'}
+        </button>
+        {showMove&&(
+          <div style={{ marginTop:6,display:'flex',gap:6 }}>
+            <select value={newStatus} onChange={e=>setNewStatus(e.target.value)} style={{ fontSize:11,padding:'4px 6px',flex:1,minWidth:0 }}>
               {moveStatuses.map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
             </select>
-            <button className="btn btn-primary btn-sm" onClick={doMove} disabled={saving} style={{ fontSize:10,padding:'3px 8px' }}>{saving?'…':'✓'}</button>
+            <button className="btn btn-primary btn-sm" onClick={doMove} disabled={saving} style={{ fontSize:11 }}>{saving?'…':'✓'}</button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
 
 // ── Kanban Column with drag-drop ────────────────────────────
-const KanbanCol = ({ col, tasks, users, clients, onTask, currentUser, onMoved, kanbanType }) => {
+const KanbanCol = ({ col, tasks, allTasks, users, clients, onTask, currentUser, onMoved, kanbanType }) => {
   const [dragOver, setDragOver] = useState(false)
   const [dropTaskId, setDropTaskId] = useState(null)
   const [dropService, setDropService] = useState(null)
@@ -126,7 +118,8 @@ const KanbanCol = ({ col, tasks, users, clients, onTask, currentUser, onMoved, k
   const confirmDrop = async () => {
     if (!dropTaskId || !dropStatus) return
     setDropSaving(true)
-    const task = tasks.find(t=>t.id===dropTaskId)
+    // Look in allTasks (not just column tasks) since task is still in source column
+    const task = allTasks.find(t=>t.id===dropTaskId)
     if (task) {
       await updateTask(dropTaskId, {
         status: dropStatus,
