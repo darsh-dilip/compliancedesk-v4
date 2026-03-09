@@ -56,7 +56,7 @@ export default function App() {
     setPage('pending')
   }, [])
 
-  // Redirect to profile if phone not filled
+  // Redirect to profile if phone not filled (must be before any conditional returns)
   useEffect(() => {
     if (currentUser && !currentUser.phone && page !== 'profile') {
       setPage('profile')
