@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { CONSTITUTIONS, CLIENT_CATEGORIES, ROLES, FINANCIAL_YEARS } from '../constants.js'
+import { CONSTITUTIONS, CLIENT_CATEGORIES, ROLES, FINANCIAL_YEARS, CRED_SERVICES } from '../constants.js'
 import { generateTasks } from '../utils/taskGenerator.js'
-import { addClient, bulkAddTasks } from '../hooks/useFirestore.js'
+import { addClient, bulkAddTasks, upsertCredential } from '../hooks/useFirestore.js'
 import { logClientOnboarded } from '../utils/auditLog.js'
 import { Label, Alert } from '../components/UI.jsx'
 
