@@ -53,22 +53,18 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
     <div className="fade-up print-root" style={{ padding:'24px 28px',maxWidth:1100,display:'grid',gridTemplateColumns:'240px 1fr',gap:20 }}>
       {/* Client picker */}
       <div>
-        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Client Wise</div><ExcelButton filename="ClientStatus" getData={()=>({
-          headers:['Client','Constitution','Category','Services','Overdue','Done','Health'],
-          rows: (visibleClients||[]).map(cl=>{
-            const ct=(tasks||[]).filter(t=>t.clientId===cl.id)
-            const ov=ct.filter(t=>t.dueDate<new Date().toISOString().split('T')[0]&&!['filed','nil_filed','not_applicable'].includes(t.status)).length
-            const dn=ct.filter(t=>['filed','nil_filed','not_applicable'].includes(t.status)).length
-            return [cl.name,cl.constitution||'',cl.category||'','',ov,dn,'']
-          })
-        })}/><ExcelButton filename="ClientStatus" getData={()=>({
-          headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
-          rows:(tasks||[]).map(t=>{
-            const u=(users||[]).find(u=>u.id===t.assignedTo)
-            const cl=(filteredClients||[]).find(c=>c.id===t.clientId)
-            return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
-          })
-        })}/><PrintButton title="Client Status"/></div>
+        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
+          <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Client Wise</div>
+          <ExcelButton filename="ClientStatus" getData={()=>({
+            headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
+            rows:(tasks||[]).filter(t=>(filteredClients||[]).some(cl=>cl.id===t.clientId)).map(t=>{
+              const u=(users||[]).find(u=>u.id===t.assignedTo)
+              const cl=(filteredClients||[]).find(c=>c.id===t.clientId)
+              return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
+            })
+          })}/>
+          <PrintButton title="Client Status"/>
+        </div>
         <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>All services for a client at a glance.</div>
         <select value={fCat} onChange={e=>{setFCat(e.target.value);setSelClient('')}} style={{ width:'100%',marginBottom:6,fontSize:12 }}>
           <option value="">All Categories</option>
