@@ -19,9 +19,9 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
   const [form, setForm] = useState({
     name:'', constitution:'Private Limited', category:'A', phone:'', email:'',
     gstin:'', pan:'', tan:'',
-    gstApplicable:false, gstFreq:'monthly', tdsApplicable:false,
-    ptMH:false, ptKA:false, itApplicable:false, auditCase:false,
-    advanceTax:false, accounting:false,
+    gstApplicable:false, gstFreq:'monthly', tdsApplicable:true,
+    ptMH:false, ptKA:false, itApplicable:true, auditCase:false,
+    advanceTax:true, accounting:true,
     assignedTo:'', fy:'2025-26', complianceStartMonth:'04',
   })
   const [error,    setError]    = useState('')
