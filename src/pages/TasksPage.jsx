@@ -6,7 +6,7 @@ import { getBucket, getStatusKanbanCol, daysDiff, fmtDate, isTaskPending } from 
 import { getVisibleUserIds } from '../utils/hierarchy.js'
 import { updateTask, deleteTask } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged } from '../utils/auditLog.js'
-import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal, PrintButton } from '../components/UI.jsx'
+import { TaskRow, DueBadge, Avatar, Modal, Label, ConfirmModal, PrintButton, ExcelButton } from '../components/UI.jsx'
 import { arrayUnion } from 'firebase/firestore'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
@@ -265,6 +265,7 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
   const [fCat,       setFCat]       = useState('')
   const [fDateFrom,  setFDateFrom]  = useState('')
   const [fDateTo,    setFDateTo]    = useState('')
+  const [fMonth,     setFMonth]     = useState('')
   const [search,    setSearch]    = useState('')
   const [refreshK,  setRefreshK]  = useState(0)
 
@@ -290,14 +291,15 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
       const catClients = new Set(clients.filter(c=>c.category===fCat).map(c=>c.id))
       t = t.filter(x=>catClients.has(x.clientId))
     }
-    if (fDateFrom) t = t.filter(x=>x.dueDate && x.dueDate >= fDateFrom)
-    if (fDateTo)   t = t.filter(x=>x.dueDate && x.dueDate <= fDateTo)
+    if (fMonth)    t = t.filter(x=>x.dueDate && x.dueDate.startsWith(fMonth))
+    if (!fMonth && fDateFrom) t = t.filter(x=>x.dueDate && x.dueDate >= fDateFrom)
+    if (!fMonth && fDateTo)   t = t.filter(x=>x.dueDate && x.dueDate <= fDateTo)
     if (search)    t = t.filter(x=>`${x.service} ${x.clientName} ${x.period}`.toLowerCase().includes(search.toLowerCase()))
     return t.sort((a,b)=>new Date(a.dueDate)-new Date(b.dueDate))
   },[
   tasks,user,users,showPendingOnly,initialBucket,
   fClient,fService,fStatus,fAssignee,fCat,
-  fDateFrom,fDateTo,search
+  fDateFrom,fDateTo,fMonth,search
 ])
 
   const services     = [...new Set(tasks.map(t=>t.service))].sort()
@@ -353,7 +355,10 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           {showPendingOnly?'Pending Tasks':'All Tasks'}
           {initialBucket&&<span style={{ fontSize:13,color:'var(--text3)',fontWeight:400,marginLeft:8 }}>· {initialBucket}</span>}
         </div>
-        <PrintButton title={showPendingOnly?'Pending Tasks':'All Tasks'}/>
+        <ExcelButton filename="Tasks" getData={()=>({
+          headers:['Client','Service','Period','Due Date','Status','Assigned To'],
+          rows: visibleTasks.map(t=>[t.clientName||'',t.service||'',t.period||'',t.dueDate||'',t.status||'',users.find(u=>u.id===t.assignedTo)?.name||''])
+        })}/><PrintButton title={showPendingOnly?'Pending Tasks':'All Tasks'}/>
         <div style={{ display:'flex',gap:3,background:'var(--surface2)',borderRadius:8,padding:3,border:'1px solid var(--border)' }}>
           {[['list','≡ List'],['status','⊞ Status'],['urgency','⏱ Urgency']].map(([v,l])=>(
             <button key={v} onClick={()=>{ setView(v==='list'?'list':'kanban'); if(v!=='list') setKanbanType(v) }}
@@ -388,19 +393,27 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>{x}</option>)}
         </select>
       </div>
-      <div style={{ display:'flex',gap:8,marginBottom:8,alignItems:'center' }}>
-        <div style={{ fontSize:11,color:'var(--text3)',whiteSpace:'nowrap' }}>Due date:</div>
-        <input type="date" value={fDateFrom} onChange={e=>setFDateFrom(e.target.value)} style={{ width:140 }} title="From"/>
+      <div style={{ display:'flex',gap:8,marginBottom:8,alignItems:'center',flexWrap:'wrap' }}>
+        <div style={{ fontSize:11,color:'var(--text3)',whiteSpace:'nowrap' }}>Due:</div>
+        <select value={fMonth} onChange={e=>{setFMonth(e.target.value);setFDateFrom('');setFDateTo('')}} style={{ width:130,fontSize:12 }}>
+          <option value="">Month…</option>
+          {['2024-10','2024-11','2024-12','2025-01','2025-02','2025-03','2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'].map(m=>{
+            const [y,mo]=m.split('-'); const label=new Date(+y,+mo-1).toLocaleString('en-IN',{month:'short',year:'numeric'})
+            return <option key={m} value={m}>{label}</option>
+          })}
+        </select>
+        <div style={{ fontSize:11,color:'var(--text3)',whiteSpace:'nowrap' }}>or range:</div>
+        <input type="date" value={fDateFrom} onChange={e=>{setFDateFrom(e.target.value);setFMonth('')}} style={{ width:136 }} title="From"/>
         <div style={{ fontSize:11,color:'var(--text3)' }}>→</div>
-        <input type="date" value={fDateTo} onChange={e=>setFDateTo(e.target.value)} style={{ width:140 }} title="To"/>
-        {(fDateFrom||fDateTo)&&<button className="btn btn-ghost btn-sm" onClick={()=>{setFDateFrom('');setFDateTo('')}}>✕</button>}
+        <input type="date" value={fDateTo} onChange={e=>{setFDateTo(e.target.value);setFMonth('')}} style={{ width:136 }} title="To"/>
+        {(fDateFrom||fDateTo||fMonth)&&<button className="btn btn-ghost btn-sm" onClick={()=>{setFDateFrom('');setFDateTo('');setFMonth('')}}>✕</button>}
       </div>
 
       </div>{/* end filters sticky */}
       <div style={{ padding:'0 28px' }}>
       <div style={{ display:'flex',alignItems:'center',gap:10,marginBottom:14,paddingTop:10 }}>
         <div style={{ fontSize:12,color:'var(--text3)' }}>{visible.length} tasks</div>
-        {hasFilters&&<button className="btn btn-ghost btn-sm" onClick={()=>{setFClient('');setFService('');setFStatus('');setFAssignee('');setSearch('');setFDateFrom('');setFDateTo('');setFCat('')}}>✕ Clear</button>}
+        {hasFilters&&<button className="btn btn-ghost btn-sm" onClick={()=>{setFClient('');setFService('');setFStatus('');setFAssignee('');setSearch('');setFDateFrom('');setFDateTo('');setFCat('');setFMonth('')}}>✕ Clear</button>}
         {view==='kanban'&&<div style={{ fontSize:11,color:'var(--text3)',marginLeft:'auto' }}>💡 Drag cards between columns to change status</div>}
       </div>
 
