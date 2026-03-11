@@ -3,6 +3,18 @@ import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS, CLIENT_CATEGORIES, CAT_CL
 import { getBucket, fmtDate } from '../utils/dates.js'
 import { Avatar, PrintButton, PrintHeader, ExcelButton } from '../components/UI.jsx'
 
+
+const getUrgency = (t) => {
+  if (!t.dueDate) return 'Unknown'
+  const today = new Date().toISOString().split('T')[0]
+  if (t.dueDate < today) return 'Overdue'
+  const diff = Math.round((new Date(t.dueDate) - new Date()) / 86400000)
+  if (diff <= 3)  return 'Due in 3 days'
+  if (diff <= 7)  return 'Due this week'
+  if (diff <= 30) return 'Due this month'
+  return 'Upcoming'
+}
+
 export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
   const [selClient, setSelClient] = useState('')
   const [fy, setFY] = useState('2025-26')
@@ -48,6 +60,13 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
             const ov=ct.filter(t=>t.dueDate<new Date().toISOString().split('T')[0]&&!['filed','nil_filed','not_applicable'].includes(t.status)).length
             const dn=ct.filter(t=>['filed','nil_filed','not_applicable'].includes(t.status)).length
             return [cl.name,cl.constitution||'',cl.category||'','',ov,dn,'']
+          })
+        })}/><ExcelButton filename="ClientStatus" getData={()=>({
+          headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
+          rows:(tasks||[]).map(t=>{
+            const u=(users||[]).find(u=>u.id===t.assignedTo)
+            const cl=(filteredClients||[]).find(c=>c.id===t.clientId)
+            return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
           })
         })}/><PrintButton title="Client Status"/></div>
         <div style={{ fontSize:12,color:'var(--text2)',marginBottom:12 }}>All services for a client at a glance.</div>
