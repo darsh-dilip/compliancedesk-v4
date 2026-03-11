@@ -255,6 +255,18 @@ const KanbanCol = ({ col, tasks, allTasks, users, clients, onTask, currentUser, 
 }
 
 // ── Main Component ─────────────────────────────────────────
+
+const getUrgency = (t) => {
+  if (!t.dueDate) return 'Unknown'
+  const today = new Date().toISOString().split('T')[0]
+  if (t.dueDate < today) return 'Overdue'
+  const diff = Math.round((new Date(t.dueDate) - new Date()) / 86400000)
+  if (diff <= 3)  return 'Due in 3 days'
+  if (diff <= 7)  return 'Due this week'
+  if (diff <= 30) return 'Due this month'
+  return 'Upcoming'
+}
+
 export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=null, showPendingOnly=false }) => {
   const [view,      setView]      = useState('kanban')
   const [kanbanType,setKanbanType]=useState('urgency')
@@ -358,6 +370,13 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
         <ExcelButton filename="Tasks" getData={()=>({
           headers:['Client','Service','Period','Due Date','Status','Assigned To'],
           rows: visibleTasks.map(t=>[t.clientName||'',t.service||'',t.period||'',t.dueDate||'',t.status||'',users.find(u=>u.id===t.assignedTo)?.name||''])
+        })}/><ExcelButton filename="Tasks" getData={()=>({
+          headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
+          rows:(visible||[]).map(t=>{
+            const u=(users||[]).find(u=>u.id===t.assignedTo)
+            const cl=(clients||[]).find(c=>c.id===t.clientId)
+            return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
+          })
         })}/><PrintButton title={showPendingOnly?'Pending Tasks':'All Tasks'}/>
         <div style={{ display:'flex',gap:3,background:'var(--surface2)',borderRadius:8,padding:3,border:'1px solid var(--border)' }}>
           {[['list','≡ List'],['status','⊞ Status'],['urgency','⏱ Urgency']].map(([v,l])=>(
