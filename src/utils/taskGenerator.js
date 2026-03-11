@@ -101,6 +101,17 @@ export const generateTasks = (client, assignedTo, fy='2025-26', complianceStartY
     push(task('Accounting',`FY ${fy}`,clamp(fyE,8,30),`${fyS}-04`))
   }
 
+  // ── Onboarding Call ────────────────────────────────────────
+  // Auto-created for every client, due 2 days from today (skip weekends)
+  const obDate = (() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 2)
+    if (d.getDay() === 6) d.setDate(d.getDate() + 2) // Sat → Mon
+    if (d.getDay() === 0) d.setDate(d.getDate() + 1) // Sun → Mon
+    return d.toISOString().split('T')[0]
+  })()
+  push(task('Onboarding Call', 'Onboarding', obDate, null, { isAdhoc:false }))
+
   return tasks
 }
 
