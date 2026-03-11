@@ -12,6 +12,18 @@ const SERVICE_OPTIONS = [
   'Ad-Hoc Tasks',
 ]
 
+
+const getUrgency = (t) => {
+  if (!t.dueDate) return 'Unknown'
+  const today = new Date().toISOString().split('T')[0]
+  if (t.dueDate < today) return 'Overdue'
+  const diff = Math.round((new Date(t.dueDate) - new Date()) / 86400000)
+  if (diff <= 3)  return 'Due in 3 days'
+  if (diff <= 7)  return 'Due this week'
+  if (diff <= 30) return 'Due this month'
+  return 'Upcoming'
+}
+
 export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
   const [selMember,  setSelMember]  = useState('')
   const [selService, setSelService] = useState('')
@@ -78,6 +90,13 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
             const ov=ut.filter(t=>t.dueDate<new Date().toISOString().split('T')[0]&&!['filed','nil_filed','not_applicable'].includes(t.status)).length
             const dn=ut.filter(t=>['filed','nil_filed','not_applicable'].includes(t.status)).length
             return [u.name,u.role,ut.length,ov,dn]
+          })
+        })}/><ExcelButton filename="MemberStatus" getData={()=>({
+          headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
+          rows:(memberTasks||[]).map(t=>{
+            const u=(users||[]).find(u=>u.id===t.assignedTo)
+            const cl=(clients||[]).find(c=>c.id===t.clientId)
+            return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
           })
         })}/><PrintButton title="Team Member Status"/></div>
         <div style={{ fontSize:11,color:'var(--text3)',marginBottom:12 }}>Select a member to see their tasks.</div>
