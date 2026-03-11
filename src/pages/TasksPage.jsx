@@ -269,7 +269,7 @@ const getUrgency = (t) => {
 
 export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=null, showPendingOnly=false }) => {
   const [view,      setView]      = useState('kanban')
-  const [kanbanType,setKanbanType]=useState('urgency')
+  const [kanbanType,setKanbanType]=useState('status')
   const [fClient,   setFClient]   = useState('')
   const [fService,  setFService]  = useState('')
   const [fStatus,   setFStatus]   = useState('')
@@ -368,9 +368,6 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
           {initialBucket&&<span style={{ fontSize:13,color:'var(--text3)',fontWeight:400,marginLeft:8 }}>· {initialBucket}</span>}
         </div>
         <ExcelButton filename="Tasks" getData={()=>({
-          headers:['Client','Service','Period','Due Date','Status','Assigned To'],
-          rows: visibleTasks.map(t=>[t.clientName||'',t.service||'',t.period||'',t.dueDate||'',t.status||'',users.find(u=>u.id===t.assignedTo)?.name||''])
-        })}/><ExcelButton filename="Tasks" getData={()=>({
           headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
           rows:(visible||[]).map(t=>{
             const u=(users||[]).find(u=>u.id===t.assignedTo)
