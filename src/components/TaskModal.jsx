@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { arrayUnion } from 'firebase/firestore'
-import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask } from '../constants.js'
+import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask, ONBOARDING_CALL_URL, ONBOARDING_CALL_PASSWORD } from '../constants.js'
 import { fmtDate } from '../utils/dates.js'
 import { updateTask, addTaskComment, deleteTask, getClientCredentials } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged, logTaskReassigned, logCommentAdded } from '../utils/auditLog.js'
@@ -183,6 +183,31 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
           </div>
         )}
 
+
+        {task.service === 'Onboarding Call' && (
+          <div style={{ background:'#5b8dee15',border:'1px solid #5b8dee40',borderRadius:10,padding:'14px 16px',marginBottom:16 }}>
+            <div style={{ fontWeight:700,fontSize:13,color:'var(--accent)',marginBottom:10 }}>🔗 Onboarding Portal</div>
+            <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
+              <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+                <span style={{ fontSize:12,color:'var(--text2)',width:70,flexShrink:0 }}>Link</span>
+                <a href={ONBOARDING_CALL_URL} target="_blank" rel="noopener noreferrer"
+                  style={{ fontSize:12,color:'var(--accent)',wordBreak:'break-all' }}>{ONBOARDING_CALL_URL}</a>
+              </div>
+              <div style={{ display:'flex',alignItems:'center',gap:10 }}>
+                <span style={{ fontSize:12,color:'var(--text2)',width:70,flexShrink:0 }}>Password</span>
+                <code style={{ fontSize:13,color:'var(--text)',background:'var(--surface3)',padding:'3px 8px',borderRadius:6,fontFamily:'var(--mono)',letterSpacing:'0.05em' }}>{ONBOARDING_CALL_PASSWORD}</code>
+                <button className="btn btn-ghost btn-sm" style={{ padding:'2px 8px',fontSize:11 }}
+                  onClick={()=>navigator.clipboard.writeText(ONBOARDING_CALL_PASSWORD)}>Copy</button>
+              </div>
+              <div style={{ marginTop:4 }}>
+                <a href={ONBOARDING_CALL_URL} target="_blank" rel="noopener noreferrer"
+                  className="btn btn-primary btn-sm" style={{ display:'inline-flex',alignItems:'center',gap:6,textDecoration:'none' }}>
+                  Open Onboarding Portal ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
         {tab==='status'&&(
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
             <div>
