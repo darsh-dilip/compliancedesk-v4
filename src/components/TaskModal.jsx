@@ -41,11 +41,14 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
     setSaving(true); setError('')
     try {
       const old = task.status
+      const isDone = [...DONE_PROPER, ...DONE_NIL].includes(status)
+      const wasNotDone = !([...DONE_PROPER, ...DONE_NIL].includes(old))
       await updateTask(task.id, {
         status, statusNote:note,
         arn: selectedSt.requiresArn ? arn : (task.arn||''),
         ref: selectedSt.requiresRef ? ref : (task.ref||''),
         history: arrayUnion({ action:`Status → ${selectedSt.l||status}`, by:currentUser.id, byName:currentUser.name, at:new Date().toISOString(), oldStatus:old }),
+        ...(isDone && wasNotDone ? { completedAt: new Date().toISOString() } : {}),
       })
       await logTaskStatusChanged(task, old, status, currentUser, arn||ref)
       onClose()
