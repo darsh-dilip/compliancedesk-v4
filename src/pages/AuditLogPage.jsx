@@ -74,25 +74,17 @@ export const AuditLogPage = ({ users, clients }) => {
 
   return (
     <div className="fade-up print-root" style={{ padding:'0',maxWidth:'none' }}>
-      <ExcelButton filename="AuditLog" getData={()=>({
-          headers:['Date','User','Action','Client','Details'],
-          rows: filteredLogs.map(l=>[
-            new Date(l.createdAt?.toDate?.()??l.createdAt).toLocaleString('en-IN'),
-            l.userName||'',
-            l.action||'',
-            l.clientName||'',
-            l.details||''
-          ])
-        })}/><ExcelButton filename="AuditLog" getData={()=>({
-          headers:['Date & Time','Action By','Action','Client','Old Status','New Status','ARN / Ref','Details'],
-          rows:(filtered||[]).map(l=>{
-            const d=l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||l.createdAt||0)
-            return [d.toLocaleString('en-IN'),l.userName||'',l.action||'',l.clientName||'',l.statusFrom||'',l.statusTo||'',l.arn||'',l.details||'']
-          })
-        })}/><PrintButton title="Audit Log"/>
       <div style={{ position:'sticky',top:0,zIndex:100,background:'var(--bg)',padding:'18px 28px 12px',borderBottom:'1px solid var(--border)' }}>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Audit Log</div>
+          <ExcelButton filename="AuditLog" getData={()=>({
+            headers:['Date & Time','Action By','Action','Client','Old Status','New Status','ARN / Ref','Details'],
+            rows:(filtered||[]).map(l=>{
+              const d=l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||l.createdAt||0)
+              return [d.toLocaleString('en-IN'),l.userName||'',l.action||'',l.clientName||'',l.statusFrom||'',l.statusTo||'',l.arn||'',l.details||'']
+            })
+          })}/>
+          <PrintButton title="Audit Log"/>
         </div>
         <div style={{ fontSize:13,color:'var(--text2)',marginBottom:12 }}>Every action — status changes, reassignments, client updates — timestamped and attributed.</div>
 
