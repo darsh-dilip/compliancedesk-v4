@@ -50,13 +50,24 @@ const MemberCard = ({ member, tasks, users, onClick }) => {
 }
 
 const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
+  const [fService, setFService] = useState('')
+  const [fClient,  setFClient]  = useState('')
+  const [fMonth,   setFMonth]   = useState('')
   const mt      = tasks.filter(t=>t.assignedTo===member.id)
-  const overdue = mt.filter(t=>getBucket(t)==='overdue')
-  const today   = mt.filter(t=>getBucket(t)==='today')
-  const upcoming= mt.filter(t=>['soon3','soon7','others'].includes(getBucket(t)))
-  const done    = mt.filter(t=>DONE_STATUSES.includes(t.status))
-  const hold    = mt.filter(t=>['hold','dropped'].includes(getBucket(t)))
+  const allClients = [...new Map(mt.map(t=>[t.clientId,{id:t.clientId,name:t.clientName}])).values()].sort((a,b)=>a.name.localeCompare(b.name))
+  const filtered = mt.filter(t => {
+    if (fService && t.service !== fService) return false
+    if (fClient  && t.clientId !== fClient) return false
+    if (fMonth   && (!t.dueDate || !t.dueDate.startsWith(fMonth))) return false
+    return true
+  })
+  const overdue = filtered.filter(t=>getBucket(t)==='overdue')
+  const today   = filtered.filter(t=>getBucket(t)==='today')
+  const upcoming= filtered.filter(t=>['soon3','soon7','others'].includes(getBucket(t)))
+  const done    = filtered.filter(t=>DONE_STATUSES.includes(t.status))
+  const hold    = filtered.filter(t=>['hold','dropped'].includes(getBucket(t)))
   const services= [...new Set(mt.map(t=>t.service))].sort()
+  const hasFilters = fService||fClient||fMonth
   return (
     <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1000 }}>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom:16 }}>← Back</button>
@@ -67,6 +78,27 @@ const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
           <div style={{ fontSize:12,color:ROLE_CLR[member.role],fontWeight:600 }}>{ROLES[member.role]}{member.dept&&` · ${member.dept}`}</div>
         </div>
       </div>
+      {/* ── Filters ── */}
+      <div style={{ display:'flex',gap:8,marginBottom:16,flexWrap:'wrap',alignItems:'center' }}>
+        <select value={fService} onChange={e=>setFService(e.target.value)} style={{ minWidth:160,fontSize:12 }}>
+          <option value="">All Services</option>
+          {services.map(s=><option key={s} value={s}>{s}</option>)}
+        </select>
+        <select value={fClient} onChange={e=>setFClient(e.target.value)} style={{ minWidth:160,fontSize:12 }}>
+          <option value="">All Clients</option>
+          {allClients.map(cl=><option key={cl.id} value={cl.id}>{cl.name}</option>)}
+        </select>
+        <select value={fMonth} onChange={e=>setFMonth(e.target.value)} style={{ minWidth:130,fontSize:12 }}>
+          <option value="">All Months</option>
+          {['2025-04','2025-05','2025-06','2025-07','2025-08','2025-09','2025-10','2025-11','2025-12','2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07'].map(m=>{
+            const [y,mo]=m.split('-'); const label=new Date(+y,+mo-1).toLocaleString('en-IN',{month:'short',year:'numeric'})
+            return <option key={m} value={m}>{label}</option>
+          })}
+        </select>
+        {hasFilters&&<button className="btn btn-ghost btn-sm" onClick={()=>{setFService('');setFClient('');setFMonth('')}}>✕ Clear</button>}
+        <span style={{ fontSize:12,color:'var(--text3)',marginLeft:4 }}>{filtered.length} tasks</span>
+      </div>
+
       <div className="grid-4" style={{ marginBottom:20 }}>
         <StatCard label="Overdue"  value={overdue.length}  color="var(--danger)"/>
         <StatCard label="Due Today"value={today.length}    color="var(--warn)"/>
