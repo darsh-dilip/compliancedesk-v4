@@ -186,6 +186,41 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           )}
         </div>
 
+
+        {/* ── Optional Credentials ── */}
+        <div className="card" style={{ padding:18 }}>
+          <div style={{ display:'flex',alignItems:'center',gap:10,cursor:'pointer' }}
+            onClick={()=>setShowCreds(v=>!v)}>
+            <div style={{ fontWeight:700,fontSize:13,color:'var(--text)' }}>🔐 Portal Credentials</div>
+            <span style={{ fontSize:11,color:'var(--accent)',background:'var(--surface2)',padding:'2px 8px',borderRadius:10,marginLeft:4 }}>Optional</span>
+            <span style={{ marginLeft:'auto',color:'var(--text3)',fontSize:12 }}>{showCreds?'▲':'▼'}</span>
+          </div>
+          {showCreds && (
+            <div style={{ marginTop:14,display:'flex',flexDirection:'column',gap:10 }}>
+              {credRows.map((cr,i) => (
+                <div key={i} style={{ display:'grid',gridTemplateColumns:'160px 1fr 1fr 1fr auto',gap:8,alignItems:'end' }}>
+                  <div>
+                    <Label>Portal</Label>
+                    <select value={cr.service} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],service:e.target.value}; setCredRows(n) }}>
+                      <option value="">-- Select --</option>
+                      {CRED_SERVICES.map(s=><option key={s.v} value={s.v}>{s.l}</option>)}
+                    </select>
+                  </div>
+                  <div><Label>Login ID</Label><input value={cr.loginId} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],loginId:e.target.value}; setCredRows(n) }} placeholder="username or email"/></div>
+                  <div><Label>Password</Label><input value={cr.password} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],password:e.target.value}; setCredRows(n) }} placeholder="password"/></div>
+                  <div><Label>Notes</Label><input value={cr.notes} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],notes:e.target.value}; setCredRows(n) }} placeholder="e.g. OTP on mobile"/></div>
+                  <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)',alignSelf:'flex-end',paddingBottom:6 }}
+                    onClick={()=>setCredRows(credRows.filter((_,j)=>j!==i))}>✕</button>
+                </div>
+              ))}
+              <button className="btn btn-ghost btn-sm" style={{ alignSelf:'flex-start',marginTop:4 }}
+                onClick={()=>setCredRows([...credRows,{service:'',loginId:'',password:'',notes:''}])}>
+                + Add Portal
+              </button>
+            </div>
+          )}
+        </div>
+
         </div>{/* end left column */}
 
         {/* ══ RIGHT COLUMN ═════════════════════════════════════ */}
@@ -252,17 +287,17 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
                       onChange={e=>{ const n=[...directors]; n[i]={...n[i],email:e.target.value}; setDirectors(n) }}/>
                   </div>
                   <div style={{ display:'flex',gap:16,alignItems:'center' }}>
-                    <label style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:12,color:'var(--text2)' }}>
-                      <input type="checkbox" checked={d.includeITR}
-                        onChange={e=>{ const n=[...directors]; n[i]={...n[i],includeITR:e.target.checked}; setDirectors(n) }}/>
-                      Include ITR
-                    </label>
+                    <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--surface3)',borderRadius:8,padding:'8px 12px',border:'1px solid var(--border2)' }}>
+                      <span style={{ fontSize:12,color:'var(--text)' }}>Include ITR</span>
+                      <label className="toggle"><input type="checkbox" checked={d.includeITR}
+                        onChange={e=>{ const n=[...directors]; n[i]={...n[i],includeITR:e.target.checked}; setDirectors(n) }}/><span className="slider"/></label>
+                    </div>
                     {d.includeITR && (
-                      <label style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:12,color:'var(--text2)' }}>
-                        <input type="checkbox" checked={d.auditITR||false}
-                          onChange={e=>{ const n=[...directors]; n[i]={...n[i],auditITR:e.target.checked}; setDirectors(n) }}/>
-                        Audit case (due Oct 31)
-                      </label>
+                      <div style={{ display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--surface3)',borderRadius:8,padding:'8px 12px',border:'1px solid var(--border2)' }}>
+                        <span style={{ fontSize:12,color:'var(--text)' }}>Audit case (due Oct 31)</span>
+                        <label className="toggle"><input type="checkbox" checked={d.auditITR||false}
+                          onChange={e=>{ const n=[...directors]; n[i]={...n[i],auditITR:e.target.checked}; setDirectors(n) }}/><span className="slider"/></label>
+                      </div>
                     )}
                     {d.includeITR && (
                       <span style={{ fontSize:11,color:'var(--text3)',marginLeft:'auto' }}>
@@ -284,40 +319,6 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
             </div>
           </div>
         )}
-
-        {/* ── Optional Credentials ── */}
-        <div className="card" style={{ padding:18 }}>
-          <div style={{ display:'flex',alignItems:'center',gap:10,cursor:'pointer' }}
-            onClick={()=>setShowCreds(v=>!v)}>
-            <div style={{ fontWeight:700,fontSize:13,color:'var(--text)' }}>🔐 Portal Credentials</div>
-            <span style={{ fontSize:11,color:'var(--accent)',background:'var(--surface2)',padding:'2px 8px',borderRadius:10,marginLeft:4 }}>Optional</span>
-            <span style={{ marginLeft:'auto',color:'var(--text3)',fontSize:12 }}>{showCreds?'▲':'▼'}</span>
-          </div>
-          {showCreds && (
-            <div style={{ marginTop:14,display:'flex',flexDirection:'column',gap:10 }}>
-              {credRows.map((cr,i) => (
-                <div key={i} style={{ display:'grid',gridTemplateColumns:'160px 1fr 1fr 1fr auto',gap:8,alignItems:'end' }}>
-                  <div>
-                    <Label>Portal</Label>
-                    <select value={cr.service} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],service:e.target.value}; setCredRows(n) }}>
-                      <option value="">-- Select --</option>
-                      {CRED_SERVICES.map(s=><option key={s.v} value={s.v}>{s.l}</option>)}
-                    </select>
-                  </div>
-                  <div><Label>Login ID</Label><input value={cr.loginId} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],loginId:e.target.value}; setCredRows(n) }} placeholder="username or email"/></div>
-                  <div><Label>Password</Label><input value={cr.password} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],password:e.target.value}; setCredRows(n) }} placeholder="password"/></div>
-                  <div><Label>Notes</Label><input value={cr.notes} onChange={e=>{ const n=[...credRows]; n[i]={...n[i],notes:e.target.value}; setCredRows(n) }} placeholder="e.g. OTP on mobile"/></div>
-                  <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)',alignSelf:'flex-end',paddingBottom:6 }}
-                    onClick={()=>setCredRows(credRows.filter((_,j)=>j!==i))}>✕</button>
-                </div>
-              ))}
-              <button className="btn btn-ghost btn-sm" style={{ alignSelf:'flex-start',marginTop:4 }}
-                onClick={()=>setCredRows([...credRows,{service:'',loginId:'',password:'',notes:''}])}>
-                + Add Portal
-              </button>
-            </div>
-          )}
-        </div>
 
         </div>{/* end right column */}
 
