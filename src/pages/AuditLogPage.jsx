@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { subscribeLogs } from '../utils/auditLog.js'
-import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
+import { Avatar, PrintButton, PrintHeader, ExcelButton } from '../components/UI.jsx'
 
 const ACTION_META = {
   client_onboarded:      { l:'Client Onboarded',      icon:'🏢', c:'#22c55e' },
@@ -28,6 +28,7 @@ export const AuditLogPage = ({ users, clients }) => {
   const [fStatusTo,  setFStatusTo]  = useState('')
   const [fDateFrom,  setFDateFrom]  = useState('')
   const [fDateTo,    setFDateTo]    = useState('')
+  const [fMonth,     setFMonth]     = useState('')
   const [search,     setSearch]     = useState('')
 
   useEffect(()=>{
@@ -41,11 +42,17 @@ export const AuditLogPage = ({ users, clients }) => {
     if (fMember  && l.by?.id!==fMember)          return false
     if (fStatusFrom && l.oldValue!==fStatusFrom) return false
     if (fStatusTo   && l.newValue!==fStatusTo)   return false
-    if (fDateFrom) {
+    if (fMonth) {
+      const [fy,fm] = fMonth.split('-')
+      const monthStart = new Date(+fy, +fm-1, 1)
+      const monthEnd   = new Date(+fy, +fm,   0, 23, 59, 59)
+      if (d < monthStart || d > monthEnd) return false
+    }
+    if (!fMonth && fDateFrom) {
       const d = l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||0)
       if (d < new Date(fDateFrom)) return false
     }
-    if (fDateTo) {
+    if (!fMonth && fDateTo) {
       const d = l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||0)
       const to = new Date(fDateTo); to.setHours(23,59,59)
       if (d > to) return false
@@ -67,7 +74,16 @@ export const AuditLogPage = ({ users, clients }) => {
 
   return (
     <div className="fade-up print-root" style={{ padding:'0',maxWidth:'none' }}>
-      <PrintButton title="Audit Log"/>
+      <ExcelButton filename="AuditLog" getData={()=>({
+          headers:['Date','User','Action','Client','Details'],
+          rows: filteredLogs.map(l=>[
+            new Date(l.createdAt?.toDate?.()??l.createdAt).toLocaleString('en-IN'),
+            l.userName||'',
+            l.action||'',
+            l.clientName||'',
+            l.details||''
+          ])
+        })}/><PrintButton title="Audit Log"/>
       <div style={{ position:'sticky',top:0,zIndex:100,background:'var(--bg)',padding:'18px 28px 12px',borderBottom:'1px solid var(--border)' }}>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>Audit Log</div>
