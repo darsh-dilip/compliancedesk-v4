@@ -65,10 +65,10 @@ export const ProfilePage = ({ currentUser, onUpdated, onBack }) => {
         <Avatar name={form.name} init={currentUser.init} role={currentUser.role} sz={64}/>
         <div>
           <div style={{ fontSize:22,fontWeight:800,color:'var(--text)' }}>
-            {form.nickname || form.name}
+            {form.name}
           </div>
           {form.nickname && (
-            <div style={{ fontSize:13,color:'var(--text3)' }}>{form.name}</div>
+            <div style={{ fontSize:13,color:'var(--text3)',marginTop:1 }}>"{form.nickname}"</div>
           )}
           <div style={{ display:'flex',alignItems:'center',gap:10,marginTop:4 }}>
             <span style={{ fontSize:12,fontWeight:700,color:roleColor,background:`${roleColor}15`,padding:'2px 10px',borderRadius:20 }}>
