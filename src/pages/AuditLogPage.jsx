@@ -83,6 +83,12 @@ export const AuditLogPage = ({ users, clients }) => {
             l.clientName||'',
             l.details||''
           ])
+        })}/><ExcelButton filename="AuditLog" getData={()=>({
+          headers:['Date & Time','Action By','Action','Client','Old Status','New Status','ARN / Ref','Details'],
+          rows:(filtered||[]).map(l=>{
+            const d=l.createdAt?.toDate?l.createdAt.toDate():new Date(l.createdAtISO||l.createdAt||0)
+            return [d.toLocaleString('en-IN'),l.userName||'',l.action||'',l.clientName||'',l.statusFrom||'',l.statusTo||'',l.arn||'',l.details||'']
+          })
         })}/><PrintButton title="Audit Log"/>
       <div style={{ position:'sticky',top:0,zIndex:100,background:'var(--bg)',padding:'18px 28px 12px',borderBottom:'1px solid var(--border)' }}>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
