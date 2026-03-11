@@ -83,9 +83,35 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
 
   const downloadTemplate = () => {
     const wb = XLSX.utils.book_new()
+    // Main sheet
     const ws = XLSX.utils.aoa_to_sheet([COLS.map(c=>c.h), COLS.map(c=>c.eg)])
-    ws['!cols'] = COLS.map(()=>({ wch:24 }))
+    ws['!cols'] = COLS.map(()=>({ wch:26 }))
     XLSX.utils.book_append_sheet(wb, ws, 'Clients')
+    // Reference sheet
+    const refData = [
+      ['Field', 'Valid Values'],
+      ['Constitution *', 'Private Limited, Public Limited, LLP, Partnership Firm, Proprietorship, HUF, Trust, Society, Individual, AOP, BOI'],
+      ['Category', 'A+, A, B, C, D'],
+      ['GST (Y/N)', 'Y or N'],
+      ['GST Freq (M/Q)', 'M for Monthly, Q for Quarterly'],
+      ['TDS (Y/N)', 'Y or N'],
+      ['PT Maharashtra (Y/N)', 'Y or N'],
+      ['PT Karnataka (Y/N)', 'Y or N'],
+      ['Income Tax (Y/N)', 'Y or N'],
+      ['Audit Case (Y/N)', 'Y or N'],
+      ['Advance Tax (Y/N)', 'Y or N'],
+      ['Accounting (Y/N)', 'Y or N'],
+      ['Assign To (Name) *', 'Must exactly match a team member name in ComplianceDesk'],
+      ['FY', '2024-25, 2025-26, 2026-27'],
+      ['', ''],
+      ['TIPS',''],
+      ['• Fill data from row 3 onwards (row 1 = headers, row 2 = example)',''],
+      ['• Assign To must match exact name as in ComplianceDesk team',''],
+      ['• Leave FY blank to default to 2025-26',''],
+    ]
+    const wsRef = XLSX.utils.aoa_to_sheet(refData)
+    wsRef['!cols'] = [{wch:35},{wch:90}]
+    XLSX.utils.book_append_sheet(wb, wsRef, 'Reference')
     XLSX.writeFile(wb, 'ComplianceDesk_Import_Template.xlsx')
   }
 
@@ -99,7 +125,17 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
       const ws  = wb.Sheets[wb.SheetNames[0]]
       const raw = XLSX.utils.sheet_to_json(ws, { defval:'' })
       if (!raw.length) { setError('File is empty.'); return }
-      setRows(raw.map(r => parseRow(r, eligible, clients)))
+      // Remap display headers → k values so parseRow works regardless of header style
+      const headerMap = Object.fromEntries(COLS.map(c => [c.h.toLowerCase().replace(/\s*\*$/,'').trim(), c.k]))
+      const remapped = raw.map(row => {
+        const out = {}
+        for (const [key, val] of Object.entries(row)) {
+          const normalized = key.toLowerCase().replace(/\s*\*$/,'').trim()
+          out[headerMap[normalized] || key] = val
+        }
+        return out
+      })
+      setRows(remapped.map(r => parseRow(r, eligible, clients)))
       setStep('preview')
     } catch(e) { setError('Failed to read file: ' + e.message) }
     e.target.value = ''
