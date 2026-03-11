@@ -3,8 +3,7 @@ import { getServiceStatuses, CLIENT_CATEGORIES } from '../constants.js'
 import { fmtDate, getBucket } from '../utils/dates.js'
 import { updateTask } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged } from '../utils/auditLog.js'
-import { Label, Alert, ExcelButton } from '../components/UI.jsx'
-import { PrintButton } from '../components/UI.jsx'
+import { Label, Alert } from '../components/UI.jsx'
 
 const MONTHS = []
 ;[['2025','04'],['2025','05'],['2025','06'],['2025','07'],['2025','08'],['2025','09'],
@@ -102,17 +101,7 @@ export const BulkUpdatesPage = ({ tasks, clients, users, currentUser }) => {
   return (
     <div className="fade-up print-root" style={{ padding:'0' }}>
       <div style={{ position:'sticky',top:0,zIndex:100,background:'var(--bg)',padding:'18px 28px 12px',borderBottom:'1px solid var(--border)' }}>
-        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:14 }}>
-          <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>⚡ Bulk Updates</div>
-          <ExcelButton filename="BulkTasks" getData={()=>({
-            headers:['Client','Service','Period','Current Due Date','Status','Category'],
-            rows: filtered.filter(t=>selected.has(t.id)).map(t=>{
-              const cl=clients.find(c=>c.id===t.clientId)
-              return [t.clientName||'',t.service||'',t.period||'',t.dueDate||'',t.status||'',cl?.category||'']
-            })
-          })}/>
-          <PrintButton title="Bulk Updates"/>
-        </div>
+        <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:14 }}>⚡ Bulk Updates</div>
 
         {/* ── Filters ── */}
         <div style={{ display:'flex',gap:8,flexWrap:'wrap',alignItems:'flex-end',marginBottom:10 }}>
