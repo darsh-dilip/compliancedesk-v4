@@ -196,8 +196,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           </div>
         </div>
       )}
-    </div>
-      </div>{/* end inner grid */}
-  </div>
+    </div>{/* end inner grid */}
+    </div>{/* end outer column flex */}
   )
 }
