@@ -176,6 +176,7 @@ export const SERVICE_STATUSES = {
 }
 // Ad-hoc services all use ADHOC_STATUSES
 export const ADHOC_SERVICES = [
+  'Onboarding Call',
   'GST APOB','GST Surrender','15CA/CB','CA Certification',
   'GST Address Change','Financial Due Diligence','GSTR-9/9C',
   'Individual ITR','IT Notice','GST Notice','IT Appeal',
@@ -263,6 +264,9 @@ export const LOG_ACTIONS = {
 }
 
 // ── Credential Services ────────────────────────────────────
+
+export const ONBOARDING_CALL_URL      = 'https://bizexpress.in/solutions/CC-onboarding/login.html'
+export const ONBOARDING_CALL_PASSWORD = 'OB25@Bizexpress'
 export const CRED_SERVICES = [
   { v:'gst',        l:'GST Portal',          url:'https://www.gst.gov.in/',                          icon:'🔐', tasks:['GSTR-1','GSTR-1 (Quarterly)','GSTR-3B','GSTR-3B (Quarterly)','GSTR-9 Annual Return'] },
   { v:'incometax',  l:'Income Tax (e-Filing)',url:'https://www.incometax.gov.in/iec/foportal/',        icon:'📋', tasks:['Income Tax Filing','Advance Tax'] },
