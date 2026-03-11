@@ -31,6 +31,7 @@ const NAV_GROUPS = [
       { id:'status',       icon:'📈', label:'Service Wise'      },
       { id:'memberstatus', icon:'👤', label:'Team Member Wise'  },
       { id:'clientstatus', icon:'🏢', label:'Client Wise'       },
+      { id:'duedone',      icon:'📊', label:'Due vs Done'       },
     ]
   },
   {
@@ -39,7 +40,7 @@ const NAV_GROUPS = [
       { id:'users',    icon:'⚙️', label:'Manage Team',  partner:true },
       { id:'workload', icon:'👥', label:'Team Workload', mgr:true    },
       { id:'audit',    icon:'🔍', label:'Audit Log'                   },
-      { id:'bulkdate', icon:'📅', label:'Bulk Due Dates', mgr:true     },
+      { id:'bulkdate', icon:'⚡', label:'Bulk Updates',   mgr:true     },
     ]
   },
 ]
