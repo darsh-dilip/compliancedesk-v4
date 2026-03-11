@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { ROLES, CLIENT_CATEGORIES } from '../constants.js'
+import { ROLES, CLIENT_CATEGORIES, DONE_PROPER, DONE_NIL } from '../constants.js'
 import { fmtDate } from '../utils/dates.js'
 import { ExcelButton, PrintButton, PrintHeader } from '../components/UI.jsx'
 
@@ -33,7 +33,8 @@ export const DashboardDueDone = ({ tasks, clients, users, user }) => {
   },[tasks])
 
   const doneTasks = useMemo(()=>{
-    return tasks.filter(t => t.completedAt && t.dueDate)
+    const allDone = [...DONE_PROPER, ...DONE_NIL]
+    return tasks.filter(t => t.dueDate && (t.completedAt || allDone.includes(t.status)))
       .filter(t => {
         if (fService && t.service !== fService) return false
         if (fMember  && t.assignedTo !== fMember) return false
@@ -42,19 +43,20 @@ export const DashboardDueDone = ({ tasks, clients, users, user }) => {
           const cl = clients.find(c=>c.id===t.clientId)
           if (cl?.category !== fCat) return false
         }
-        if (fMonth && !t.completedAt.startsWith(fMonth)) return false
+        const ca2 = t.completedAt || t.updatedAt?.toDate?.()?.toISOString() || (typeof t.updatedAt==='string'?t.updatedAt:null); if (fMonth && (!ca2 || !ca2.startsWith(fMonth))) return false
         return true
       })
-      .map(t=>({ ...t, _diff: daysDiff(t.dueDate, t.completedAt) }))
+      .map(t=>{ const ca = t.completedAt || t.updatedAt?.toDate?.()?.toISOString() || (typeof t.updatedAt==='string'?t.updatedAt:null); return { ...t, _completedAt: ca, _diff: daysDiff(t.dueDate, ca) } })
       .sort((a,b)=>{
         if (sortBy === 'diff') return (b._diff||0) - (a._diff||0)
         if (sortBy === 'dueDate') return new Date(a.dueDate) - new Date(b.dueDate)
-        return new Date(b.completedAt) - new Date(a.completedAt)
+        return new Date(b._completedAt||0) - new Date(a._completedAt||0)
       })
   }, [tasks, fService, fMember, fClient, fCat, fMonth, sortBy])
 
-  const services = [...new Set(tasks.filter(t=>t.completedAt).map(t=>t.service))].sort()
-  const clientList = [...new Set(tasks.filter(t=>t.completedAt).map(t=>t.clientId))]
+  const allDoneStatuses = [...DONE_PROPER,...DONE_NIL]
+  const services = [...new Set(tasks.filter(t=>allDoneStatuses.includes(t.status)).map(t=>t.service))].sort()
+  const clientList = [...new Set(tasks.filter(t=>allDoneStatuses.includes(t.status)).map(t=>t.clientId))]
     .map(id=>clients.find(c=>c.id===id)).filter(Boolean).sort((a,b)=>a.name.localeCompare(b.name))
 
   // Stats
@@ -157,7 +159,7 @@ export const DashboardDueDone = ({ tasks, clients, users, user }) => {
           <div style={{ textAlign:'center',padding:60,color:'var(--text3)' }}>
             <div style={{ fontSize:32,marginBottom:12 }}>📭</div>
             <div style={{ fontSize:15,fontWeight:600,marginBottom:6 }}>No completed tasks yet</div>
-            <div style={{ fontSize:12 }}>Tasks completed after this feature was enabled will appear here.</div>
+            <div style={{ fontSize:12 }}>No tasks with a completed status found for the selected filters.</div>
           </div>
         )}
 
@@ -175,7 +177,7 @@ export const DashboardDueDone = ({ tasks, clients, users, user }) => {
                 {doneTasks.map(t=>{
                   const u  = users.find(u=>u.id===t.assignedTo)
                   const cl = clients.find(c=>c.id===t.clientId)
-                  const doneDate = t.completedAt?.slice(0,10)
+                  const doneDate = (t._completedAt||t.completedAt||'')?.slice(0,10)
                   return (
                     <tr key={t.id} style={{ borderBottom:'1px solid var(--border2)' }}>
                       <td style={{ padding:'10px 14px',fontWeight:600,color:'var(--text)' }}>{t.clientName}</td>
