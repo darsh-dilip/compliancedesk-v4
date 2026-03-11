@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { arrayUnion } from 'firebase/firestore'
-import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask, ONBOARDING_CALL_URL, ONBOARDING_CALL_PASSWORD } from '../constants.js'
+import { getServiceStatuses, getStatusObj, COMMENT_STATUSES, ROLES, CLIENT_STATUS, getCredForTask, ONBOARDING_CALL_URL, ONBOARDING_CALL_PASSWORD, DONE_PROPER, DONE_NIL, SOFT_DEPS } from '../constants.js'
 import { fmtDate } from '../utils/dates.js'
 import { updateTask, addTaskComment, deleteTask, getClientCredentials } from '../hooks/useFirestore.js'
 import { logTaskStatusChanged, logTaskReassigned, logCommentAdded } from '../utils/auditLog.js'
 import { Modal, Label, Avatar, Divider, Alert, ConfirmModal } from './UI.jsx'
 
-export const TaskModal = ({ task, users, clients, currentUser, onClose, onDeleted }) => {
+export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose, onDeleted }) => {
   const statuses  = getServiceStatuses(task.service)
   const currentSt = getStatusObj(task.service, task.status)
 
@@ -214,6 +214,30 @@ export const TaskModal = ({ task, users, clients, currentUser, onClose, onDelete
         {tab==='status'&&(
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
             <div>
+
+              {/* ── Soft dependency highlight ── */}
+              {(() => {
+                const deps = SOFT_DEPS[task.service] || []
+                const taskList = allTasks || []
+                if (!deps.length) return null
+                const pending = deps.filter(dep => {
+                  const depTask = taskList.find(t =>
+                    t.clientId === task.clientId &&
+                    t.service === dep &&
+                    t.period === task.period &&
+                    ![...DONE_PROPER,...DONE_NIL].includes(t.status)
+                  )
+                  return !!depTask
+                })
+                if (!pending.length) return null
+                return (
+                  <div style={{ background:'#f59e0b12',border:'1px solid #f59e0b40',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:12 }}>
+                    <div style={{ fontWeight:700,color:'#f59e0b',marginBottom:4 }}>⚠ Prerequisite tasks pending</div>
+                    {pending.map(d=><div key={d} style={{ color:'var(--text2)' }}>• {d} · {task.period}</div>)}
+                    <div style={{ color:'var(--text3)',marginTop:4,fontSize:11 }}>You can still update — this is a soft reminder only.</div>
+                  </div>
+                )
+              })()}
               <Label>Update Status</Label>
               <select value={status} onChange={e=>setStatus(e.target.value)}>
                 {statuses.map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
