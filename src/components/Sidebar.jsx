@@ -32,6 +32,8 @@ const NAV_GROUPS = [
       { id:'memberstatus', icon:'👤', label:'Team Member Wise'  },
       { id:'clientstatus', icon:'🏢', label:'Client Wise'       },
       { id:'duedone',      icon:'📊', label:'Due vs Done'       },
+      { id:'leaderboard',   icon:'🏆', label:'Leaderboard',  mgr:true },
+      { id:'scorecard',     icon:'🎯', label:'Score Card',    mgr:true },
     ]
   },
   {
