@@ -79,26 +79,25 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
   }
 
   return (
-    <div className="fade-up print-root" style={{ padding:'24px 28px',display:'grid',gridTemplateColumns:'220px 1fr',gap:20,height:'calc(100vh - 48px)',overflow:'hidden' }}>
-
-      {/* Left: team member cards */}
-      <div style={{ display:'flex',flexDirection:'column',overflow:'hidden' }}>
-        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:16,fontWeight:800,color:'var(--text)',flex:1 }}>Team Member Status</div><ExcelButton filename="MemberStatus" getData={()=>({
-          headers:['Member','Role','Total Tasks','Overdue','Done'],
-          rows: (users||[]).map(u=>{
-            const ut=(tasks||[]).filter(t=>t.assignedTo===u.id)
-            const ov=ut.filter(t=>t.dueDate<new Date().toISOString().split('T')[0]&&!['filed','nil_filed','not_applicable'].includes(t.status)).length
-            const dn=ut.filter(t=>['filed','nil_filed','not_applicable'].includes(t.status)).length
-            return [u.name,u.role,ut.length,ov,dn]
-          })
-        })}/><ExcelButton filename="MemberStatus" getData={()=>({
+    <div className="fade-up print-root" style={{ display:'flex',flexDirection:'column',height:'calc(100vh - 48px)',overflow:'hidden' }}>
+      {/* Sticky top bar */}
+      <div style={{ display:'flex',alignItems:'center',gap:8,padding:'14px 28px 12px',borderBottom:'1px solid var(--border)',flexShrink:0 }}>
+        <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',flex:1 }}>👥 Team Member Status</div>
+        <ExcelButton filename="MemberStatus" getData={()=>({
           headers:['Client Name','FY','Task / Service','Period','Due Date','Assigned To','Status','Urgency','Client Category'],
           rows:(memberTasks||[]).map(t=>{
             const u=(users||[]).find(u=>u.id===t.assignedTo)
             const cl=(clients||[]).find(c=>c.id===t.clientId)
             return [t.clientName||'',t.fy||'',t.service||'',t.period||'',t.dueDate||'',u?.name||'',t.status||'',getUrgency(t),cl?.category||t.category||'']
           })
-        })}/><PrintButton title="Team Member Status"/></div>
+        })}/>
+        <PrintButton title="Team Member Status"/>
+      </div>
+      <div style={{ flex:1,overflow:'hidden',padding:'20px 28px 0',display:'grid',gridTemplateColumns:'220px 1fr',gap:20 }}>
+
+      {/* Left: team member cards */}
+      <div style={{ display:'flex',flexDirection:'column',overflow:'hidden' }}>
+        <div style={{ fontSize:16,fontWeight:800,color:'var(--text)',marginBottom:4 }}>Team Member Status</div>
         <div style={{ fontSize:11,color:'var(--text3)',marginBottom:12 }}>Select a member to see their tasks.</div>
         <div style={{ flex:1,overflow:'auto' }}>
           {teamMembers.map(u => <MemberCard key={u.id} u={u}/>)}
@@ -198,5 +197,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
         </div>
       )}
     </div>
+      </div>{/* end inner grid */}
+  </div>
   )
 }
