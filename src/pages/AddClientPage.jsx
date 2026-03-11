@@ -27,7 +27,7 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
   const [error,    setError]    = useState('')
   const [saving,   setSaving]   = useState(false)
   const [success,  setSuccess]  = useState(false)
-  const [directors,setDirectors]= useState([])  // {name, includeITR}
+  const [directors,setDirectors]= useState([])  // {name, includeITR, phone, email, auditITR}
   const [showCreds,setShowCreds]= useState(false)
   const [credRows, setCredRows] = useState([])  // {service, loginId, password, notes}
 
@@ -85,7 +85,7 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           name: d.name.trim(),
           constitution: 'Individual',
           category: form.category,
-          phone:'', email:'', gstin:'', pan:'', tan:'',
+          phone: d.phone||'', email: d.email||'', gstin:'', pan:'', tan:'',
           assignedTo: form.assignedTo,
           fy: form.fy, complianceStartMonth:'04',
           complianceStartYM: `${fyS}-04`,
@@ -96,10 +96,11 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
         }
         const dirRef = await addClient(dirData)
         const ayLabel = `AY ${fyE}-${String(fyE+1).slice(2)}`
+        const itrDue = d.auditITR ? `${fyE}-10-31` : `${fyE}-07-31`
         await bulkAddTasks([{
           clientId: dirRef.id, clientName: d.name.trim(),
           service: 'Income Tax Filing', period: ayLabel,
-          dueDate: `${fyE}-07-31`,
+          dueDate: itrDue,
           assignedTo: form.assignedTo,
           status:'pending', statusNote:'', arn:'', ref:'',
           comments:[], history:[], fy: form.fy, periodYM:`${fyE}-04`,
@@ -185,6 +186,11 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           )}
         </div>
 
+        </div>{/* end left column */}
+
+        {/* ══ RIGHT COLUMN ═════════════════════════════════════ */}
+        <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
+
         {/* ── Compliance Package ── */}
         <div className="card" style={{ padding:18 }}>
           <div style={{ fontWeight:700,fontSize:13,color:'var(--text)',marginBottom:12 }}>⚖️ Compliance Package</div>
@@ -218,11 +224,6 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
           </div>
         </div>
 
-        </div>{/* end left column */}
-
-        {/* ══ RIGHT COLUMN ═════════════════════════════════════ */}
-        <div style={{ display:'flex',flexDirection:'column',gap:18 }}>
-
         {/* ── Directors / Partners ── */}
         {FIRM_CONSTITUTIONS.includes(form.constitution) && (
           <div className="card" style={{ padding:18 }}>
@@ -234,19 +235,41 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
             </div>
             <div style={{ display:'flex',flexDirection:'column',gap:8 }}>
               {directors.map((d,i) => (
-                <div key={i} style={{ display:'grid',gridTemplateColumns:'1fr auto auto',gap:8,alignItems:'center',background:'var(--surface2)',borderRadius:8,padding:'10px 12px',border:'1px solid var(--border)' }}>
-                  <input
-                    placeholder={`${directorLabel(form.constitution)} ${i+1} — full name`}
-                    value={d.name}
-                    onChange={e=>{ const n=[...directors]; n[i]={...n[i],name:e.target.value}; setDirectors(n) }}
-                  />
-                  <label style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:12,color:'var(--text2)',whiteSpace:'nowrap' }}>
-                    <input type="checkbox" checked={d.includeITR}
-                      onChange={e=>{ const n=[...directors]; n[i]={...n[i],includeITR:e.target.checked}; setDirectors(n) }}/>
-                    Include ITR
-                  </label>
-                  <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)' }}
-                    onClick={()=>setDirectors(directors.filter((_,j)=>j!==i))}>✕</button>
+                <div key={i} style={{ background:'var(--surface2)',borderRadius:8,padding:'12px',border:'1px solid var(--border)',display:'flex',flexDirection:'column',gap:8 }}>
+                  <div style={{ display:'grid',gridTemplateColumns:'1fr auto',gap:8,alignItems:'center' }}>
+                    <input
+                      placeholder={`${directorLabel(form.constitution)} ${i+1} — full name`}
+                      value={d.name}
+                      onChange={e=>{ const n=[...directors]; n[i]={...n[i],name:e.target.value}; setDirectors(n) }}
+                    />
+                    <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)' }}
+                      onClick={()=>setDirectors(directors.filter((_,j)=>j!==i))}>✕</button>
+                  </div>
+                  <div style={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:8 }}>
+                    <input placeholder="Phone" type="tel" value={d.phone||''}
+                      onChange={e=>{ const n=[...directors]; n[i]={...n[i],phone:e.target.value}; setDirectors(n) }}/>
+                    <input placeholder="Email" type="email" value={d.email||''}
+                      onChange={e=>{ const n=[...directors]; n[i]={...n[i],email:e.target.value}; setDirectors(n) }}/>
+                  </div>
+                  <div style={{ display:'flex',gap:16,alignItems:'center' }}>
+                    <label style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:12,color:'var(--text2)' }}>
+                      <input type="checkbox" checked={d.includeITR}
+                        onChange={e=>{ const n=[...directors]; n[i]={...n[i],includeITR:e.target.checked}; setDirectors(n) }}/>
+                      Include ITR
+                    </label>
+                    {d.includeITR && (
+                      <label style={{ display:'flex',alignItems:'center',gap:6,cursor:'pointer',fontSize:12,color:'var(--text2)' }}>
+                        <input type="checkbox" checked={d.auditITR||false}
+                          onChange={e=>{ const n=[...directors]; n[i]={...n[i],auditITR:e.target.checked}; setDirectors(n) }}/>
+                        Audit case (due Oct 31)
+                      </label>
+                    )}
+                    {d.includeITR && (
+                      <span style={{ fontSize:11,color:'var(--text3)',marginLeft:'auto' }}>
+                        Due: {d.auditITR ? 'Oct 31' : 'Jul 31'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               ))}
               <button className="btn btn-ghost btn-sm" style={{ alignSelf:'flex-start' }}
