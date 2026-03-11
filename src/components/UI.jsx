@@ -157,6 +157,30 @@ export const PrintButton = ({ title = 'ComplianceDesk' }) => {
   )
 }
 
+
+// ── Excel Export Button ──────────────────────────────────────────────────
+export const ExcelButton = ({ getData, filename = 'export' }) => {
+  const handleExport = async () => {
+    try {
+      const XLSX = await import('xlsx')
+      const { headers, rows } = getData()
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...rows])
+      ws['!cols'] = headers.map(() => ({ wch: 20 }))
+      const wb = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(wb, ws, 'Data')
+      XLSX.writeFile(wb, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`)
+    } catch(e) { console.error('Excel export failed', e) }
+  }
+  return (
+    <button
+      className="btn btn-ghost btn-sm no-print"
+      onClick={handleExport}
+      style={{ borderRadius:20, padding:'4px 14px', fontSize:12, fontWeight:600 }}
+    >
+      Excel
+    </button>
+  )
+}
 // ── Print Header (visible only on print) ────────────────────
 export const PrintHeader = ({ title, subtitle }) => (
   <div className="print-header" style={{ display: 'none' }}>
