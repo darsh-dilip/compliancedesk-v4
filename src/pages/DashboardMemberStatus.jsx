@@ -156,7 +156,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
             </select>
             </div>
           </div>
-          </div>{/* end sticky */}
+          </div>
 
           {/* Summary chips */}
           <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
@@ -196,7 +196,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           </div>
         </div>
       )}
-    </div>{/* end inner grid */}
-    </div>{/* end outer column flex */}
+      </div>
+    </div>
   )
 }
