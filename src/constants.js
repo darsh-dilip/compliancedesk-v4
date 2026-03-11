@@ -87,6 +87,7 @@ const IT_STATUSES = [
   s('itr_filed','ITR Filed','#22c55e',{done:true,requiresArn:true}),
   s('revision_required','Revision Required','#f43f5e'),
   s('revision_filed','Revision Filed','#fb923c',{done:true,requiresArn:true}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true,requiresArn:true}),
   s('not_to_be_filed','Not to be Filed','#4a5578',{done:true}),
   s('customer_refused','Customer Refused','#f43f5e',{done:true}),
   s('not_responding','Not Responding','#f43f5e'),
@@ -100,6 +101,7 @@ const PTEC_STATUSES = [
   s('paid','Paid','#22c55e',{done:true,requiresRef:true,refLabel:'Challan / Ref No.'}),
   s('nil_filed','Nil Filed','#34d399',{done:true}),
   s('no_employee','No Employees','#4a5578',{done:true}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true}),
   s('no_response','No Response','#f43f5e'),
   s('on_hold','On Hold','#f59e0b'),
   s('state_issue','State Issue','#f97316'),
@@ -110,6 +112,7 @@ const PT_MONTHLY_STATUSES = [
   s('pending','Pending','#8892b0'),
   s('paid','Paid','#22c55e',{done:true,requiresRef:true,refLabel:'Challan / Ref No.'}),
   s('no_employee','No Employees','#4a5578',{done:true}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true}),
   s('on_hold','On Hold','#f59e0b'),
   s('state_issue','State Issue','#f97316'),
   s('no_response','No Response','#f43f5e'),
@@ -121,6 +124,7 @@ const ADV_TAX_STATUSES = [
   s('denied','Denied','#f43f5e'),
   s('no_profits','No Profits','#4a5578',{done:true}),
   s('paid','Paid','#22c55e',{done:true,requiresRef:true,refLabel:'BSR Code & Challan No.'}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true}),
   s('no_response','No Response','#f43f5e'),
   s('on_hold','On Hold','#f59e0b'),
 ]
@@ -139,8 +143,21 @@ const TDS_RETURN_STATUSES = [
   s('pending','Pending','#8892b0'),
   s('nil','Nil','#34d399',{done:true,requiresArn:true}),
   s('filed','Filed','#22c55e',{done:true,requiresArn:true}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true,requiresArn:true}),
   s('on_hold','On Hold','#f59e0b'),
   s('na','N/A (No TDS)','#4a5578',{done:true}),
+]
+
+
+// ── Onboarding Call statuses ─────────────────────────────────────────────
+const ONBOARDING_STATUSES = [
+  s('pending',           'Pending',            '#8892b0'),
+  s('partial',           'Partial',            '#5b8dee'),
+  s('not_responding',    'Not Responding',     '#f43f5e'),
+  s('completed',         'Completed',          '#22c55e', {done:true}),
+  s('existing_client',   'Existing Client',    '#34d399', {done:true}),
+  s('on_hold',           'On Hold',            '#a78bfa', {hold:true}),
+  s('refused',           'Refused / Cancelled','#4a5578', {hold:true}),
 ]
 
 // ── Ad-hoc generic statuses ──────────────────────────────────
@@ -149,6 +166,7 @@ const ADHOC_STATUSES = [
   s('in_progress','In Progress','#5b8dee'),
   s('pending_client','Pending @ Client','#f59e0b'),
   s('completed','Completed','#22c55e',{done:true}),
+  s('delayed_filing','Delayed Filing','#fb923c',{done:true}),
   s('on_hold','On Hold','#a78bfa'),
   s('cancelled','Cancelled','#4a5578',{done:true}),
   s('not_responding','Not Responding','#f43f5e'),
@@ -176,6 +194,7 @@ export const SERVICE_STATUSES = {
 }
 // Ad-hoc services all use ADHOC_STATUSES
 export const ADHOC_SERVICES = [
+  'Onboarding Call',
   'GST APOB','GST Surrender','15CA/CB','CA Certification',
   'GST Address Change','Financial Due Diligence','GSTR-9/9C',
   'Individual ITR','IT Notice','GST Notice','IT Appeal',
@@ -183,6 +202,7 @@ export const ADHOC_SERVICES = [
   'Preparation of Financials','Other CA Services',
 ]
 ADHOC_SERVICES.forEach(svc => { SERVICE_STATUSES[svc] = ADHOC_STATUSES })
+SERVICE_STATUSES['Onboarding Call'] = ONBOARDING_STATUSES
 
 const FALLBACK = [
   s('pending','Pending','#8892b0'),
@@ -263,6 +283,9 @@ export const LOG_ACTIONS = {
 }
 
 // ── Credential Services ────────────────────────────────────
+
+export const ONBOARDING_CALL_URL      = 'https://bizexpress.in/solutions/CC-onboarding/login.html'
+export const ONBOARDING_CALL_PASSWORD = 'OB25@Bizexpress'
 export const CRED_SERVICES = [
   { v:'gst',        l:'GST Portal',          url:'https://www.gst.gov.in/',                          icon:'🔐', tasks:['GSTR-1','GSTR-1 (Quarterly)','GSTR-3B','GSTR-3B (Quarterly)','GSTR-9 Annual Return'] },
   { v:'incometax',  l:'Income Tax (e-Filing)',url:'https://www.incometax.gov.in/iec/foportal/',        icon:'📋', tasks:['Income Tax Filing','Advance Tax'] },
@@ -281,3 +304,15 @@ export const getCredForTask = (service) => {
 }
 
 export const DEPARTMENTS = ['CC','RR','FF','SS','HR','MM','LL']
+
+// ── Soft task dependency map ─────────────────────────────────────────────
+export const SOFT_DEPS = {
+  'GSTR-3B':              ['GSTR-1', 'GSTR-2B Reconciliation'],
+  'GSTR-3B (Quarterly)':  ['GSTR-1 (Quarterly)', 'GSTR-2B Reconciliation'],
+  'GSTR-2B Reconciliation': ['GSTR-1'],
+  'Income Tax Filing':    ['Accounting'],
+  'TDS Return 24Q':       ['TDS Payment'],
+  'TDS Return 26Q':       ['TDS Payment'],
+  'GSTR-9 Annual Return': ['GSTR-3B'],
+}
+
