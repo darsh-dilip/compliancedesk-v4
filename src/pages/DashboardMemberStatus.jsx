@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { SERVICE_STATUSES, getStatusObj, DONE_STATUSES, DONE_NIL, DONE_PROPER, FINANCIAL_YEARS, ROLES, ROLE_CLR } from '../constants.js'
 import { getBucket } from '../utils/dates.js'
-import { Avatar, PrintButton, PrintHeader } from '../components/UI.jsx'
+import { Avatar, PrintButton, PrintHeader, ExcelButton } from '../components/UI.jsx'
 
 const SERVICES = Object.keys(SERVICE_STATUSES)
 const allDone = [...DONE_STATUSES, ...DONE_NIL, ...DONE_PROPER]
@@ -71,7 +71,15 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
 
       {/* Left: team member cards */}
       <div style={{ display:'flex',flexDirection:'column',overflow:'hidden' }}>
-        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:16,fontWeight:800,color:'var(--text)',flex:1 }}>Team Member Status</div><PrintButton title="Team Member Status"/></div>
+        <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}><div style={{ fontSize:16,fontWeight:800,color:'var(--text)',flex:1 }}>Team Member Status</div><ExcelButton filename="MemberStatus" getData={()=>({
+          headers:['Member','Role','Total Tasks','Overdue','Done'],
+          rows: (users||[]).map(u=>{
+            const ut=(tasks||[]).filter(t=>t.assignedTo===u.id)
+            const ov=ut.filter(t=>t.dueDate<new Date().toISOString().split('T')[0]&&!['filed','nil_filed','not_applicable'].includes(t.status)).length
+            const dn=ut.filter(t=>['filed','nil_filed','not_applicable'].includes(t.status)).length
+            return [u.name,u.role,ut.length,ov,dn]
+          })
+        })}/><PrintButton title="Team Member Status"/></div>
         <div style={{ fontSize:11,color:'var(--text3)',marginBottom:12 }}>Select a member to see their tasks.</div>
         <div style={{ flex:1,overflow:'auto' }}>
           {teamMembers.map(u => <MemberCard key={u.id} u={u}/>)}
