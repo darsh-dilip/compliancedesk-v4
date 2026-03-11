@@ -29,6 +29,8 @@ import { DashboardMemberStatus }  from './pages/DashboardMemberStatus.jsx'
 import { DashboardClientStatus }  from './pages/DashboardClientStatus.jsx'
 import { ProfilePage }            from './pages/ProfilePage.jsx'
 import { BulkDueDatePage }        from './pages/BulkDueDatePage.jsx'
+import { BulkUpdatesPage }        from './pages/BulkUpdatesPage.jsx'
+import { DashboardDueDone }       from './pages/DashboardDueDone.jsx'
 import { BulkImportPage }         from './pages/BulkImportPage.jsx'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
@@ -162,7 +164,9 @@ export default function App() {
       case 'bulkimport':
         return <BulkImportPage users={users} clients={clients} onBack={()=>setPage('clients')}/>
       case 'bulkdate':
-        return isMgr ? <BulkDueDatePage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
+        return isMgr ? <BulkUpdatesPage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
+      case 'duedone':
+        return <DashboardDueDone tasks={visibleTasks} clients={clients} users={users} user={currentUser}/>
       case 'users':
         return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }}/> : null
       default:
