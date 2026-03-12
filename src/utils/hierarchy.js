@@ -8,6 +8,6 @@ export const getSubordinates = (uid, users) => {
   return [...res]
 }
 export const getVisibleUserIds = (user, users) => {
-  if (user.role === 'partner') return users.map(u => u.id)
+  if (user.role === 'partner' || user.role === 'sales') return users.map(u => u.id)
   return [user.id, ...getSubordinates(user.id, users)]
 }

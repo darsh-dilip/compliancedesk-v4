@@ -1,4 +1,4 @@
-import { DONE_STATUSES, PENDING_AT_CLIENT, HOLD_REFUSED, DONE_NIL, DONE_PROPER, ACCOUNTING_MONTH_DONE } from '../constants.js'
+import { FINANCIAL_YEARS, DONE_STATUSES, PENDING_AT_CLIENT, HOLD_REFUSED, DONE_NIL, DONE_PROPER, ACCOUNTING_MONTH_DONE } from '../constants.js'
 
 export const TODAY = (() => { const d=new Date(); d.setHours(0,0,0,0); return d })()
 export const parseDt  = s => { if(!s) return null; const d=new Date(s); d.setHours(0,0,0,0); return d }
@@ -41,3 +41,10 @@ export const getStatusKanbanCol = t => {
 export const isTaskPending = t =>
   !DONE_STATUSES.includes(t.status) && !DONE_NIL.includes(t.status) &&
   !DONE_PROPER.includes(t.status) && t.status!=='dropped'
+
+// Dynamic FY list: merges DB values from tasks + static base list, sorted
+export const getFYOptions = (tasks = []) => {
+  const fromDB = (tasks || []).map(t => t.fy).filter(Boolean)
+  const merged = [...new Set([...FINANCIAL_YEARS, ...fromDB])]
+  return merged.sort()
+}
