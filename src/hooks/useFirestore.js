@@ -25,7 +25,7 @@ export const useCollection = (name) => {
 
 // Get client IDs visible to a given user
 export const getVisibleClientIds = (user, users, clients) => {
-  if (['partner','hod'].includes(user.role)) return clients.map(c=>c.id)
+  if (['partner','hod','sales'].includes(user.role)) return clients.map(c=>c.id)
   if (user.role === 'team_leader') {
     const subIds = getSubordinateIds(user.id, users)
     return clients.filter(c=>[user.id,...subIds].includes(c.assignedTo)).map(c=>c.id)
