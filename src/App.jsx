@@ -33,6 +33,8 @@ import { BulkUpdatesPage }        from './pages/BulkUpdatesPage.jsx'
 import { DashboardDueDone }       from './pages/DashboardDueDone.jsx'
 import { DashboardLeaderboard }    from './pages/DashboardLeaderboard.jsx'
 import { DashboardScoreCard }      from './pages/DashboardScoreCard.jsx'
+import { UnassignedPage }          from './pages/UnassignedPage.jsx'
+import { YearEndBatchPage }        from './pages/YearEndBatchPage.jsx'
 import { BulkImportPage }         from './pages/BulkImportPage.jsx'
 
 const allDone = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
@@ -103,6 +105,7 @@ export default function App() {
   const visibleIds   = getVisibleUserIds(currentUser, users)
   const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
   const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
+  const isSales       = currentUser.role === 'sales'
 
   const renderPage = () => {
     switch (page) {
@@ -156,7 +159,7 @@ export default function App() {
       case 'audit':
         return <AuditLogPage users={users} clients={clients} currentUser={currentUser}/>
       case 'creds':
-        return <CredentialManager clients={clients} currentUser={currentUser}/>
+        return isSales ? null : <CredentialManager clients={clients} currentUser={currentUser}/>
       case 'memberstatus':
         return <DashboardMemberStatus tasks={visibleTasks} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'clientstatus':
@@ -173,6 +176,10 @@ export default function App() {
         return <DashboardLeaderboard tasks={visibleTasks} users={users} clients={clients}/>
       case 'scorecard':
         return <DashboardScoreCard tasks={visibleTasks} users={users} clients={clients}/>
+      case 'unassigned':
+        return isMgr ? <UnassignedPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
+      case 'yearend':
+        return isMgr ? <YearEndBatchPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
         return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }}/> : null
       default:

@@ -1,12 +1,12 @@
 // ── ROLES ────────────────────────────────────────────────────
 export const ROLES = {
   partner:'Partner', hod:'Head of Dept', team_leader:'Team Leader',
-  executive:'Executive', intern:'Intern',
+  executive:'Executive', intern:'Intern', sales:'Sales Member',
 }
-export const ROLE_ORDER = { partner:0, hod:1, team_leader:2, executive:3, intern:4 }
+export const ROLE_ORDER = { partner:0, hod:1, team_leader:2, executive:3, intern:4, sales:5 }
 export const ROLE_CLR   = {
   partner:'#f59e0b', hod:'#ec4899', team_leader:'#34d399',
-  executive:'#5b8dee', intern:'#fde68a',
+  executive:'#5b8dee', intern:'#fde68a', sales:'#a78bfa',
 }
 
 // ── FINANCIAL YEARS ──────────────────────────────────────────
