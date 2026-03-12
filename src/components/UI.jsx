@@ -5,16 +5,29 @@ import { daysDiff, fmtDate } from '../utils/dates.js'
 export const Avatar = ({ name, init, role, sz=32, rank=null, streak=false }) => {
   const c = ROLE_CLR[role]||'#5b8dee'
   const i = init||(name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
-  const ringColor = rank===1?'#f59e0b':rank===2?'#94a3b8':rank===3?'#cd7f32':null
-  const ringGlow  = rank===1?'0 0 0 2.5px #f59e0b, 0 0 10px #f59e0b70':rank===2?'0 0 0 2.5px #94a3b8, 0 0 6px #94a3b850':rank===3?'0 0 0 2.5px #cd7f32, 0 0 6px #cd7f3250':null
+  // rank=1 gold, rank=2 silver (true silver), rank=3 bronze (copper)
+  const ringCfg = rank===1
+    ? { base:'0 0 0 3px #f59e0b, 0 0 12px #f59e0b80', bright:'0 0 0 3px #fde68a, 0 0 18px #f59e0baa' }
+    : rank===2
+    ? { base:'0 0 0 3px #d1d5db, 0 0 8px #9ca3af70', bright:'0 0 0 3px #f3f4f6, 0 0 14px #d1d5dbaa' }
+    : rank===3
+    ? { base:'0 0 0 3px #b45309, 0 0 8px #92400e60', bright:'0 0 0 3px #d97706, 0 0 14px #b4530988' }
+    : null
   if (!rank && !streak) {
     return <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,border:`1.5px solid ${c}45`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,flexShrink:0 }}>{i}</div>
   }
   return (
-    <div style={{ position:'relative',flexShrink:0,width:sz+(rank?6:0),height:sz+(rank?6:0),display:'inline-flex',alignItems:'center',justifyContent:'center' }}>
-      <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,boxShadow:ringGlow||`0 0 0 1.5px ${c}45` }}>{i}</div>
+    <div style={{ position:'relative',flexShrink:0,width:sz+(rank?8:0),height:sz+(rank?8:0),display:'inline-flex',alignItems:'center',justifyContent:'center' }}>
+      <div style={{
+        width:sz,height:sz,borderRadius:'50%',background:`${c}20`,
+        display:'flex',alignItems:'center',justifyContent:'center',
+        fontSize:sz*.36,fontWeight:700,color:c,
+        '--ring-shadow': ringCfg?.base, '--ring-shadow-bright': ringCfg?.bright,
+        boxShadow: ringCfg?.base || `0 0 0 1.5px ${c}45`,
+        animation: ringCfg ? 'rankPulse 2s ease-in-out infinite' : 'none',
+      }}>{i}</div>
       {rank===1&&<span style={{ position:'absolute',top:-sz*.28,left:'50%',transform:'translateX(-50%)',fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>👑</span>}
-      {streak&&<span style={{ position:'absolute',bottom:-sz*.16,right:-sz*.16,fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>🔥</span>}
+      {streak&&<span style={{ position:'absolute',bottom:-sz*.16,right:-sz*.16,fontSize:sz*.32,lineHeight:1,pointerEvents:'none',animation:'streakBounce 1.5s ease-in-out infinite' }}>🔥</span>}
     </div>
   )
 }
@@ -101,9 +114,9 @@ export const TaskRow = ({ task, users, clients, onClick, compact=false }) => {
   const allDone  = [...DONE_STATUSES,...DONE_NIL,...DONE_PROPER]
   const isDone   = allDone.includes(task.status)
   const st       = getStatusObj(task.service,task.status)
-  const bdr      = cst==='discontinued'?'#f43f5e30':cst==='on_hold'?'#f59e0b30':'var(--border)'
+  const bdr      = cst==='discontinued'?'#f43f5e30':cst==='struck_off'?'#6b728040':cst==='on_hold'?'#f59e0b30':cst==='closure'?'#06b6d440':'var(--border)'
   return (
-    <div onClick={onClick} className="hover-lift" style={{ display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr 150px 110px 20px',alignItems:'center',gap:12,padding:'11px 16px',background:'var(--surface2)',borderRadius:10,cursor:'pointer',border:`1px solid ${bdr}`,opacity:isDone?.65:1,marginBottom:4 }}>
+    <div onClick={onClick} className="hover-lift" style={{ display:'grid',gridTemplateColumns:'2fr 1.2fr 1fr 150px 110px 20px',alignItems:'center',gap:12,padding:'11px 16px',background:cst==='closure'?'#06b6d408':cst==='struck_off'?'#6b728008':'var(--surface2)',borderRadius:10,cursor:'pointer',border:`1px solid ${bdr}`,borderLeft:cst==='closure'?'3px solid #06b6d460':cst==='struck_off'?'3px solid #6b728060':undefined,opacity:isDone?.65:1,marginBottom:4 }}>
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:7,marginBottom:2 }}>
           <span style={{ fontWeight:600,fontSize:13,color:'var(--text)' }}>{task.service}</span>
