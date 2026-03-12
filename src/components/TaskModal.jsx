@@ -35,7 +35,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
   const cst        = client?.clientStatus||'active'
   const cBadge     = CLIENT_STATUS[cst]
   const selectedSt = statuses.find(x=>x.v===status)||{}
-  const canDelete  = ['partner','hod'].includes(currentUser.role) || (task.isAdhoc && task.assignedTo===currentUser.id)
+  const canDelete  = !(['sales'].includes(currentUser.role)) && (['partner','hod'].includes(currentUser.role) || (task.isAdhoc && task.assignedTo===currentUser.id))
 
   const save = async () => {
     setSaving(true); setError('')
@@ -131,7 +131,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
         </div>
 
         <div style={{ display:'flex',gap:4,marginBottom:16,borderBottom:'1px solid var(--border)',paddingBottom:10,flexWrap:'wrap' }}>
-          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History'],['creds','🔐 Credentials']].map(([t,l])=>(
+          {[['status','✏️ Status'],['edit','🖊 Edit'],['comments','💬 Comments'],['history','📋 History'],['creds','🔐 Credentials']].filter(([t])=>currentUser.role==='sales'?t!=='creds':true).map(([t,l])=>(
             <button key={t} onClick={()=>{ setTab(t); if(t==='creds') loadCreds() }} style={tabSt(tab===t)}>{l}</button>
           ))}
           <button onClick={()=>setReassigning(!reassigning)} style={{ ...tabSt(reassigning),marginLeft:'auto' }}>↔ Reassign</button>
@@ -215,6 +215,13 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
             <div>
 
+
+              {/* Sales Member: restricted status changes */}
+              {currentUser.role === 'sales' && !task.isAdhoc && (
+                <div style={{ background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:12,color:'#f43f5e' }}>
+                  🔒 Sales Members can only update status on Ad-hoc tasks.
+                </div>
+              )}
               {/* ── Soft dependency highlight ── */}
               {(() => {
                 const deps = SOFT_DEPS[task.service] || []
@@ -239,8 +246,12 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
                 )
               })()}
               <Label>Update Status</Label>
-              <select value={status} onChange={e=>setStatus(e.target.value)}>
-                {statuses.map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
+              <select value={status} onChange={e=>setStatus(e.target.value)}
+                disabled={currentUser.role==='sales' && !task.isAdhoc}>
+                {(currentUser.role==='sales'
+                  ? statuses.filter(x=>x.v==='on_hold'||x.v==='pending')
+                  : statuses
+                ).map(x=><option key={x.v} value={x.v}>{x.l}</option>)}
               </select>
               {selectedSt.l&&(
                 <div style={{ marginTop:6,display:'flex',alignItems:'center',gap:8 }}>
@@ -257,11 +268,17 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
             )}
             <div><Label>Internal Note (optional)</Label><textarea placeholder="Add an internal note…" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{ resize:'vertical' }}/></div>
             {error&&<Alert message={error}/>}
-            <button className="btn btn-primary" onClick={save} disabled={saving}>{saving?'Saving…':'Save Status Update'}</button>
+            <button className="btn btn-primary" onClick={save}
+              disabled={saving||(currentUser.role==='sales'&&!task.isAdhoc)}>
+              {saving?'Saving…':'Save Status Update'}
+            </button>
           </div>
         )}
 
         {tab==='edit'&&(
+          <>{currentUser.role==='sales'&&!task.isAdhoc&&(
+            <div style={{background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:12,color:'#f43f5e'}}>🔒 Sales Members can only edit due date on Ad-hoc tasks.</div>
+          )}</>
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
             <div>
               <Label>Due Date</Label>

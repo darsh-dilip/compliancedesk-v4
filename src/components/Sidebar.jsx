@@ -14,7 +14,7 @@ const NAV_GROUPS = [
     label: 'CUSTOMERS',
     items: [
       { id:'clients',  icon:'🏢', label:'Clients'            },
-      { id:'creds',    icon:'🔐', label:'Credential Manager' },
+      { id:'creds',    icon:'🔐', label:'Credential Manager', noSales:true },
     ]
   },
   {
@@ -40,9 +40,11 @@ const NAV_GROUPS = [
     label: 'TEAM',
     items: [
       { id:'users',    icon:'⚙️', label:'Manage Team',  partner:true },
-      { id:'workload', icon:'👥', label:'Team Workload', mgr:true    },
+      { id:'workload', icon:'👥', label:'Team Workload', mgr:true, noSales:true },
       { id:'audit',    icon:'🔍', label:'Audit Log'                   },
-      { id:'bulkdate', icon:'⚡', label:'Bulk Updates',   mgr:true     },
+      { id:'bulkdate', icon:'⚡', label:'Bulk Updates',   mgr:true, noSales:true },
+      { id:'unassigned',icon:'📌',label:'Unassigned',    mgr:true, noSales:true },
+      { id:'yearend',  icon:'🗓', label:'Year-End Batch', mgr:true, noSales:true },
     ]
   },
 ]
@@ -50,6 +52,7 @@ const NAV_GROUPS = [
 export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
   const isMgr     = ['partner','hod','team_leader'].includes(user.role)
   const isPartner = user.role==='partner'
+  const isSales   = user.role==='sales'
 
   return (
     <div className="sidebar-root" style={{ width:214,flexShrink:0,background:'var(--surface)',borderRight:'1px solid var(--border)',display:'flex',flexDirection:'column',height:'100vh',position:'sticky',top:0 }}>
@@ -65,6 +68,7 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
           const visibleItems = group.items.filter(n => {
             if (n.partner && !isPartner) return false
             if (n.mgr && !isMgr) return false
+            if (n.noSales && isSales) return false
             return true
           })
           if (!visibleItems.length) return null
