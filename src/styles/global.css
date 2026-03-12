@@ -16,6 +16,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 input::placeholder{color:var(--text3)}
 option{background:var(--surface2)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes rankPulse{0%,100%{box-shadow:var(--ring-shadow)}50%{box-shadow:var(--ring-shadow-bright)}}
+@keyframes streakBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 .fade-up{animation:fadeUp .25s ease}
 .hover-lift{transition:transform .15s,box-shadow .15s}
