@@ -15,7 +15,7 @@ const getUrgency = (t) => {
   return 'Upcoming'
 }
 
-export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
+export const DashboardClientStatus = ({ tasks, clients, users, onTask, memberMeta={} }) => {
   const [selClient, setSelClient] = useState('')
   const [fy, setFY] = useState('2026-27')
   const [search, setSearch] = useState('')
@@ -118,7 +118,7 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
               <div style={{ fontSize:12,color:'var(--text3)',marginTop:2 }}>{client?.constitution} · FY {fy}</div>
               {assignee && (
                 <div style={{ display:'flex',alignItems:'center',gap:6,marginTop:6 }}>
-                  <Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={18}/>
+                  <Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={18} rank={memberMeta[assignee.id]?.rank} streak={memberMeta[assignee.id]?.streak}/>
                   <span style={{ fontSize:12,color:'var(--text2)' }}>{assignee.name}</span>
                 </div>
               )}
@@ -172,7 +172,7 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
                               <span style={{ fontSize:9,color:ov?'var(--danger)':'var(--text3)',fontWeight:ov?700:400 }}>
                                 {t.dueDate ? fmtDate(t.dueDate) : '—'}
                               </span>
-                              {assigneeU && <Avatar name={assigneeU.name} init={assigneeU.init} role={assigneeU.role} sz={16}/>}
+                              {assigneeU && <Avatar name={assigneeU.name} init={assigneeU.init} role={assigneeU.role} sz={16} rank={memberMeta[assigneeU.id]?.rank} streak={memberMeta[assigneeU.id]?.streak}/>}
                             </div>
                           </div>
                         )

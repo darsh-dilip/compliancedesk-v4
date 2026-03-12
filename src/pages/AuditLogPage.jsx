@@ -18,7 +18,7 @@ const fmtTs = ts => {
   return d.toLocaleDateString('en-IN',{ day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit' })
 }
 
-export const AuditLogPage = ({ users, clients, currentUser }) => {
+export const AuditLogPage = ({ users, clients, currentUser, memberMeta={} }) => {
   const [logs,       setLogs]       = useState([])
   const [loading,    setLoading]    = useState(true)
   const [fAction,    setFAction]    = useState('')
@@ -146,7 +146,7 @@ export const AuditLogPage = ({ users, clients, currentUser }) => {
                   </div>
                   <div style={{ display:'flex',flexDirection:'column',alignItems:'flex-end',gap:4,flexShrink:0 }}>
                     <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-                      {byUser&&<Avatar name={byUser.name} init={byUser.init} role={byUser.role} sz={20}/>}
+                      {byUser&&<Avatar name={byUser.name} init={byUser.init} role={byUser.role} sz={20} rank={memberMeta[byUser.id]?.rank} streak={memberMeta[byUser.id]?.streak}/>}
                       <span style={{ fontSize:11,color:'var(--text2)' }}>{log.by?.name||'?'}</span>
                     </div>
                     <span style={{ fontSize:10,color:'var(--text3)' }}>{fmtTs(log.createdAt)}</span>

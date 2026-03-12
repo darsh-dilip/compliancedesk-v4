@@ -19,7 +19,7 @@ const secondaryAuth = getAuth(secondaryApp)
 const createFirebaseUser = (email, password) =>
   createUserWithEmailAndPassword(secondaryAuth, email, password)
 
-export const UsersPage = ({ users, currentUser, onViewProfile }) => {
+export const UsersPage = ({ users, currentUser, onViewProfile, memberMeta={} }) => {
   const [showAdd,    setShowAdd]    = useState(false)
   const [editUser,   setEditUser]   = useState(null)
   const [deleteUser, setDeleteUser] = useState(null)
@@ -106,7 +106,7 @@ export const UsersPage = ({ users, currentUser, onViewProfile }) => {
           return (
             <div key={u.id} style={{ background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:'12px 16px',display:'flex',alignItems:'center',gap:14 }}>
               <button onClick={()=>onViewProfile?.(u)} style={{ background:'none',border:'none',cursor:'pointer',padding:0 }}>
-                <Avatar name={u.name} init={u.init} role={u.role} sz={34}/>
+                <Avatar name={u.name} init={u.init} role={u.role} sz={34} rank={memberMeta[u.id]?.rank} streak={memberMeta[u.id]?.streak}/>
               </button>
               <div style={{ flex:1 }}>
                 <div style={{ fontWeight:600,fontSize:13,color:'var(--text)' }}>{u.name}{isMe&&<span style={{ marginLeft:6,fontSize:10,color:'var(--text3)' }}>(you)</span>}</div>

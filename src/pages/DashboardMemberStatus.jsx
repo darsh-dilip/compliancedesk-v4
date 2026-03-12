@@ -24,7 +24,7 @@ const getUrgency = (t) => {
   return 'Upcoming'
 }
 
-export const DashboardMemberStatus = ({ tasks, users, user, onTask, memberMeta={} }) => {
+export const DashboardMemberStatus = ({ tasks, users, clients, user, onTask, memberMeta={} }) => {
   const [selMember,  setSelMember]  = useState('')
   const [selService, setSelService] = useState('')
   const [fy,         setFY]         = useState('2026-27')

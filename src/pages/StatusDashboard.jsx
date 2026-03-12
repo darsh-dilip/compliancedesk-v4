@@ -45,7 +45,7 @@ function getPeriods(svc, fy) {
   return []
 }
 
-export const StatusDashboard = ({ tasks, users, user }) => {
+export const StatusDashboard = ({ tasks, users, user, memberMeta={} }) => {
   const [selSvc,    setSelSvc]    = useState('')
   const [selPeriod, setSelPeriod] = useState('')
   const [selFY,     setSelFY]     = useState('2026-27')
@@ -202,7 +202,7 @@ export const StatusDashboard = ({ tasks, users, user }) => {
                     <tr key={u.id} style={{ borderTop:'1px solid var(--border)',background:ri%2===0?'var(--surface)':'var(--surface2)' }}>
                       <td style={{ padding:'8px 14px',position:'sticky',left:0,background:ri%2===0?'var(--surface)':'var(--surface2)',zIndex:1,borderRight:'1px solid var(--border)' }}>
                         <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-                          <Avatar name={u.name} init={u.init} role={u.role} sz={26}/>
+                          <Avatar name={u.name} init={u.init} role={u.role} sz={26} rank={memberMeta[u.id]?.rank} streak={memberMeta[u.id]?.streak}/>
                           <div>
                             <div style={{ fontWeight:600,color:'var(--text)',fontSize:12 }}>{u.name}</div>
                             <div style={{ fontSize:10,color:'var(--text3)' }}>{u.role}</div>

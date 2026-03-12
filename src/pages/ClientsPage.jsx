@@ -87,7 +87,7 @@ const ClientRow = ({ client, users, tasks, onClick }) => {
         </div>
       </div>
       <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-        {assignee&&<Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={28}/>}
+        {assignee&&<Avatar name={assignee.name} init={assignee.init} role={assignee.role} sz={28} rank={memberMeta[assignee.id]?.rank} streak={memberMeta[assignee.id]?.streak}/>}
         <div>
           <div style={{ fontSize:12,fontWeight:600,color:'var(--text)' }}>{assignee?.name||'Unassigned'}</div>
           <div style={{ fontSize:11,color:'var(--text3)' }}>{assignee&&ROLES[assignee.role]}</div>
@@ -265,7 +265,7 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
   )
 }
 
-export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask, onAddAdhoc, onBulkImport }) => {
+export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask, onAddAdhoc, onBulkImport, memberMeta={} }) => {
   const [search,  setSearch]  = useState('')
   const [selected,setSelected]=useState(null)
   const [filter,  setFilter]  = useState('all')

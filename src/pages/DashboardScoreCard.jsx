@@ -64,7 +64,7 @@ const computeStats = (tasks) => {
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────
-export const DashboardScoreCard = ({ tasks, users, clients }) => {
+export const DashboardScoreCard = ({ tasks, users, clients, memberMeta={} }) => {
   const [view,    setView]    = useState('member')   // 'member' | 'client'
   const [fCat,    setFCat]    = useState('')
   const [fMember, setFMember] = useState('')
@@ -239,7 +239,7 @@ export const DashboardScoreCard = ({ tasks, users, clients }) => {
                   background: i%2===0?'transparent':'var(--surface2)' }}>
                   <td style={{ padding:'10px 14px' }}>
                     <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-                      <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={28}/>
+                      <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={28} rank={memberMeta[r.user.id]?.rank} streak={memberMeta[r.user.id]?.streak}/>
                       <div>
                         <div style={{ fontWeight:600,color:'var(--text)' }}>{r.user.name}</div>
                         <div style={{ fontSize:10,color:ROLE_CLR[r.user.role] }}>{ROLES[r.user.role]}</div>
@@ -289,7 +289,7 @@ export const DashboardScoreCard = ({ tasks, users, clients }) => {
                   <td style={{ padding:'10px 14px' }}>
                     {r.assignee && (
                       <div style={{ display:'flex',alignItems:'center',gap:6 }}>
-                        <Avatar name={r.assignee.name} init={r.assignee.init} role={r.assignee.role} sz={20}/>
+                        <Avatar name={r.assignee.name} init={r.assignee.init} role={r.assignee.role} sz={20} rank={memberMeta[r.assignee.id]?.rank} streak={memberMeta[r.assignee.id]?.streak}/>
                         <span style={{ fontSize:12,color:'var(--text2)' }}>{r.assignee.name}</span>
                       </div>
                     )}
