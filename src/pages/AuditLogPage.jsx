@@ -18,12 +18,12 @@ const fmtTs = ts => {
   return d.toLocaleDateString('en-IN',{ day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit' })
 }
 
-export const AuditLogPage = ({ users, clients }) => {
+export const AuditLogPage = ({ users, clients, currentUser }) => {
   const [logs,       setLogs]       = useState([])
   const [loading,    setLoading]    = useState(true)
   const [fAction,    setFAction]    = useState('')
   const [fClient,    setFClient]    = useState('')
-  const [fMember,    setFMember]    = useState('')
+  const [fMember,    setFMember]    = useState(currentUser?.role==='sales' ? (currentUser?.id||'') : '')
   const [fStatusFrom,setFStatusFrom]= useState('')
   const [fStatusTo,  setFStatusTo]  = useState('')
   const [fDateFrom,  setFDateFrom]  = useState('')

@@ -16,7 +16,9 @@ export const AddAdHocTask = ({ clients, users, currentUser, onBack, onSuccess })
   const [success,setSuccess]=useState(false)
 
   const set = (k,v) => setForm(f=>({...f,[k]:v}))
-  const eligible = users.filter(u=>['team_leader','executive','intern'].includes(u.role))
+  const eligible = currentUser?.role==='sales'
+    ? users.filter(u=>['hod','team_leader'].includes(u.role))
+    : users.filter(u=>['team_leader','executive','intern'].includes(u.role))
   const selectedClient = clients.find(c=>c.id===form.clientId)
 
   const submit = async () => {

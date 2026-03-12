@@ -68,9 +68,21 @@ const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBet
             background: i===0 ? '#f59e0b08' : 'var(--surface2)',
             border: `1px solid ${i===0 ? '#f59e0b30' : 'var(--border)'}` }}>
             <span style={{ fontSize:16,width:22,textAlign:'center' }}>{MEDAL[i] || `#${i+1}`}</span>
-            <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={26}/>
+            <div style={{ position:'relative',flexShrink:0 }}>
+              <div style={{
+                borderRadius:'50%',padding:2,
+                background: i===0?'linear-gradient(135deg,#f59e0b,#fde68a)':i===1?'linear-gradient(135deg,#94a3b8,#e2e8f0)':i===2?'linear-gradient(135deg,#cd7f32,#f0c080)':'transparent',
+                boxShadow: i===0?'0 0 10px #f59e0b60':i===1?'0 0 6px #94a3b840':i===2?'0 0 6px #cd7f3260':'none'
+              }}>
+                <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={26}/>
+              </div>
+              {i===0&&<span style={{ position:'absolute',top:-8,left:'50%',transform:'translateX(-50%)',fontSize:12 }}>👑</span>}
+            </div>
             <div style={{ flex:1,minWidth:0 }}>
-              <div style={{ fontSize:12,fontWeight:600,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{r.user.name}</div>
+              <div style={{ display:'flex',alignItems:'center',gap:4 }}>
+                <span style={{ fontSize:12,fontWeight:600,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{r.user.name}</span>
+                {r.doneToday>0&&<span style={{ fontSize:9,fontWeight:700,color:'#f59e0b',background:'#f59e0b15',padding:'1px 5px',borderRadius:4,border:'1px solid #f59e0b40',whiteSpace:'nowrap' }}>🔥 {r.doneToday} today</span>}
+              </div>
               <div style={{ fontSize:10,color:ROLE_CLR[r.user.role] }}>{ROLES[r.user.role]}</div>
             </div>
             <div style={{ fontWeight:800,fontSize:14,color: i===0 ? RANK_CLR[0] : 'var(--text)',minWidth:44,textAlign:'right' }}>
@@ -111,8 +123,21 @@ const OverallTable = ({ stats }) => {
                 </td>
                 <td style={{ padding:'8px 10px' }}>
                   <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-                    <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={24}/>
-                    <span style={{ fontWeight:600,color:'var(--text)' }}>{r.user.name}</span>
+                    <div style={{ position:'relative' }}>
+                      <div style={{
+                        borderRadius:'50%',padding:i<3?2:0,
+                        background:i===0?'linear-gradient(135deg,#f59e0b,#fde68a)':i===1?'linear-gradient(135deg,#94a3b8,#e2e8f0)':i===2?'linear-gradient(135deg,#cd7f32,#f0c080)':'transparent'
+                      }}>
+                        <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={24}/>
+                      </div>
+                      {i===0&&<span style={{ position:'absolute',top:-7,left:'50%',transform:'translateX(-50%)',fontSize:10 }}>👑</span>}
+                    </div>
+                    <div>
+                      <div style={{ display:'flex',alignItems:'center',gap:4 }}>
+                        <span style={{ fontWeight:600,color:'var(--text)' }}>{r.user.name}</span>
+                        {r.doneToday>0&&<span style={{ fontSize:9,fontWeight:700,color:'#f59e0b',background:'#f59e0b15',padding:'1px 5px',borderRadius:4,border:'1px solid #f59e0b40' }}>🔥 {r.doneToday}</span>}
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td style={{ padding:'8px 10px',color:ROLE_CLR[r.user.role],fontSize:11,fontWeight:600 }}>{ROLES[r.user.role]}</td>

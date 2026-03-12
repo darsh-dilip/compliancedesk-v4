@@ -167,7 +167,7 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
           })()}
         </div>
         <div style={{ display:'flex',gap:8 }}>
-          {['partner','hod'].includes(currentUser.role) && (
+          {['partner','hod'].includes(currentUser.role) && !['sales'].includes(currentUser.role) && (
             <>
               <button className="btn btn-ghost btn-sm" onClick={()=>setShowEditClient(true)}>✏️ Edit</button>
               <button className="btn btn-ghost btn-sm" style={{ color:'var(--danger)' }}
