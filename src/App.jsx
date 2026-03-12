@@ -104,8 +104,16 @@ export default function App() {
       const onTime=comp.filter(t=>t.completedAt.slice(0,10)<=t.dueDate).length
       const pct=comp.length?Math.round(onTime/comp.length*100):null
       const score=Math.round(0.4*cpct+0.4*(pct??cpct)+0.2*(100-opct))
+      // completedAt can be Firestore Timestamp or ISO string
+      const toDateStr = v => {
+        if (!v) return ''
+        if (typeof v === 'string') return v.slice(0,10)
+        if (v.toDate) return v.toDate().toISOString().slice(0,10)
+        if (v.seconds) return new Date(v.seconds*1000).toISOString().slice(0,10)
+        return String(v).slice(0,10)
+      }
       const streak=[today,yesterday,dayBefore].every(day=>
-        (tasks||[]).some(t=>t.assignedTo===u.id&&allDone.includes(t.status)&&(t.completedAt||'').slice(0,10)===day)
+        (tasks||[]).some(t=>t.assignedTo===u.id&&allDone.includes(t.status)&&toDateStr(t.completedAt)===day)
       )
       return {id:u.id,score,streak}
     })
