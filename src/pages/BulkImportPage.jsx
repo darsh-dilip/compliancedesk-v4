@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import * as XLSX from 'xlsx'
-import { CONSTITUTIONS, CLIENT_CATEGORIES, FINANCIAL_YEARS, ROLES } from '../constants.js'
+import { CONSTITUTIONS, CLIENT_CATEGORIES, FINANCIAL_YEARS, ROLES, CRED_SERVICES } from '../constants.js'
 import { generateTasks } from '../utils/taskGenerator.js'
 import { addClient, bulkAddTasks, upsertCredential } from '../hooks/useFirestore.js'
 import { Alert } from '../components/UI.jsx'
@@ -93,9 +93,71 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
   // ── Credential helpers ─────────────────────────────────────────
   const downloadCredTemplate = () => {
     const wb = XLSX.utils.book_new()
-    const ws = XLSX.utils.aoa_to_sheet([CRED_COLS.map(col=>col.h), CRED_COLS.map(col=>col.eg)])
-    ws['!cols'] = CRED_COLS.map(()=>({ wch:28 }))
-    XLSX.utils.book_append_sheet(wb, ws, 'Credentials Template')
+    const serviceLabels = CRED_SERVICES.map(s => s.l)
+
+    // ── Sheet 1: Data entry template ──────────────────────────────
+    const dataRows = [
+      CRED_COLS.map(col => col.h),
+      CRED_COLS.map(col => col.eg),
+      // 20 empty rows for data entry
+      ...Array(20).fill(CRED_COLS.map(() => ''))
+    ]
+    const ws = XLSX.utils.aoa_to_sheet(dataRows)
+    ws['!cols'] = CRED_COLS.map((col, i) => ({ wch: i === 0 ? 32 : i === 1 ? 26 : 20 }))
+
+    // Style header row (row 0) — bold
+    const headerRange = XLSX.utils.decode_range(ws['!ref'])
+    for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+      const cellAddr = XLSX.utils.encode_cell({ r: 0, c: C })
+      if (!ws[cellAddr]) continue
+      ws[cellAddr].s = { font: { bold: true }, fill: { fgColor: { rgb: 'E2F0FB' } } }
+    }
+
+    // Dropdown validation for Service column (col index 1 = B)
+    // Excel data validation — list from named range
+    if (!ws['!dataValidation']) ws['!dataValidation'] = []
+    ws['!dataValidation'].push({
+      sqref: 'B3:B500',
+      type: 'list',
+      formula1: `"${serviceLabels.join(',')}"`,
+      showDropDown: false,
+      showErrorMessage: true,
+      errorTitle: 'Invalid Service',
+      error: `Choose from: ${serviceLabels.join(', ')}`,
+    })
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Credentials')
+
+    // ── Sheet 2: Instructions ──────────────────────────────────────
+    const instructions = [
+      ['📋 BULK CREDENTIALS UPLOAD — INSTRUCTIONS', '', '', ''],
+      ['', '', '', ''],
+      ['COLUMN', 'REQUIRED?', 'RULES', 'EXAMPLE'],
+      ['Client Name *', 'Yes', 'Must exactly match the client name in ComplianceDesk (case-insensitive)', 'Sharma Enterprises Pvt Ltd'],
+      ['Service / Portal *', 'Yes', 'Must be one of the exact service names listed in the Services tab below', 'GST Portal'],
+      ['Username / ID', 'No', 'Login username, GSTIN, PAN, or user ID for the portal', '27AAAAA0000A1Z5'],
+      ['Password', 'No', 'Portal password. Will be stored securely.', 'MyPass@123'],
+      ['PIN', 'No', 'Numeric PIN if applicable (e.g. DSC PIN, OTP backup)', '123456'],
+      ['Notes', 'No', 'Any extra info: registered mobile, email, DSC expiry, etc.', 'Mobile: 98765 43210 | DSC expiry: Mar 2026'],
+      ['', '', '', ''],
+      ['IMPORTANT RULES', '', '', ''],
+      ['• Row 2 is an example row — delete it before uploading', '', '', ''],
+      ['• Client Name must match exactly as in ComplianceDesk (spelling, spaces, Pvt Ltd vs Private Limited etc.)', '', '', ''],
+      ['• If a record for the same Client + Service already exists, it will be UPDATED (not duplicated)', '', '', ''],
+      ['• You can leave Username / Password / PIN / Notes blank — only Client Name and Service are mandatory', '', '', ''],
+      ['• Use the Service dropdown (column B) to avoid typos — only listed services are accepted', '', '', ''],
+      ['', '', '', ''],
+      ['VALID SERVICE / PORTAL NAMES', '', '', ''],
+      ...CRED_SERVICES.map(s => [s.l, s.url || '(Desktop / No URL)', s.icon, `Used for: ${s.tasks.length ? s.tasks.join(', ') : 'General / Custom'}`]),
+    ]
+    const wsInstr = XLSX.utils.aoa_to_sheet(instructions)
+    wsInstr['!cols'] = [{ wch: 38 }, { wch: 32 }, { wch: 36 }, { wch: 60 }]
+    // Bold the section headers
+    ;['A1','A3','B3','C3','D3','A11','A18'].forEach(addr => {
+      if (wsInstr[addr]) wsInstr[addr].s = { font: { bold: true } }
+    })
+    XLSX.utils.book_append_sheet(wb, wsInstr, 'Instructions')
+
     XLSX.writeFile(wb, 'BulkCredentials_Template.xlsx')
   }
 
