@@ -34,9 +34,7 @@ export const AddClientPage = ({ users, clients, currentUser, onBack, onSuccess }
   const set = (k,v) => setForm(f=>({...f,[k]:v}))
   const eligible = currentUser?.role==='sales'
     ? users.filter(u=>['hod','team_leader'].includes(u.role))
-    : users.filter(u=>['team_leader','executive','intern'].includes(u.role))
-    ? users.filter(u=>['hod','team_leader'].includes(u.role))
-    : users.filter(u=>['team_leader','executive','intern'].includes(u.role))
+    : users.filter(u=>['hod','team_leader','executive','intern'].includes(u.role))
 
   const fyS = parseInt(form.fy)
   const fyE = fyS + 1
