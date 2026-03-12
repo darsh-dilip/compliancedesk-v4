@@ -163,7 +163,7 @@ export default function App() {
         return <ClientsPage onBulkImport={()=>setPage('bulkimport')}
           clients={clients} users={users} tasks={visibleTasks}
           currentUser={currentUser} onAdd={goAddClient}
-          onTask={setSelectedTask} onAddAdhoc={goAddAdhoc}
+          onTask={setSelectedTask} onAddAdhoc={goAddAdhoc} memberMeta={memberMeta}
         />
       case 'add_client':
         return <AddClientPage
@@ -189,15 +189,15 @@ export default function App() {
       case 'it':
         return <DashboardIT tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'status':
-        return <StatusDashboard tasks={visibleTasks} users={users} user={currentUser}/>
+        return <StatusDashboard tasks={visibleTasks} users={users} user={currentUser} memberMeta={memberMeta}/>
       case 'audit':
-        return <AuditLogPage users={users} clients={clients} currentUser={currentUser}/>
+        return <AuditLogPage users={users} clients={clients} currentUser={currentUser} memberMeta={memberMeta}/>
       case 'creds':
         return isSales ? null : <CredentialManager clients={clients} currentUser={currentUser}/>
       case 'memberstatus':
-        return <DashboardMemberStatus tasks={visibleTasks} users={users} user={currentUser} onTask={setSelectedTask}/>
+        return <DashboardMemberStatus tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask} memberMeta={memberMeta}/>
       case 'clientstatus':
-        return <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/>
+        return <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask} memberMeta={memberMeta}/>
       case 'profile':
         return <ProfilePage currentUser={profileUser||currentUser} memberMeta={memberMeta} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
       case 'bulkimport':
@@ -209,13 +209,13 @@ export default function App() {
       case 'leaderboard':
         return <DashboardLeaderboard tasks={visibleTasks} users={users} clients={clients} memberMeta={memberMeta}/>
       case 'scorecard':
-        return <DashboardScoreCard tasks={visibleTasks} users={users} clients={clients}/>
+        return <DashboardScoreCard tasks={visibleTasks} users={users} clients={clients} memberMeta={memberMeta}/>
       case 'unassigned':
         return isMgr ? <UnassignedPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'yearend':
         return isMgr ? <YearEndBatchPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
-        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }}/> : null
+        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }} memberMeta={memberMeta}/> : null
       default:
         return <DashboardPage
           tasks={visibleTasks} user={currentUser} users={users} clients={clients}
