@@ -354,5 +354,6 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
           )}
         </div>
       )}
+    </div>
   )
 }
