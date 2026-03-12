@@ -138,6 +138,7 @@ export default function App() {
   const visibleIds   = getVisibleUserIds(currentUser, users)
   const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
   const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
+  const isHOD        = ['partner','hod'].includes(currentUser.role)
   const isSales       = currentUser.role === 'sales'
 
 
@@ -203,7 +204,7 @@ export default function App() {
       case 'bulkimport':
         return <BulkImportPage users={users} clients={clients} onBack={()=>setPage('clients')}/>
       case 'bulkdate':
-        return isMgr ? <BulkUpdatesPage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/> : null
+        return <BulkUpdatesPage tasks={visibleTasks} clients={clients} users={users} currentUser={currentUser}/>
       case 'duedone':
         return <DashboardDueDone tasks={visibleTasks} clients={clients} users={users} user={currentUser}/>
       case 'leaderboard':
@@ -213,9 +214,9 @@ export default function App() {
       case 'unassigned':
         return isMgr ? <UnassignedPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'yearend':
-        return isMgr ? <YearEndBatchPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
+        return isHOD ? <YearEndBatchPage tasks={tasks} clients={clients} users={users} currentUser={currentUser}/> : null
       case 'users':
-        return currentUser.role === 'partner' ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }} memberMeta={memberMeta}/> : null
+        return isHOD ? <UsersPage users={users} currentUser={currentUser} createFirebaseUser={createUser} onViewProfile={(u)=>{ setProfileUser(u); setPage('profile') }} memberMeta={memberMeta}/> : null
       default:
         return <DashboardPage
           tasks={visibleTasks} user={currentUser} users={users} clients={clients}
