@@ -5,29 +5,28 @@ import { daysDiff, fmtDate } from '../utils/dates.js'
 export const Avatar = ({ name, init, role, sz=32, rank=null, streak=false }) => {
   const c = ROLE_CLR[role]||'#5b8dee'
   const i = init||(name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
-  // rank=1 gold, rank=2 silver (true silver), rank=3 bronze (copper)
-  const ringCfg = rank===1
-    ? { base:'0 0 0 3px #f59e0b, 0 0 12px #f59e0b80', bright:'0 0 0 3px #fde68a, 0 0 18px #f59e0baa' }
+  // rank rings: gold=double border, silver=white ring, bronze=copper ring
+  // Technique: outline + box-shadow gives a clean double-ring effect
+  const ringStyle = rank===1
+    ? { boxShadow:'0 0 0 2px #1e293b, 0 0 0 4px #f59e0b, 0 0 0 5px #fde68a50' }   // gold
     : rank===2
-    ? { base:'0 0 0 3px #d1d5db, 0 0 8px #9ca3af70', bright:'0 0 0 3px #f3f4f6, 0 0 14px #d1d5dbaa' }
+    ? { boxShadow:'0 0 0 2px #1e293b, 0 0 0 4px #cbd5e1, 0 0 0 5px #f1f5f950' }   // silver
     : rank===3
-    ? { base:'0 0 0 3px #b45309, 0 0 8px #92400e60', bright:'0 0 0 3px #d97706, 0 0 14px #b4530988' }
+    ? { boxShadow:'0 0 0 2px #1e293b, 0 0 0 4px #b45309, 0 0 0 5px #d9770640' }   // bronze
     : null
   if (!rank && !streak) {
     return <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,border:`1.5px solid ${c}45`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,flexShrink:0 }}>{i}</div>
   }
   return (
-    <div style={{ position:'relative',flexShrink:0,width:sz+(rank?8:0),height:sz+(rank?8:0),display:'inline-flex',alignItems:'center',justifyContent:'center' }}>
+    <div style={{ position:'relative',flexShrink:0,width:sz+(rank?10:0),height:sz+(rank?10:0),display:'inline-flex',alignItems:'center',justifyContent:'center' }}>
       <div style={{
         width:sz,height:sz,borderRadius:'50%',background:`${c}20`,
         display:'flex',alignItems:'center',justifyContent:'center',
         fontSize:sz*.36,fontWeight:700,color:c,
-        '--ring-shadow': ringCfg?.base, '--ring-shadow-bright': ringCfg?.bright,
-        boxShadow: ringCfg?.base || `0 0 0 1.5px ${c}45`,
-        animation: ringCfg ? 'rankPulse 2s ease-in-out infinite' : 'none',
+        ...(ringStyle||{ boxShadow:`0 0 0 1.5px ${c}45` }),
       }}>{i}</div>
       {rank===1&&<span style={{ position:'absolute',top:-sz*.28,left:'50%',transform:'translateX(-50%)',fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>👑</span>}
-      {streak&&<span style={{ position:'absolute',bottom:-sz*.16,right:-sz*.16,fontSize:sz*.32,lineHeight:1,pointerEvents:'none',animation:'streakBounce 1.5s ease-in-out infinite' }}>🔥</span>}
+      {streak&&<span style={{ position:'absolute',bottom:-sz*.16,right:-sz*.16,fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>🔥</span>}
     </div>
   )
 }
