@@ -32,19 +32,19 @@ const NAV_GROUPS = [
       { id:'memberstatus', icon:'👤', label:'Team Member Wise'  },
       { id:'clientstatus', icon:'🏢', label:'Client Wise'       },
       { id:'duedone',      icon:'📊', label:'Due vs Done'       },
-      { id:'leaderboard',   icon:'🏆', label:'Leaderboard',  mgr:true },
-      { id:'scorecard',     icon:'🎯', label:'Score Card',    mgr:true },
+      { id:'leaderboard',   icon:'🏆', label:'Leaderboard' },
+      { id:'scorecard',     icon:'🎯', label:'Score Card' },
     ]
   },
   {
     label: 'TEAM',
     items: [
-      { id:'users',    icon:'⚙️', label:'Manage Team',  partner:true },
+      { id:'users',    icon:'⚙️', label:'Manage Team',  hod:true },
       { id:'workload', icon:'👥', label:'Team Workload', mgr:true, noSales:true },
       { id:'audit',    icon:'🔍', label:'Audit Log'                   },
-      { id:'bulkdate', icon:'⚡', label:'Bulk Updates',   mgr:true, noSales:true },
+      { id:'bulkdate', icon:'⚡', label:'Bulk Updates' },
       { id:'unassigned',icon:'📌',label:'Unassigned',    mgr:true, noSales:true },
-      { id:'yearend',  icon:'🗓', label:'Year-End Batch', mgr:true, noSales:true },
+      { id:'yearend',  icon:'🗓', label:'Year-End Batch', hod:true },
     ]
   },
 ]
@@ -52,6 +52,7 @@ const NAV_GROUPS = [
 export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0, memberMeta={} }) => {
   const isMgr     = ['partner','hod','team_leader'].includes(user.role)
   const isPartner = user.role==='partner'
+  const isHOD     = ['partner','hod'].includes(user.role)
   const isSales   = user.role==='sales'
 
   return (
@@ -67,6 +68,7 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0, memberM
         {NAV_GROUPS.map((group, gi) => {
           const visibleItems = group.items.filter(n => {
             if (n.partner && !isPartner) return false
+            if (n.hod && !isHOD) return false
             if (n.mgr && !isMgr) return false
             if (n.noSales && isSales) return false
             return true

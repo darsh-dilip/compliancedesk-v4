@@ -216,12 +216,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
             <div>
 
 
-              {/* Sales Member: restricted status changes */}
-              {currentUser.role === 'sales' && !task.isAdhoc && (
-                <div style={{ background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:12,color:'#f43f5e' }}>
-                  🔒 Sales Members can only update status on Ad-hoc tasks.
-                </div>
-              )}
+
               {/* ── Soft dependency highlight ── */}
               {(() => {
                 const deps = SOFT_DEPS[task.service] || []
@@ -246,8 +241,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
                 )
               })()}
               <Label>Update Status</Label>
-              <select value={status} onChange={e=>setStatus(e.target.value)}
-                disabled={currentUser.role==='sales' && !task.isAdhoc}>
+              <select value={status} onChange={e=>setStatus(e.target.value)}>
                 {(currentUser.role==='sales'
                   ? statuses.filter(x=>x.v==='on_hold'||x.v==='pending')
                   : statuses
@@ -269,7 +263,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
             <div><Label>Internal Note (optional)</Label><textarea placeholder="Add an internal note…" value={note} onChange={e=>setNote(e.target.value)} rows={2} style={{ resize:'vertical' }}/></div>
             {error&&<Alert message={error}/>}
             <button className="btn btn-primary" onClick={save}
-              disabled={saving||(currentUser.role==='sales'&&!task.isAdhoc)}>
+              disabled={saving}>
               {saving?'Saving…':'Save Status Update'}
             </button>
           </div>
@@ -277,13 +271,10 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
 
         {tab==='edit'&&(
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
-            {currentUser.role==='sales'&&!task.isAdhoc&&(
-              <div style={{background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',fontSize:12,color:'#f43f5e'}}>🔒 Sales Members can only edit due date on Ad-hoc tasks.</div>
-            )}
+
             <div>
               <Label>Due Date</Label>
-              <input type="date" value={editDue} onChange={e=>setEditDue(e.target.value)}
-                disabled={currentUser.role==='sales'&&!task.isAdhoc}/>
+              <input type="date" value={editDue} onChange={e=>setEditDue(e.target.value)}/>
             </div>
             {task.isAdhoc&&(
               <div>
@@ -296,7 +287,7 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
               <textarea value={editNotes} onChange={e=>setEditNotes(e.target.value)} rows={3} style={{ resize:'vertical' }} placeholder="Add an internal note…"/>
             </div>
             <button className="btn btn-primary" onClick={saveEdit}
-              disabled={editSaving||(currentUser.role==='sales'&&!task.isAdhoc)}>
+              disabled={editSaving}>
               {editSaving?'Saving…':'Save Changes'}
             </button>
           </div>
