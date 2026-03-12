@@ -276,13 +276,14 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
         )}
 
         {tab==='edit'&&(
-          <>{currentUser.role==='sales'&&!task.isAdhoc&&(
-            <div style={{background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',marginBottom:12,fontSize:12,color:'#f43f5e'}}>🔒 Sales Members can only edit due date on Ad-hoc tasks.</div>
-          )}</>
           <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
+            {currentUser.role==='sales'&&!task.isAdhoc&&(
+              <div style={{background:'#f43f5e12',border:'1px solid #f43f5e30',borderRadius:8,padding:'10px 14px',fontSize:12,color:'#f43f5e'}}>🔒 Sales Members can only edit due date on Ad-hoc tasks.</div>
+            )}
             <div>
               <Label>Due Date</Label>
-              <input type="date" value={editDue} onChange={e=>setEditDue(e.target.value)}/>
+              <input type="date" value={editDue} onChange={e=>setEditDue(e.target.value)}
+                disabled={currentUser.role==='sales'&&!task.isAdhoc}/>
             </div>
             {task.isAdhoc&&(
               <div>
@@ -294,7 +295,10 @@ export const TaskModal = ({ task, users, clients, currentUser, allTasks, onClose
               <Label>Internal Note</Label>
               <textarea value={editNotes} onChange={e=>setEditNotes(e.target.value)} rows={3} style={{ resize:'vertical' }} placeholder="Add an internal note…"/>
             </div>
-            <button className="btn btn-primary" onClick={saveEdit} disabled={editSaving}>{editSaving?'Saving…':'Save Changes'}</button>
+            <button className="btn btn-primary" onClick={saveEdit}
+              disabled={editSaving||(currentUser.role==='sales'&&!task.isAdhoc)}>
+              {editSaving?'Saving…':'Save Changes'}
+            </button>
           </div>
         )}
 
