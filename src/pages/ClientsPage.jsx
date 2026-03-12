@@ -65,7 +65,7 @@ const CategoryBadge = ({ cat }) => {
 }
 
 
-const ClientRow = ({ client, users, tasks, onClick }) => {
+const ClientRow = ({ client, users, tasks, onClick, memberMeta={} }) => {
   const assignee=users.find(u=>u.id===client.assignedTo)
   const ct=tasks.filter(t=>t.clientId===client.id)
   const overdue=ct.filter(t=>getBucket(t)==='overdue').length
@@ -313,7 +313,7 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
         </div>
       </div>
       <div style={{ display:'flex',flexDirection:'column',gap:6 }}>
-        {filtered.map(c=><ClientRow key={c.id} client={c} users={users} tasks={tasks} onClick={()=>setSelected(c)}/>)}
+        {filtered.map(c=><ClientRow key={c.id} client={c} users={users} tasks={tasks} memberMeta={memberMeta} onClick={()=>setSelected(c)}/>)}
         {!filtered.length&&<div style={{ textAlign:'center',padding:40,color:'var(--text3)' }}>No clients found.</div>}
       </div>
     </div>
