@@ -2,10 +2,21 @@ import { useState } from 'react'
 import { ROLE_CLR, DONE_STATUSES, DONE_NIL, DONE_PROPER, CLIENT_STATUS, getStatusObj } from '../constants.js'
 import { daysDiff, fmtDate } from '../utils/dates.js'
 
-export const Avatar = ({ name, init, role, sz=32 }) => {
+export const Avatar = ({ name, init, role, sz=32, rank=null, streak=false }) => {
   const c = ROLE_CLR[role]||'#5b8dee'
   const i = init||(name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()
-  return <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,border:`1.5px solid ${c}45`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,flexShrink:0 }}>{i}</div>
+  const ringColor = rank===1?'#f59e0b':rank===2?'#94a3b8':rank===3?'#cd7f32':null
+  const ringGlow  = rank===1?'0 0 0 2.5px #f59e0b, 0 0 10px #f59e0b70':rank===2?'0 0 0 2.5px #94a3b8, 0 0 6px #94a3b850':rank===3?'0 0 0 2.5px #cd7f32, 0 0 6px #cd7f3250':null
+  if (!rank && !streak) {
+    return <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,border:`1.5px solid ${c}45`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,flexShrink:0 }}>{i}</div>
+  }
+  return (
+    <div style={{ position:'relative',flexShrink:0,width:sz+(rank?6:0),height:sz+(rank?6:0),display:'inline-flex',alignItems:'center',justifyContent:'center' }}>
+      <div style={{ width:sz,height:sz,borderRadius:'50%',background:`${c}20`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:sz*.36,fontWeight:700,color:c,boxShadow:ringGlow||`0 0 0 1.5px ${c}45` }}>{i}</div>
+      {rank===1&&<span style={{ position:'absolute',top:-sz*.28,left:'50%',transform:'translateX(-50%)',fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>👑</span>}
+      {streak&&<span style={{ position:'absolute',bottom:-sz*.16,right:-sz*.16,fontSize:sz*.32,lineHeight:1,pointerEvents:'none' }}>🔥</span>}
+    </div>
+  )
 }
 
 export const StatusBadge = ({ service, status }) => {

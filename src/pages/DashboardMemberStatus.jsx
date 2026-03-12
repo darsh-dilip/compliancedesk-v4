@@ -67,7 +67,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           background:isActive?`${ROLE_CLR[u.role]}10`:'var(--surface)',
           borderLeft:`3px solid ${isActive?ROLE_CLR[u.role]:'transparent'}`,marginBottom:5,transition:'all .12s' }}>
         <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-          <Avatar name={u.name} init={u.init} role={u.role} sz={28}/>
+          <Avatar name={u.name} init={u.init} role={u.role} sz={28} rank={memberMeta[u.id]?.rank} streak={memberMeta[u.id]?.streak}/>
           <div style={{ flex:1,minWidth:0 }}>
             <div style={{ fontWeight:isActive?700:500,fontSize:12,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{u.name}</div>
             <div style={{ fontSize:10,color:ROLE_CLR[u.role],fontWeight:600 }}>{ROLES[u.role]}</div>
@@ -115,7 +115,7 @@ export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
           {/* Member header + filters (sticky) */}
           <div style={{ position:'sticky',top:0,zIndex:50,background:'var(--bg)',paddingBottom:12,borderBottom:'1px solid var(--border)',marginBottom:14 }}>
           <div style={{ display:'flex',alignItems:'center',gap:12,flexWrap:'nowrap' }}>
-            <Avatar name={selectedMember.name} init={selectedMember.init} role={selectedMember.role} sz={36}/>
+            <Avatar name={selectedMember.name} init={selectedMember.init} role={selectedMember.role} sz={36} rank={memberMeta[selectedMember.id]?.rank} streak={memberMeta[selectedMember.id]?.streak}/>
             <div style={{ minWidth:0,maxWidth:220 }}>
               <div style={{ fontWeight:700,fontSize:15,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{selectedMember.name}</div>
               <div style={{ fontSize:11,color:ROLE_CLR[selectedMember.role],fontWeight:600 }}>{ROLES[selectedMember.role]}</div>

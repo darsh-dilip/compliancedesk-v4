@@ -68,21 +68,9 @@ const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBet
             background: i===0 ? '#f59e0b08' : 'var(--surface2)',
             border: `1px solid ${i===0 ? '#f59e0b30' : 'var(--border)'}` }}>
             <span style={{ fontSize:16,width:22,textAlign:'center' }}>{MEDAL[i] || `#${i+1}`}</span>
-            <div style={{ position:'relative',flexShrink:0 }}>
-              <div style={{
-                borderRadius:'50%',padding:2,
-                background: i===0?'linear-gradient(135deg,#f59e0b,#fde68a)':i===1?'linear-gradient(135deg,#94a3b8,#e2e8f0)':i===2?'linear-gradient(135deg,#cd7f32,#f0c080)':'transparent',
-                boxShadow: i===0?'0 0 10px #f59e0b60':i===1?'0 0 6px #94a3b840':i===2?'0 0 6px #cd7f3260':'none'
-              }}>
-                <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={26}/>
-              </div>
-              {i===0&&<span style={{ position:'absolute',top:-8,left:'50%',transform:'translateX(-50%)',fontSize:12 }}>👑</span>}
-            </div>
+            <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={26} rank={memberMeta[r.user.id]?.rank} streak={memberMeta[r.user.id]?.streak}/>
             <div style={{ flex:1,minWidth:0 }}>
-              <div style={{ display:'flex',alignItems:'center',gap:4 }}>
-                <span style={{ fontSize:12,fontWeight:600,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{r.user.name}</span>
-                {r.doneToday>0&&<span style={{ fontSize:9,fontWeight:700,color:'#f59e0b',background:'#f59e0b15',padding:'1px 5px',borderRadius:4,border:'1px solid #f59e0b40',whiteSpace:'nowrap' }}>🔥 {r.doneToday} today</span>}
-              </div>
+              <div style={{ fontSize:12,fontWeight:600,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{r.user.name}</div>
               <div style={{ fontSize:10,color:ROLE_CLR[r.user.role] }}>{ROLES[r.user.role]}</div>
             </div>
             <div style={{ fontWeight:800,fontSize:14,color: i===0 ? RANK_CLR[0] : 'var(--text)',minWidth:44,textAlign:'right' }}>
@@ -96,7 +84,7 @@ const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBet
 }
 
 // ── Overall score table ──────────────────────────────────────────────────
-const OverallTable = ({ stats }) => {
+const OverallTable = ({ stats, memberMeta={} }) => {
   const sorted = [...stats].sort((a,b) => b.overallScore - a.overallScore)
   return (
     <div className="card" style={{ padding:18 }}>
@@ -123,15 +111,7 @@ const OverallTable = ({ stats }) => {
                 </td>
                 <td style={{ padding:'8px 10px' }}>
                   <div style={{ display:'flex',alignItems:'center',gap:8 }}>
-                    <div style={{ position:'relative' }}>
-                      <div style={{
-                        borderRadius:'50%',padding:i<3?2:0,
-                        background:i===0?'linear-gradient(135deg,#f59e0b,#fde68a)':i===1?'linear-gradient(135deg,#94a3b8,#e2e8f0)':i===2?'linear-gradient(135deg,#cd7f32,#f0c080)':'transparent'
-                      }}>
-                        <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={24}/>
-                      </div>
-                      {i===0&&<span style={{ position:'absolute',top:-7,left:'50%',transform:'translateX(-50%)',fontSize:10 }}>👑</span>}
-                    </div>
+                    <Avatar name={r.user.name} init={r.user.init} role={r.user.role} sz={24} rank={memberMeta[r.user.id]?.rank} streak={memberMeta[r.user.id]?.streak}/>
                     <div>
                       <div style={{ display:'flex',alignItems:'center',gap:4 }}>
                         <span style={{ fontWeight:600,color:'var(--text)' }}>{r.user.name}</span>
@@ -166,7 +146,7 @@ const OverallTable = ({ stats }) => {
 }
 
 // ── Main page ────────────────────────────────────────────────────────────
-export const DashboardLeaderboard = ({ tasks, users, clients }) => {
+export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) => {
   const [fy, setFY] = useState('2025-26')
 
   const teamMembers = useMemo(() =>
@@ -204,9 +184,37 @@ export const DashboardLeaderboard = ({ tasks, users, clients }) => {
         })}/>
       </div>
 
+
+      {/* Champion spotlight */}
+      {(() => {
+        const champ = stats.find(r => memberMeta[r.user.id]?.rank === 1)
+        if (!champ) return null
+        return (
+          <div style={{ marginBottom:20,borderRadius:16,padding:'20px 24px',
+            background:'linear-gradient(135deg,#f59e0b08,#fde68a12)',
+            border:'1.5px solid #f59e0b40',display:'flex',alignItems:'center',gap:20 }}>
+            <div style={{ position:'relative' }}>
+              <Avatar name={champ.user.name} init={champ.user.init} role={champ.user.role} sz={64}
+                rank={1} streak={memberMeta[champ.user.id]?.streak}/>
+            </div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:11,fontWeight:700,color:'#f59e0b',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:2 }}>🏆 Overall Champion · FY {fy}</div>
+              <div style={{ fontSize:22,fontWeight:800,color:'var(--text)' }}>{champ.user.name}</div>
+              <div style={{ fontSize:12,color:'var(--text2)',marginTop:2 }}>
+                Score {champ.overallScore} · {champ.completionPct}% completion · {champ.punctScore!=null?`${champ.punctScore}% punctual`:'building history'}
+                {memberMeta[champ.user.id]?.streak&&<span style={{ marginLeft:8,color:'#f59e0b',fontWeight:700 }}>🔥 On a 3-day streak!</span>}
+              </div>
+            </div>
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontSize:48,fontWeight:900,color:'#f59e0b',lineHeight:1 }}>{champ.overallScore}</div>
+              <div style={{ fontSize:11,color:'var(--text3)' }}>Overall Score</div>
+            </div>
+          </div>
+        )
+      })()}
       {/* Overall table */}
       <div style={{ marginBottom:20 }}>
-        <OverallTable stats={stats}/>
+        <OverallTable stats={stats} memberMeta={memberMeta}/>
       </div>
 
       {/* Sub-leaderboards grid */}

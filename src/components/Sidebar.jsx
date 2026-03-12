@@ -49,7 +49,7 @@ const NAV_GROUPS = [
   },
 ]
 
-export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
+export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0, memberMeta={} }) => {
   const isMgr     = ['partner','hod','team_leader'].includes(user.role)
   const isPartner = user.role==='partner'
   const isSales   = user.role==='sales'
@@ -108,7 +108,7 @@ export const Sidebar = ({ page, setPage, user, onLogout, overdueCount=0 }) => {
       <div style={{ padding:'10px 16px' }}>
         <button onClick={()=>setPage('profile')}
           style={{ display:'flex',alignItems:'center',gap:8,marginBottom:8,width:'100%',background:'none',border:'none',cursor:'pointer',padding:'4px 0',borderRadius:8 }}>
-          <Avatar name={user.name} init={user.init} role={user.role} sz={28}/>
+          <Avatar name={user.name} init={user.init} role={user.role} sz={28} rank={memberMeta[user.id]?.rank} streak={memberMeta[user.id]?.streak}/>
           <div style={{ flex:1,minWidth:0,textAlign:'left' }}>
             <div style={{ fontWeight:600,fontSize:12,color:'var(--text)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{user.nickname||user.name}</div>
             <div style={{ fontSize:10,color:ROLE_CLR[user.role],fontWeight:600 }}>{ROLES[user.role]}</div>

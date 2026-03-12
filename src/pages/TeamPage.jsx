@@ -13,7 +13,7 @@ const MemberCard = ({ member, tasks, users, onClick }) => {
   const mgr     = users.find(u=>u.id===member.reportsTo)
   return (
     <div onClick={onClick} className="hover-lift" style={{ background:'var(--surface)',border:'1px solid var(--border)',borderRadius:12,padding:'14px 18px',cursor:'pointer',display:'grid',gridTemplateColumns:'auto 1fr 80px 80px 80px 80px 24px',alignItems:'center',gap:16 }}>
-      <Avatar name={member.name} init={member.init} role={member.role} sz={36}/>
+      <Avatar name={member.name} init={member.init} role={member.role} sz={36} rank={memberMeta[member.id]?.rank} streak={memberMeta[member.id]?.streak}/>
       <div>
         <div style={{ fontWeight:700,fontSize:13,color:'var(--text)' }}>{member.name}</div>
         <div style={{ display:'flex',gap:6,alignItems:'center',marginTop:3 }}>
@@ -44,7 +44,7 @@ const MemberDetail = ({ member, tasks, users, clients, onTask, onBack }) => {
     <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1000 }}>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom:16 }}>← Back to Team</button>
       <div style={{ display:'flex',alignItems:'center',gap:14,marginBottom:20 }}>
-        <Avatar name={member.name} init={member.init} role={member.role} sz={44}/>
+        <Avatar name={member.name} init={member.init} role={member.role} sz={44} rank={memberMeta[member.id]?.rank} streak={memberMeta[member.id]?.streak}/>
         <div>
           <div style={{ fontSize:20,fontWeight:800,color:'var(--text)' }}>{member.name}</div>
           <div style={{ fontSize:12,color:ROLE_CLR[member.role],fontWeight:600 }}>{ROLES[member.role]}{member.dept&&` · ${member.dept}`}</div>
@@ -65,7 +65,7 @@ const MemberDetail = ({ member, tasks, users, clients, onTask, onBack }) => {
   )
 }
 
-export const TeamPage = ({ users, tasks, clients, user, onTask }) => {
+export const TeamPage = ({ users, tasks, clients, user, onTask, memberMeta={} }) => {
   const [selected, setSelected] = useState(null)
   const team   = useMemo(()=>{
     if (user.role==='partner') return users.filter(u=>u.id!==user.id)

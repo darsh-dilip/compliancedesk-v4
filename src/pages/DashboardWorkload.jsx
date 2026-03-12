@@ -23,7 +23,7 @@ const MemberCard = ({ member, tasks, users, onClick }) => {
   return (
     <div onClick={onClick} className="hover-lift card" style={{ padding:'16px 18px',cursor:'pointer' }}>
       <div style={{ display:'flex',alignItems:'center',gap:12,marginBottom:12 }}>
-        <Avatar name={member.name} init={member.init} role={member.role} sz={38}/>
+        <Avatar name={member.name} init={member.init} role={member.role} sz={38} rank={memberMeta[member.id]?.rank} streak={memberMeta[member.id]?.streak}/>
         <div style={{ flex:1 }}>
           <div style={{ fontWeight:700,fontSize:14,color:'var(--text)' }}>{member.name}</div>
           <div style={{ fontSize:11,color:ROLE_CLR[member.role],fontWeight:600 }}>{ROLES[member.role]}{mgr?` · ${mgr.name.split(' ')[0]}`:''}</div>
@@ -72,7 +72,7 @@ const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
     <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1000 }}>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom:16 }}>← Back</button>
       <div style={{ display:'flex',alignItems:'center',gap:14,marginBottom:20 }}>
-        <Avatar name={member.name} init={member.init} role={member.role} sz={44}/>
+        <Avatar name={member.name} init={member.init} role={member.role} sz={44} rank={memberMeta[member.id]?.rank} streak={memberMeta[member.id]?.streak}/>
         <div>
           <div style={{ fontSize:20,fontWeight:800,color:'var(--text)' }}>{member.name}</div>
           <div style={{ fontSize:12,color:ROLE_CLR[member.role],fontWeight:600 }}>{ROLES[member.role]}{member.dept&&` · ${member.dept}`}</div>

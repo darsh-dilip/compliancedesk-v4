@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from './firebase.js'
 import { useAuth } from './hooks/useAuth.js'
@@ -34,6 +34,7 @@ import { DashboardDueDone }       from './pages/DashboardDueDone.jsx'
 import { DashboardLeaderboard }    from './pages/DashboardLeaderboard.jsx'
 import { DashboardScoreCard }      from './pages/DashboardScoreCard.jsx'
 import { UnassignedPage }          from './pages/UnassignedPage.jsx'
+import { CelebrationFAB }          from './components/CelebrationFAB.jsx'
 import { YearEndBatchPage }        from './pages/YearEndBatchPage.jsx'
 import { BulkImportPage }         from './pages/BulkImportPage.jsx'
 
@@ -65,10 +66,10 @@ export default function App() {
 
   // Redirect to profile if phone not filled (must be before any conditional returns)
   useEffect(() => {
-    if (currentUser && !currentUser.phone && page !== 'profile') {
+    if (currentUser && (!currentUser.phone || !currentUser.birthDate) && page !== 'profile') {
       setPage('profile')
     }
-  }, [currentUser?.id, currentUser?.phone])
+  }, [currentUser?.id, currentUser?.phone, currentUser?.birthDate])
 
   const goAddClient = () => setPage('add_client')
 
@@ -106,6 +107,38 @@ export default function App() {
   const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
   const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
   const isSales       = currentUser.role === 'sales'
+
+
+  // ── Global member ranks + streak (used by Avatar throughout portal) ──
+  const memberMeta = useMemo(() => {
+    const allDone = [...(DONE_PROPER||[]),...(DONE_NIL||[])]
+    const today     = new Date().toISOString().split('T')[0]
+    const yesterday = new Date(Date.now()-86400000).toISOString().split('T')[0]
+    const dayBefore = new Date(Date.now()-172800000).toISOString().split('T')[0]
+    const team = (users||[]).filter(u=>u.role!=='partner')
+    const scores = team.map(u=>{
+      const mt = (tasks||[]).filter(t=>t.assignedTo===u.id)
+      const total=mt.length, done=mt.filter(t=>allDone.includes(t.status)).length
+      const overdue=mt.filter(t=>!allDone.includes(t.status)&&t.dueDate<today).length
+      const cpct=total?Math.round(done/total*100):0
+      const opct=total?Math.round(overdue/total*100):0
+      const comp=mt.filter(t=>t.completedAt&&t.dueDate)
+      const onTime=comp.filter(t=>t.completedAt.slice(0,10)<=t.dueDate).length
+      const pct=comp.length?Math.round(onTime/comp.length*100):null
+      const score=Math.round(0.4*cpct+0.4*(pct??cpct)+0.2*(100-opct))
+      const streak=[today,yesterday,dayBefore].every(day=>
+        (tasks||[]).some(t=>t.assignedTo===u.id&&allDone.includes(t.status)&&(t.completedAt||'').slice(0,10)===day)
+      )
+      return {id:u.id,score,streak}
+    })
+    const sorted=[...scores].sort((a,b)=>b.score-a.score)
+    const meta={}
+    scores.forEach(s=>{
+      const ri=sorted.findIndex(x=>x.id===s.id)
+      meta[s.id]={rank:ri<3?ri+1:null,streak:s.streak,score:s.score}
+    })
+    return meta
+  }, [users, tasks])
 
   const renderPage = () => {
     switch (page) {
@@ -145,9 +178,9 @@ export default function App() {
           onSuccess={() => setPage('clients')}
         />
       case 'team':
-        return isMgr ? <TeamPage users={users} tasks={visibleTasks} clients={clients} user={currentUser} onTask={setSelectedTask}/> : null
+        return isMgr ? <TeamPage users={users} tasks={visibleTasks} clients={clients} user={currentUser} onTask={setSelectedTask} memberMeta={memberMeta}/> : null
       case 'workload':
-        return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask} onNavigatePending={navigatePending}/> : null
+        return isMgr ? <DashboardWorkload tasks={visibleTasks} users={users} clients={clients} user={currentUser} onTask={setSelectedTask} onNavigatePending={navigatePending} memberMeta={memberMeta}/> : null
       case 'gst':
         return <DashboardGST tasks={visibleTasks} clients={clients} users={users} user={currentUser} onTask={setSelectedTask}/>
       case 'tds':
@@ -165,7 +198,7 @@ export default function App() {
       case 'clientstatus':
         return <DashboardClientStatus tasks={visibleTasks} clients={clients} users={users} onTask={setSelectedTask}/>
       case 'profile':
-        return <ProfilePage currentUser={profileUser||currentUser} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
+        return <ProfilePage currentUser={profileUser||currentUser} memberMeta={memberMeta} onUpdated={()=>{}} onBack={()=>setPage('dashboard')}/>
       case 'bulkimport':
         return <BulkImportPage users={users} clients={clients} onBack={()=>setPage('clients')}/>
       case 'bulkdate':
@@ -173,7 +206,7 @@ export default function App() {
       case 'duedone':
         return <DashboardDueDone tasks={visibleTasks} clients={clients} users={users} user={currentUser}/>
       case 'leaderboard':
-        return <DashboardLeaderboard tasks={visibleTasks} users={users} clients={clients}/>
+        return <DashboardLeaderboard tasks={visibleTasks} users={users} clients={clients} memberMeta={memberMeta}/>
       case 'scorecard':
         return <DashboardScoreCard tasks={visibleTasks} users={users} clients={clients}/>
       case 'unassigned':
