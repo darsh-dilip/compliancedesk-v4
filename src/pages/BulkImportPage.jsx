@@ -37,6 +37,15 @@ const CRED_COLS = [
   { k:'notes',      h:'Notes',           eg:'Registered mobile: 9876543210' },
 ]
 
+const CRED_COLS = [
+  { k:'clientName', h:'Client Name *',       eg:'Sharma Enterprises Pvt Ltd' },
+  { k:'service',    h:'Service / Portal *',  eg:'GST Portal' },
+  { k:'username',   h:'Username / ID',       eg:'27AAAA0000A1Z5' },
+  { k:'password',   h:'Password',            eg:'Pass@1234' },
+  { k:'pin',        h:'PIN',                 eg:'123456' },
+  { k:'notes',      h:'Notes',               eg:'Registered mobile: 9876543210' },
+]
+
 const yn = v => String(v||'').trim().toUpperCase() === 'Y'
 
 const parseRow = (row, users, existingClients) => {
@@ -89,6 +98,64 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
   const [error,        setError]        = useState('')
   const [progress,     setProgress]     = useState({ done:0, total:0 })
   const fileRef = useRef()
+
+  // ── Credential helpers ─────────────────────────────────────────
+  const downloadCredTemplate = () => {
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet([CRED_COLS.map(col=>col.h), CRED_COLS.map(col=>col.eg)])
+    ws['!cols'] = CRED_COLS.map(()=>({ wch:28 }))
+    XLSX.utils.book_append_sheet(wb, ws, 'Credentials Template')
+    XLSX.writeFile(wb, 'BulkCredentials_Template.xlsx')
+  }
+
+  const parseCreds = (file) => {
+    if (!file) return
+    setCredFile(file); setCredRows([]); setCredErrors([]); setCredFinished(false)
+    const reader = new FileReader()
+    reader.onload = e => {
+      const wb = XLSX.read(e.target.result, { type:'binary' })
+      const ws = wb.Sheets[wb.SheetNames[0]]
+      const raw = XLSX.utils.sheet_to_json(ws, { defval:'' })
+      const parsed = raw.map((r, idx) => {
+        const get = k => String(r[k]||'').trim()
+        const clientName = get('clientName') || get('Client Name *') || get('Client Name')
+        const service    = get('service')    || get('Service / Portal *') || get('Service / Portal')
+        const errs = []
+        if (!clientName) errs.push('Client Name missing')
+        if (!service)    errs.push('Service missing')
+        const matchedClient = (clients||[]).find(cl => cl.name?.toLowerCase() === clientName.toLowerCase())
+        if (clientName && !matchedClient) errs.push(`"${clientName}" not found`)
+        return {
+          rowNum: idx + 2, clientName, service,
+          username: get('username') || get('Username / ID'),
+          password: get('password') || get('Password'),
+          pin:      get('pin')      || get('PIN'),
+          notes:    get('notes')    || get('Notes'),
+          clientId: matchedClient?.id || null,
+          errors: errs,
+        }
+      })
+      setCredRows(parsed)
+    }
+    reader.readAsBinaryString(file)
+  }
+
+  const runCredImport = async () => {
+    const valid = credRows.filter(r => r.errors.length === 0)
+    if (!valid.length) return
+    setCredSaving(true); setCredDone(0); setCredErrors([])
+    let done = 0; const errs = []
+    for (const r of valid) {
+      try {
+        await upsertCredential(r.clientId, r.service, {
+          username: r.username, password: r.password, pin: r.pin, notes: r.notes,
+        })
+        done++; setCredDone(done)
+      } catch (e) { errs.push(`Row ${r.rowNum}: ${e.message}`) }
+    }
+    setCredErrors(errs); setCredSaving(false); setCredFinished(true)
+  }
+
   // credential states
   const [credFile,     setCredFile]     = useState(null)
   const [credRows,     setCredRows]     = useState([])
