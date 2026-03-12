@@ -24,10 +24,10 @@ const getUrgency = (t) => {
   return 'Upcoming'
 }
 
-export const DashboardMemberStatus = ({ tasks, users, user, onTask }) => {
+export const DashboardMemberStatus = ({ tasks, users, user, onTask, memberMeta={} }) => {
   const [selMember,  setSelMember]  = useState('')
   const [selService, setSelService] = useState('')
-  const [fy,         setFY]         = useState('2025-26')
+  const [fy,         setFY]         = useState('2026-27')
 
   const teamMembers = [...users].sort((a,b)=>a.name.localeCompare(b.name))
   const selectedMember = users.find(u => u.id === selMember)

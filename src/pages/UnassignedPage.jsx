@@ -17,7 +17,7 @@ export const UnassignedPage = ({ tasks, clients, users, currentUser }) => {
   const [assignTo,    setAssignTo]    = useState('')
   const [saving,      setSaving]      = useState(false)
   const [done,        setDone]        = useState(0)
-  const [fy,          setFY]          = useState('2025-26')
+  const [fy,          setFY]          = useState('2026-27')
   const [search,      setSearch]      = useState('')
 
   const eligible = useMemo(() => assignableUsers(users), [users])

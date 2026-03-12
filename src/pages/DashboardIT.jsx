@@ -16,7 +16,7 @@ const FUNNEL = [
 ]
 
 export const DashboardIT = ({ clients, tasks, users, onTask }) => {
-  const [fy,      setFY]      = useState('2025-26')
+  const [fy,      setFY]      = useState('2026-27')
   const [fSvc,    setFSvc]    = useState('Income Tax Filing')
   const [fUser,   setFUser]   = useState('')
   const [search,  setSearch]  = useState('')

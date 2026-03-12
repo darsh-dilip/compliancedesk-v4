@@ -48,7 +48,7 @@ function getPeriods(svc, fy) {
 export const StatusDashboard = ({ tasks, users, user }) => {
   const [selSvc,    setSelSvc]    = useState('')
   const [selPeriod, setSelPeriod] = useState('')
-  const [selFY,     setSelFY]     = useState('2025-26')
+  const [selFY,     setSelFY]     = useState('2026-27')
   const [drill,     setDrill]     = useState(null) // {member, status, tasks}
 
   const visibleIds = useMemo(() => getVisibleUserIds(user, users), [user, users])

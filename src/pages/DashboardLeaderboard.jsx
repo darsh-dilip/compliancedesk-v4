@@ -147,7 +147,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
 
 // ── Main page ────────────────────────────────────────────────────────────
 export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) => {
-  const [fy, setFY] = useState('2025-26')
+  const [fy, setFY] = useState('2026-27')
 
   const teamMembers = useMemo(() =>
     (users||[]).filter(u => !['partner'].includes(u.role))

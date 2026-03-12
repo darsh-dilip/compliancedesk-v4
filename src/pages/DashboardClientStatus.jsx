@@ -17,7 +17,7 @@ const getUrgency = (t) => {
 
 export const DashboardClientStatus = ({ tasks, clients, users, onTask }) => {
   const [selClient, setSelClient] = useState('')
-  const [fy, setFY] = useState('2025-26')
+  const [fy, setFY] = useState('2026-27')
   const [search, setSearch] = useState('')
   const [fCat,   setFCat]   = useState('')
 

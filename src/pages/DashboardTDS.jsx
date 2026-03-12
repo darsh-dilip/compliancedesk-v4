@@ -211,7 +211,7 @@ const TDSReturnMatrix = ({ tasks, clients, users, fy, onTask }) => {
 
 // ── Main Export ────────────────────────────────────────────────
 export const DashboardTDS = ({ tasks, clients, users, user, onTask }) => {
-  const [fy, setFY] = useState('2025-26')
+  const [fy, setFY] = useState('2026-27')
 
   const visibleIds = useMemo(() => getVisibleUserIds(user, users), [user, users])
   const visibleTasks    = tasks.filter(t => visibleIds.includes(t.assignedTo))

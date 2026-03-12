@@ -10,7 +10,7 @@ const Bar = ({ value, max, color }) => (
   </div>
 )
 
-const MemberCard = ({ member, tasks, users, onClick }) => {
+const MemberCard = ({ member, tasks, users, onClick, memberMeta={} }) => {
   const mt      = tasks.filter(t=>t.assignedTo===member.id)
   const overdue = mt.filter(t=>getBucket(t)==='overdue').length
   const today   = mt.filter(t=>getBucket(t)==='today').length
@@ -49,7 +49,7 @@ const MemberCard = ({ member, tasks, users, onClick }) => {
   )
 }
 
-const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
+const MemberDrill = ({ member, tasks, users, clients, onTask, onBack, memberMeta={} }) => {
   const [fService, setFService] = useState('')
   const [fClient,  setFClient]  = useState('')
   const [fMonth,   setFMonth]   = useState('')
@@ -132,7 +132,7 @@ const MemberDrill = ({ member, tasks, users, clients, onTask, onBack }) => {
   )
 }
 
-export const DashboardWorkload = ({ users, tasks, clients, user, onTask, onNavigatePending }) => {
+export const DashboardWorkload = ({ users, tasks, clients, user, onTask, onNavigatePending, memberMeta={} }) => {
   const [selected, setSelected] = useState(null)
   const team = useMemo(()=>{
     if (user.role==='partner') return users.filter(u=>u.id!==user.id)
@@ -140,7 +140,7 @@ export const DashboardWorkload = ({ users, tasks, clients, user, onTask, onNavig
   },[users,user])
   const sorted = [...team].sort((a,b)=>ROLE_ORDER[a.role]-ROLE_ORDER[b.role])
   const teamTasks = tasks.filter(t=>team.some(m=>m.id===t.assignedTo))
-  if (selected) return <MemberDrill member={selected} tasks={tasks} users={users} clients={clients} onTask={onTask} onBack={()=>setSelected(null)}/>
+  if (selected) return <MemberDrill member={selected} tasks={tasks} users={users} clients={clients} onTask={onTask} onBack={()=>setSelected(null)} memberMeta={memberMeta}/>
   return (
     <div className="fade-up" style={{ padding:'24px 28px' }}>
       <div style={{ fontSize:20,fontWeight:800,color:'var(--text)',marginBottom:6 }}>Team Workload</div>
@@ -152,7 +152,7 @@ export const DashboardWorkload = ({ users, tasks, clients, user, onTask, onNavig
         <StatCard label="Done This FY"  value={teamTasks.filter(t=>DONE_STATUSES.includes(t.status)).length}      color="var(--success)"/>
       </div>
       <div style={{ display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:12 }}>
-        {sorted.map(m=><MemberCard key={m.id} member={m} tasks={tasks} users={users} onClick={()=>setSelected(m)}/>)}
+        {sorted.map(m=><MemberCard key={m.id} member={m} tasks={tasks} users={users} onClick={()=>setSelected(m)} memberMeta={memberMeta}/>)}
       </div>
     </div>
   )
