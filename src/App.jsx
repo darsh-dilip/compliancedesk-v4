@@ -82,32 +82,6 @@ export default function App() {
     ? tasks.filter(t => t.assignedTo === currentUser.id && getBucket(t) === 'overdue').length
     : 0
 
-  if (authLoading || (authUser && (uLoad || cLoad || tLoad))) {
-    return (
-      <div style={{ minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center' }}>
-        <Spinner text="Loading ComplianceDesk…"/>
-      </div>
-    )
-  }
-
-  if (!authUser) return <LoginPage onLogin={login}/>
-
-  if (!currentUser) return (
-    <div style={{ minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text)' }}>
-      <div style={{ textAlign:'center' }}>
-        <div style={{ fontSize:32,marginBottom:12 }}>⚠️</div>
-        <div style={{ fontSize:18,fontWeight:700,marginBottom:8 }}>Account Not Set Up</div>
-        <div style={{ fontSize:13,color:'var(--text2)',marginBottom:16 }}>Your login exists but no profile was found.</div>
-        <button className="btn btn-ghost" onClick={logout}>Sign Out</button>
-      </div>
-    </div>
-  )
-
-  const visibleIds   = getVisibleUserIds(currentUser, users)
-  const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
-  const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
-  const isSales       = currentUser.role === 'sales'
-
 
   // ── Global member ranks + streak (used by Avatar throughout portal) ──
   const memberMeta = useMemo(() => {
@@ -139,6 +113,33 @@ export default function App() {
     })
     return meta
   }, [users, tasks])
+
+  if (authLoading || (authUser && (uLoad || cLoad || tLoad))) {
+    return (
+      <div style={{ minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center' }}>
+        <Spinner text="Loading ComplianceDesk…"/>
+      </div>
+    )
+  }
+
+  if (!authUser) return <LoginPage onLogin={login}/>
+
+  if (!currentUser) return (
+    <div style={{ minHeight:'100vh',background:'var(--bg)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text)' }}>
+      <div style={{ textAlign:'center' }}>
+        <div style={{ fontSize:32,marginBottom:12 }}>⚠️</div>
+        <div style={{ fontSize:18,fontWeight:700,marginBottom:8 }}>Account Not Set Up</div>
+        <div style={{ fontSize:13,color:'var(--text2)',marginBottom:16 }}>Your login exists but no profile was found.</div>
+        <button className="btn btn-ghost" onClick={logout}>Sign Out</button>
+      </div>
+    </div>
+  )
+
+  const visibleIds   = getVisibleUserIds(currentUser, users)
+  const visibleTasks = tasks.filter(t => visibleIds.includes(t.assignedTo))
+  const isMgr        = ['partner','hod','team_leader'].includes(currentUser.role)
+  const isSales       = currentUser.role === 'sales'
+
 
   const renderPage = () => {
     switch (page) {
