@@ -48,7 +48,7 @@ const MEDAL = ['🥇','🥈','🥉']
 const RANK_CLR = ['#f59e0b','#94a3b8','#cd7f32']
 
 // ── Sub-leaderboard card ─────────────────────────────────────────────────
-const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBetter=true, emptyMsg }) => {
+const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBetter=true, emptyMsg, memberMeta={} }) => {
   const sorted = [...rows].sort((a,b) => higherBetter ? b[valueKey] - a[valueKey] : a[valueKey] - b[valueKey])
     .filter(r => r[valueKey] != null && !isNaN(r[valueKey]))
 
@@ -226,6 +226,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           rows={stats}
           valueKey="completionPct"
           valueFmt={v=>`${v}%`}
+          memberMeta={memberMeta}
         />
         <LeaderCard
           title="Daily Hero"
@@ -235,6 +236,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           valueKey="doneToday"
           valueFmt={v=>`${v} today`}
           emptyMsg="No tasks completed today yet"
+          memberMeta={memberMeta}
         />
         <LeaderCard
           title="Punctuality"
@@ -244,6 +246,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           valueKey="punctScore"
           valueFmt={v=>`${v}%`}
           emptyMsg="Needs completedAt data — update task statuses to build history"
+          memberMeta={memberMeta}
         />
       </div>
 
@@ -255,6 +258,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           rows={stats}
           valueKey="total"
           valueFmt={v=>`${v} tasks`}
+          memberMeta={memberMeta}
         />
         <LeaderCard
           title="Least Delayed"
@@ -265,6 +269,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           valueFmt={v=>v<=0?`${Math.abs(v)}d early`:`${v}d late`}
           higherBetter={false}
           emptyMsg="Needs completedAt data — update task statuses to build history"
+          memberMeta={memberMeta}
         />
         <LeaderCard
           title="Fewest Overdue"
@@ -274,6 +279,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           valueKey="overdue"
           valueFmt={v=>`${v} overdue`}
           higherBetter={false}
+          memberMeta={memberMeta}
         />
       </div>
     </div>

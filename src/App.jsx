@@ -234,6 +234,7 @@ export default function App() {
       <main style={{ flex:1,overflow:'auto' }}>
         {renderPage()}
       </main>
+      <CelebrationFAB users={users}/>
       {selectedTask && (
         <TaskModal
           task={selectedTask} users={users} clients={clients}
