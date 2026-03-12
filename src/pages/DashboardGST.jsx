@@ -50,7 +50,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
       if (mi!==null) map[t.clientId][t.service][mi]=t
     })
     return map
-  },[tasks])
+  },[tasks,fy])
 
   const gstTasks = tasks.filter(t=>t.fy===fy&&GST_SVCS.includes(t.service))
   const assignees = [...new Map(gstClients.map(c=>{ const u=users.find(x=>x.id===c.assignedTo); return u?[u.id,u]:null }).filter(Boolean)).values()]

@@ -4,6 +4,7 @@ import { ROLES, ROLE_CLR, FINANCIAL_YEARS } from '../constants.js'
 import { Avatar } from '../components/UI.jsx'
 import { writeLog } from '../utils/auditLog.js'
 import { LOG_ACTIONS } from '../constants.js'
+import { getFYOptions } from '../utils/dates.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────
 const assignableUsers = (users) =>

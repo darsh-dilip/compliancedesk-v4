@@ -28,7 +28,7 @@ export const DashboardIT = ({ clients, tasks, users, onTask }) => {
       (fUser ? t.assignedTo===fUser : true)&&
       (search? t.clientName.toLowerCase().includes(search.toLowerCase()):true)
     )
-  ,[tasks,fSvc,fUser,search])
+  ,[tasks,fy,fSvc,fUser,search])
 
   const byClient = useMemo(()=>{
     const map = {}

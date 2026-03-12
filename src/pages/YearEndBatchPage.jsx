@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { bulkAddTasks } from '../hooks/useFirestore.js'
 import { generateTasks } from '../utils/taskGenerator.js'
 import { FINANCIAL_YEARS } from '../constants.js'
+import { getFYOptions } from '../utils/dates.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────
 const nextFY = (fy) => {
