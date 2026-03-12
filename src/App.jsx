@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth'
 import { auth } from './firebase.js'
 import { useAuth } from './hooks/useAuth.js'
@@ -64,12 +64,16 @@ export default function App() {
     setPage('pending')
   }, [])
 
-  // Redirect to profile if phone not filled (must be before any conditional returns)
+  // Redirect to profile if phone/DOB not filled — only check once per login session
+  const profileChecked = useRef(false)
   useEffect(() => {
-    if (currentUser && (!currentUser.phone || !currentUser.birthDate) && page !== 'profile') {
-      setPage('profile')
+    if (currentUser && !profileChecked.current) {
+      profileChecked.current = true
+      if (!currentUser.phone?.trim() || !currentUser.birthDate) {
+        setPage('profile')
+      }
     }
-  }, [currentUser?.id, currentUser?.phone, currentUser?.birthDate])
+  }, [currentUser?.id])
 
   const goAddClient = () => setPage('add_client')
 

@@ -17,6 +17,8 @@ export const CLIENT_STATUS = {
   active:       { l:'Active',       badge:null },
   on_hold:      { l:'On Hold',      badge:'ON HOLD',      badgeColor:'#f59e0b', badgeBg:'#f59e0b22', badgeBorder:'#f59e0b55' },
   discontinued: { l:'Discontinued', badge:'STOP SERVICE', badgeColor:'#f43f5e', badgeBg:'#f43f5e22', badgeBorder:'#f43f5e55' },
+  closure:      { l:'Closure',      badge:'CLOSURE',      badgeColor:'#eab308', badgeBg:'#eab30822', badgeBorder:'#eab30855' },
+  struck_off:   { l:'Struck Off',   badge:'STRUCK OFF',   badgeColor:'#6b7280', badgeBg:'#6b728022', badgeBorder:'#6b728055' },
 }
 
 // ── STATUS BUILDER ───────────────────────────────────────────
