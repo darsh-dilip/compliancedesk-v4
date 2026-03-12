@@ -15,11 +15,11 @@ const taskCount = (client, fy) => {
   return tasks.filter(t => t.service !== 'Onboarding Call')
 }
 
-const FY_OPTIONS = FINANCIAL_YEARS
+// FY_OPTIONS now dynamic (see getFYOptions below)
 
 // ── main ─────────────────────────────────────────────────────────────────
 export const YearEndBatchPage = ({ tasks, clients, users, currentUser }) => {
-  const [sourceFY,  setSourceFY]  = useState('2025-26')
+  const [sourceFY,  setSourceFY]  = useState('2026-27')
   const targetFY = nextFY(sourceFY)
 
   const [selectedIds, setSelectedIds] = useState(new Set())
@@ -114,7 +114,7 @@ export const YearEndBatchPage = ({ tasks, clients, users, currentUser }) => {
           <div style={{ fontSize:11, color:'var(--text3)', marginBottom:4, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}>Source FY (existing tasks)</div>
           <select value={sourceFY} onChange={e=>{ setSourceFY(e.target.value); setSelectedIds(new Set()); setFinished(false) }}
             style={{ fontSize:13, fontWeight:700 }}>
-            {FY_OPTIONS.map(f=><option key={f} value={f}>{f}</option>)}
+            {getFYOptions(tasks).map(f=><option key={f} value={f}>{f}</option>)}
           </select>
         </div>
         <div style={{ fontSize:22, color:'var(--text3)' }}>→</div>

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { SERVICE_STATUSES, getStatusObj, DONE_STATUSES, DONE_NIL, DONE_PROPER, FINANCIAL_YEARS, ROLES, ROLE_CLR } from '../constants.js'
-import { getBucket } from '../utils/dates.js'
+import { getBucket , getFYOptions } from '../utils/dates.js'
 import { Avatar, PrintButton, PrintHeader, ExcelButton } from '../components/UI.jsx'
 
 const SERVICES = Object.keys(SERVICE_STATUSES)
@@ -152,7 +152,7 @@ export const DashboardMemberStatus = ({ tasks, users, clients, user, onTask, mem
               </optgroup>
             </select>
             <select value={fy} onChange={e=>setFY(e.target.value)} style={{ fontSize:12,minWidth:110 }}>
-              {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+              {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
             </select>
             </div>
           </div>

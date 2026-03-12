@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { FINANCIAL_YEARS } from '../constants.js'
 import { getStatusObj, DONE_STATUSES } from '../constants.js'
-import { getBucket, fmtDate } from '../utils/dates.js'
+import { getBucket, fmtDate , getFYOptions } from '../utils/dates.js'
 
 const IT_SVCS = ['Income Tax Filing','Accounting','CA Certificate','GSTR-9 Annual Return','Advance Tax']
 
@@ -69,7 +69,7 @@ export const DashboardIT = ({ clients, tasks, users, onTask }) => {
       <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap' }}>
         <input placeholder="🔍 Search client…" value={search} onChange={e=>setSearch(e.target.value)} style={{ width:200 }}/>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ width:120 }}>
-          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+          {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
         </select>
         <select value={fSvc} onChange={e=>setFSvc(e.target.value)} style={{ width:200 }}>
           <option value="">All IT Services</option>

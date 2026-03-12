@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { getStatusObj, DONE_STATUSES, FINANCIAL_YEARS, CLIENT_CATEGORIES, CAT_CLR } from '../constants.js'
-import { getBucket, fmtDate } from '../utils/dates.js'
+import { getBucket, fmtDate , getFYOptions } from '../utils/dates.js'
 import { Avatar, PrintButton, PrintHeader, ExcelButton } from '../components/UI.jsx'
 
 
@@ -74,7 +74,7 @@ export const DashboardClientStatus = ({ tasks, clients, users, onTask, memberMet
         </select>
         <input placeholder="🔍 Search…" value={search} onChange={e=>setSearch(e.target.value)} style={{ marginBottom:8 }}/>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ marginBottom:10 }}>
-          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+          {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
         </select>
         <div style={{ display:'flex',flexDirection:'column',gap:4,maxHeight:'calc(100vh - 280px)',overflow:'auto' }}>
           {[...filteredClients].sort((a,b)=>a.name.localeCompare(b.name)).map(cl=>{

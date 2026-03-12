@@ -176,7 +176,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
           <div style={{ fontSize:13,color:'var(--text3)',marginTop:2 }}>Rankings across completion, punctuality, and daily performance</div>
         </div>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ fontSize:12,minWidth:110 }}>
-          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+          {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
         </select>
         <ExcelButton filename={`Leaderboard-FY${fy}`} getData={()=>({
           headers:['Rank','Member','Role','Total Tasks','Done','Completion %','Overdue','Done Today','Punctuality %','Avg Delay','Overall Score'],

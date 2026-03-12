@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { FINANCIAL_YEARS } from '../constants.js'
 import { MONTHS, DONE_STATUSES, getStatusObj } from '../constants.js'
-import { getBucket } from '../utils/dates.js'
+import { getBucket , getFYOptions } from '../utils/dates.js'
 
 const GST_SVCS = ['GSTR-1','GSTR-1 (Quarterly)','GSTR-3B','GSTR-3B (Quarterly)']
 const FY_MONTHS = [3,4,5,6,7,8,9,10,11,0,1,2]
@@ -77,7 +77,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
       <div style={{ display:'flex',gap:8,marginBottom:14,flexWrap:'wrap',alignItems:'center' }}>
         <input placeholder="🔍 Search client…" value={search} onChange={e=>setSearch(e.target.value)} style={{ width:200 }}/>
         <select value={fy} onChange={e=>setFY(e.target.value)} style={{ width:120 }}>
-          {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+          {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
         </select>
         <select value={fFreq} onChange={e=>setFFreq(e.target.value)} style={{ width:160 }}>
           <option value="">Monthly + Quarterly</option>

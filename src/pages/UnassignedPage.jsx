@@ -124,7 +124,7 @@ export const UnassignedPage = ({ tasks, clients, users, currentUser }) => {
         {tab==='tasks' && (
           <select value={fy} onChange={e=>setFY(e.target.value)} style={{ fontSize:12, minWidth:110 }}>
             <option value="">All FY</option>
-            {FINANCIAL_YEARS.map(f=><option key={f} value={f}>FY {f}</option>)}
+            {getFYOptions(tasks).map(f=><option key={f} value={f}>FY {f}</option>)}
           </select>
         )}
         <div style={{ marginLeft:'auto', display:'flex', gap:8, alignItems:'center' }}>
