@@ -27,6 +27,7 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
   const [newStatus, setNewStatus] = useState(task.status)
   const [saving, setSaving] = useState(false)
   const assignee = users?.find(u=>u.id===task.assignedTo)
+  const clientCst = (clients?.find(cl=>cl.id===task.clientId)?.clientStatus)||'active'
   const st       = getStatusObj(task.service, task.status)
   const allSvcs  = getServiceStatuses(task.service)
   const ov       = getBucket(task)==='overdue'
@@ -60,9 +61,9 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
       draggable
       onDragStart={e=>{ e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('taskService', task.service) }}
       style={{
-        border:`1px solid ${ov?'#f43f5e50':getClientCst(task.clientId)==='closure'?'#06b6d440':getClientCst(task.clientId)==='struck_off'?'#6b728040':'var(--border)'}`,
+        border:`1px solid ${ov?'#f43f5e50':clientCst==='closure'?'#06b6d440':clientCst==='struck_off'?'#6b728040':'var(--border)'}`,
         borderLeft:`3px solid ${st.c}`,
-        background:getClientCst(task.clientId)==='closure'?'#06b6d406':getClientCst(task.clientId)==='struck_off'?'#6b728006':'var(--surface)',
+        background:clientCst==='closure'?'#06b6d406':clientCst==='struck_off'?'#6b728006':'var(--surface)',
         borderRadius:8,
         padding:'10px 10px 8px 10px',
         marginBottom:6,

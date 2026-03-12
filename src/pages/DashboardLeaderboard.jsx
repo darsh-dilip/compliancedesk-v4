@@ -78,9 +78,7 @@ const getMemberStats = (user, tasks, fy, clients=[]) => {
 
   const completionPct = pct(done, total)
   const overdueRate   = pct(overdue, total)
-  const overallScore  = maxPoints > 0
-    ? Math.max(0, Math.round((rawPoints / maxPoints) * 100))
-    : 0
+  const overallScore  = Math.round(rawPoints)
 
   return { user, total, done, overdue, doneToday, avgDelay, punctScore, punctCount, onTime,
     completionPct, overdueRate, overallScore, breakdown, rawPoints, maxPoints }
@@ -134,7 +132,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
     <div className="card" style={{ padding:18 }}>
       <div style={{ fontWeight:800,fontSize:15,color:'var(--text)',marginBottom:4 }}>🏆 Overall Leaderboard</div>
       <div style={{ fontSize:11,color:'var(--text3)',marginBottom:14 }}>
-        Category-weighted score · On-time done = +100pts · Late/Overdue = −50pts · A/A+ clients ×1.3, B ×1.12, C ×1.05
+        Category-weighted points · On-time = +100pts · Late done / Overdue = −50pts · A/A+ ×1.3 · B ×1.12 · C ×1.05
         <span style={{ marginLeft:6,color:'var(--accent)' }}>Click a row to see score breakdown →</span>
       </div>
       <div style={{ overflowX:'auto' }}>
@@ -177,7 +175,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
                 </td>
                 <td style={{ padding:'8px 10px',textAlign:'center' }}>
                   <span style={{ fontWeight:800,fontSize:14,
-                    color: r.overallScore>=80?'#22c55e':r.overallScore>=60?'#f59e0b':'#f43f5e' }}>
+                    color: r.overallScore>0?'#22c55e':r.overallScore===0?'#f59e0b':'#f43f5e' }}>
                     {r.overallScore}
                   </span>
                   <div style={{ fontSize:9,color:'var(--text3)',marginTop:1 }}>{r.rawPoints>0?`+${Math.round(r.rawPoints)}`:Math.round(r.rawPoints)} raw</div>
@@ -253,7 +251,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients=[], memberMeta={} }
             </div>
             <div style={{ textAlign:'right' }}>
               <div style={{ fontSize:48,fontWeight:900,color:'#f59e0b',lineHeight:1 }}>{champ.overallScore}</div>
-              <div style={{ fontSize:11,color:'var(--text3)' }}>Overall Score</div>
+              <div style={{ fontSize:11,color:'var(--text3)' }}>Total Points</div>
             </div>
           </div>
         )

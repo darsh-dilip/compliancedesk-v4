@@ -83,11 +83,19 @@ const rowTaskCount = p => {
 }
 
 export const BulkImportPage = ({ users, clients, onBack }) => {
-  const [step,     setStep]    = useState('upload')
-  const [rows,     setRows]    = useState([])
-  const [error,    setError]   = useState('')
-  const [progress, setProgress]= useState({ done:0, total:0 })
+  const [tab,          setTab]          = useState('clients')
+  const [step,         setStep]         = useState('upload')
+  const [rows,         setRows]         = useState([])
+  const [error,        setError]        = useState('')
+  const [progress,     setProgress]     = useState({ done:0, total:0 })
   const fileRef = useRef()
+  // credential states
+  const [credFile,     setCredFile]     = useState(null)
+  const [credRows,     setCredRows]     = useState([])
+  const [credSaving,   setCredSaving]   = useState(false)
+  const [credDone,     setCredDone]     = useState(0)
+  const [credErrors,   setCredErrors]   = useState([])
+  const [credFinished, setCredFinished] = useState(false)
 
   const eligible = users.filter(u => ['executive','intern','team_leader','hod'].includes(u.role))
 
