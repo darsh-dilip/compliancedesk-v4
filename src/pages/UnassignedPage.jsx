@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { updateTask, updateClient } from '../hooks/useFirestore.js'
 import { ROLES, ROLE_CLR, FINANCIAL_YEARS } from '../constants.js'
 import { Avatar } from '../components/UI.jsx'
-import { logEvent } from '../utils/auditLog.js'
+import { writeLog } from '../utils/auditLog.js'
 import { LOG_ACTIONS } from '../constants.js'
 
 // ── helpers ──────────────────────────────────────────────────────────────
@@ -68,8 +68,7 @@ export const UnassignedPage = ({ tasks, clients, users, currentUser }) => {
       try {
         if (tab === 'tasks') {
           await updateTask(id, { assignedTo: assignTo })
-          await logEvent(currentUser, LOG_ACTIONS.TASK_UPDATED,
-            `Assigned to ${assignee?.name||assignTo}`)
+          await writeLog({ action:LOG_ACTIONS.TASK_REASSIGNED, by:currentUser, entityId:id, entityName:'', clientId:'', clientName:'', oldValue:'Unassigned', newValue:assignee?.name||assignTo })
         } else {
           await updateClient(id, { assignedTo: assignTo })
         }
