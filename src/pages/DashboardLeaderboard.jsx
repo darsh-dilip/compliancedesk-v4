@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { DONE_PROPER, DONE_NIL, DONE_STATUSES, FINANCIAL_YEARS, ROLE_CLR, ROLES } from '../constants.js'
 import { Avatar, ExcelButton } from '../components/UI.jsx'
 import { getFYOptions } from '../utils/dates.js'
@@ -8,40 +8,82 @@ const allDone = [...DONE_PROPER, ...DONE_NIL]
 // ── Score helpers ────────────────────────────────────────────────────────
 const pct = (n, d) => d === 0 ? 0 : Math.round((n / d) * 100)
 
-const getMemberStats = (user, tasks, fy) => {
+// Category weight: A+/A = 1.30x, B = 1.12x, C = 1.05x, others = 1.0x
+const CAT_WEIGHT = { 'A+':1.30, 'A':1.30, 'B':1.12, 'C':1.05, 'D':1.00 }
+const catWeight = cat => CAT_WEIGHT[String(cat||'').toUpperCase()] ?? 1.00
+
+const toDateStr = v => {
+  if (!v) return ''
+  if (typeof v === 'string') return v.slice(0,10)
+  if (v.toDate) return v.toDate().toISOString().slice(0,10)
+  if (v.seconds) return new Date(v.seconds*1000).toISOString().slice(0,10)
+  return String(v).slice(0,10)
+}
+
+// Points per task: on-time done = +100, late done = -50, overdue (not done) = -50, ongoing = 0
+const getMemberStats = (user, tasks, fy, clients=[]) => {
   const mt = tasks.filter(t => t.assignedTo === user.id && (!fy || t.fy === fy))
   const total       = mt.length
   const done        = mt.filter(t => allDone.includes(t.status)).length
   const today       = new Date().toISOString().split('T')[0]
   const overdue     = mt.filter(t => t.dueDate < today && !allDone.includes(t.status)).length
-  const doneToday   = mt.filter(t => {
-    const ca = t.completedAt
-    return ca && ca.slice(0,10) === today
-  }).length
+  const doneToday   = mt.filter(t => toDateStr(t.completedAt) === today).length
 
-  // Punctuality from completedAt vs dueDate
+  // Punctuality (for display only)
   let totalDelay = 0, punctCount = 0, onTime = 0
   mt.forEach(t => {
     if (!t.completedAt || !t.dueDate) return
-    const diff = Math.round((new Date(t.completedAt) - new Date(t.dueDate)) / 86400000)
+    const ca = toDateStr(t.completedAt)
+    const diff = Math.round((new Date(ca) - new Date(t.dueDate)) / 86400000)
     totalDelay += diff
     punctCount++
     if (diff <= 0) onTime++
   })
-  const avgDelay    = punctCount > 0 ? Math.round(totalDelay / punctCount) : null
-  const punctScore  = punctCount > 0 ? pct(onTime, punctCount) : null
+  const avgDelay   = punctCount > 0 ? Math.round(totalDelay / punctCount) : null
+  const punctScore = punctCount > 0 ? pct(onTime, punctCount) : null
 
-  // Composite overall score (0-100)
-  // 40% completion rate + 40% punctuality + 20% low overdue rate
+  // ── Category-weighted scoring ────────────────────────────────
+  // Build clientId → category map
+  const clientCatMap = {}
+  clients.forEach(cl => { clientCatMap[cl.id] = cl.category||'D' })
+
+  let rawPoints = 0, maxPoints = 0
+  const breakdown = { onTime:0, lateDone:0, overduePending:0, ongoing:0,
+    onTimeW:0, lateDoneW:0, overduePendingW:0, onTimeList:[], overdueList:[] }
+
+  mt.forEach(t => {
+    const w = catWeight(clientCatMap[t.clientId])
+    const taskMax = 100 * w
+    maxPoints += taskMax
+
+    if (allDone.includes(t.status)) {
+      const ca = toDateStr(t.completedAt)
+      const diff = ca && t.dueDate ? Math.round((new Date(ca)-new Date(t.dueDate))/86400000) : null
+      if (diff !== null && diff <= 0) {
+        rawPoints += 100 * w    // on-time done
+        breakdown.onTime++; breakdown.onTimeW += Math.round(100*w)
+        breakdown.onTimeList.push({ service:t.service, client:t.clientName, pts:Math.round(100*w) })
+      } else {
+        rawPoints += (-50) * w  // late done
+        breakdown.lateDone++; breakdown.lateDoneW += Math.round(-50*w)
+      }
+    } else if (t.dueDate && t.dueDate < today) {
+      rawPoints += (-50) * w    // overdue
+      breakdown.overduePending++; breakdown.overduePendingW += Math.round(-50*w)
+      breakdown.overdueList.push({ service:t.service, client:t.clientName, pts:Math.round(-50*w), dueDate:t.dueDate })
+    } else {
+      breakdown.ongoing++ // 0 points
+    }
+  })
+
   const completionPct = pct(done, total)
   const overdueRate   = pct(overdue, total)
-  const overallScore  = Math.round(
-    0.40 * completionPct +
-    0.40 * (punctScore ?? completionPct) +
-    0.20 * (100 - overdueRate)
-  )
+  const overallScore  = maxPoints > 0
+    ? Math.max(0, Math.round((rawPoints / maxPoints) * 100))
+    : 0
 
-  return { user, total, done, overdue, doneToday, avgDelay, punctScore, punctCount, onTime, completionPct, overdueRate, overallScore }
+  return { user, total, done, overdue, doneToday, avgDelay, punctScore, punctCount, onTime,
+    completionPct, overdueRate, overallScore, breakdown, rawPoints, maxPoints }
 }
 
 // ── Medal colours ────────────────────────────────────────────────────────
@@ -86,12 +128,14 @@ const LeaderCard = ({ title, icon, subtitle, rows, valueKey, valueFmt, higherBet
 
 // ── Overall score table ──────────────────────────────────────────────────
 const OverallTable = ({ stats, memberMeta={} }) => {
+  const [selBreakdown, setSelBreakdown] = React.useState(null)
   const sorted = [...stats].sort((a,b) => b.overallScore - a.overallScore)
   return (
     <div className="card" style={{ padding:18 }}>
       <div style={{ fontWeight:800,fontSize:15,color:'var(--text)',marginBottom:4 }}>🏆 Overall Leaderboard</div>
       <div style={{ fontSize:11,color:'var(--text3)',marginBottom:14 }}>
-        Composite score: 40% Completion + 40% Punctuality + 20% Low Overdue Rate
+        Category-weighted score · On-time done = +100pts · Late/Overdue = −50pts · A/A+ clients ×1.3, B ×1.12, C ×1.05
+        <span style={{ marginLeft:6,color:'var(--accent)' }}>Click a row to see score breakdown →</span>
       </div>
       <div style={{ overflowX:'auto' }}>
         <table style={{ width:'100%',borderCollapse:'collapse',fontSize:12 }}>
@@ -105,7 +149,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
           </thead>
           <tbody>
             {sorted.map((r, i) => (
-              <tr key={r.user.id} style={{ borderBottom:'1px solid var(--border)',
+              <tr key={r.user.id} onClick={()=>setSelBreakdown(selBreakdown?.user.id===r.user.id?null:r)} style={{ borderBottom:'1px solid var(--border)',cursor:'pointer',
                 background: i===0 ? '#f59e0b06' : i%2===0 ? 'transparent' : 'var(--surface2)' }}>
                 <td style={{ padding:'8px 10px',textAlign:'center',fontWeight:800,color:RANK_CLR[i]||'var(--text3)' }}>
                   {MEDAL[i]||i+1}
@@ -136,6 +180,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
                     color: r.overallScore>=80?'#22c55e':r.overallScore>=60?'#f59e0b':'#f43f5e' }}>
                     {r.overallScore}
                   </span>
+                  <div style={{ fontSize:9,color:'var(--text3)',marginTop:1 }}>{r.rawPoints>0?`+${Math.round(r.rawPoints)}`:Math.round(r.rawPoints)} raw</div>
                 </td>
               </tr>
             ))}
@@ -147,7 +192,7 @@ const OverallTable = ({ stats, memberMeta={} }) => {
 }
 
 // ── Main page ────────────────────────────────────────────────────────────
-export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) => {
+export const DashboardLeaderboard = ({ tasks, users, clients=[], memberMeta={} }) => {
   const [fy, setFY] = useState('2026-27')
 
   const teamMembers = useMemo(() =>
@@ -155,7 +200,7 @@ export const DashboardLeaderboard = ({ tasks, users, clients, memberMeta={} }) =
   , [users])
 
   const stats = useMemo(() =>
-    teamMembers.map(u => getMemberStats(u, tasks||[], fy))
+    teamMembers.map(u => getMemberStats(u, tasks||[], fy, clients||[]))
   , [teamMembers, tasks, fy])
 
   const excelRows = useMemo(() =>

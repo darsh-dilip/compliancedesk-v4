@@ -60,9 +60,9 @@ const KanbanCard = ({ task, users, clients, onClick, currentUser, onMoved, dragC
       draggable
       onDragStart={e=>{ e.dataTransfer.setData('taskId', task.id); e.dataTransfer.setData('taskService', task.service) }}
       style={{
-        background:'var(--surface)',
-        border:`1px solid ${ov?'#f43f5e50':'var(--border)'}`,
+        border:`1px solid ${ov?'#f43f5e50':getClientCst(task.clientId)==='closure'?'#06b6d440':getClientCst(task.clientId)==='struck_off'?'#6b728040':'var(--border)'}`,
         borderLeft:`3px solid ${st.c}`,
+        background:getClientCst(task.clientId)==='closure'?'#06b6d406':getClientCst(task.clientId)==='struck_off'?'#6b728006':'var(--surface)',
         borderRadius:8,
         padding:'10px 10px 8px 10px',
         marginBottom:6,
@@ -286,7 +286,8 @@ export const TasksPage = ({ tasks, user, users, clients, onTask, initialBucket=n
     const m={}; clients.forEach(c=>m[c.id]=c.clientStatus||'active'); return m
   },[clients])
 
-  const isClientOnHold = cid => ['on_hold','suspended','customer_refused','not_in_compliance','discontinued'].includes(clientStatusMap[cid])
+  const isClientOnHold = cid => ['on_hold','suspended','customer_refused','not_in_compliance','discontinued','struck_off'].includes(clientStatusMap[cid])
+  const getClientCst = cid => clientStatusMap[cid]||'active'
 
   const visible = useMemo(()=>{
     const ids = getVisibleUserIds(user,users)

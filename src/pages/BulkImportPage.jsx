@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import * as XLSX from 'xlsx'
 import { CONSTITUTIONS, CLIENT_CATEGORIES, FINANCIAL_YEARS, ROLES } from '../constants.js'
 import { generateTasks } from '../utils/taskGenerator.js'
-import { addClient, bulkAddTasks } from '../hooks/useFirestore.js'
+import { addClient, bulkAddTasks, upsertCredential } from '../hooks/useFirestore.js'
 import { Alert } from '../components/UI.jsx'
 
 const COLS = [
@@ -25,6 +25,16 @@ const COLS = [
   { k:'accounting',   h:'Accounting (Y/N)',        eg:'N' },
   { k:'assignTo',     h:'Assign To (Name) *',     eg:'Priya Sharma' },
   { k:'fy',           h:'FY',                     eg:'2025-26' },
+]
+
+
+const CRED_COLS = [
+  { k:'clientName', h:'Client Name *',  eg:'Sharma Enterprises Pvt Ltd' },
+  { k:'service',    h:'Service / Portal *', eg:'GST Portal' },
+  { k:'username',   h:'Username / ID',   eg:'27AAAA0000A1Z5' },
+  { k:'password',   h:'Password',        eg:'Pass@1234' },
+  { k:'pin',        h:'PIN',             eg:'123456' },
+  { k:'notes',      h:'Notes',           eg:'Registered mobile: 9876543210' },
 ]
 
 const yn = v => String(v||'').trim().toUpperCase() === 'Y'
@@ -280,5 +290,65 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
         </div>
       )}
     </div>
+
+      </>}
+      {tab==='credentials' && (
+        <div>
+          <div style={{ fontSize:16,fontWeight:700,color:'var(--text)',marginBottom:4 }}>🔐 Bulk Credentials Upload</div>
+          <div style={{ fontSize:12,color:'var(--text3)',marginBottom:16 }}>Upload credentials for multiple clients at once. Existing records for the same client + service will be updated.</div>
+          <div style={{ display:'flex',gap:8,marginBottom:16 }}>
+            <button className="btn btn-ghost btn-sm" onClick={downloadCredTemplate}>⬇ Download Template</button>
+          </div>
+          <label style={{ display:'flex',alignItems:'center',gap:10,padding:'14px 18px',borderRadius:10,border:'2px dashed var(--border2)',cursor:'pointer',marginBottom:16 }}>
+            <span style={{ fontSize:20 }}>📎</span>
+            <div>
+              <div style={{ fontWeight:600,fontSize:13,color:'var(--text)' }}>{credFile?credFile.name:'Choose Excel file (.xlsx)'}</div>
+              <div style={{ fontSize:11,color:'var(--text3)',marginTop:2 }}>clientName · service · username · password · pin · notes</div>
+            </div>
+            <input type="file" accept=".xlsx,.xls" style={{ display:'none' }} onChange={e=>parseCreds(e.target.files[0])}/>
+          </label>
+
+          {credRows.length>0&&(
+            <div style={{ marginBottom:16 }}>
+              <div style={{ fontSize:12,color:'var(--text3)',marginBottom:8 }}>{credRows.filter(r=>r.errors.length===0).length} valid · {credRows.filter(r=>r.errors.length>0).length} errors</div>
+              <div style={{ maxHeight:300,overflowY:'auto',borderRadius:8,border:'1px solid var(--border)' }}>
+                <table style={{ width:'100%',fontSize:11,borderCollapse:'collapse' }}>
+                  <thead style={{ position:'sticky',top:0,background:'var(--surface)' }}>
+                    <tr>{['#','Client','Service','Username','Password','Notes','Status'].map(h=><th key={h} style={{ padding:'6px 10px',textAlign:'left',color:'var(--text3)',fontWeight:600,fontSize:10,borderBottom:'1px solid var(--border)' }}>{h}</th>)}</tr>
+                  </thead>
+                  <tbody>
+                    {credRows.map((r,i)=>(
+                      <tr key={i} style={{ borderBottom:'1px solid var(--border)',background:r.errors.length?'#f43f5e08':'transparent' }}>
+                        <td style={{ padding:'5px 10px',color:'var(--text3)' }}>{r.rowNum}</td>
+                        <td style={{ padding:'5px 10px' }}>{r.clientName||'—'}</td>
+                        <td style={{ padding:'5px 10px' }}>{r.service||'—'}</td>
+                        <td style={{ padding:'5px 10px',color:'var(--text2)' }}>{r.username||'—'}</td>
+                        <td style={{ padding:'5px 10px',color:'var(--text3)',fontFamily:'monospace' }}>{r.password?'••••••':'—'}</td>
+                        <td style={{ padding:'5px 10px',color:'var(--text3)',maxWidth:120,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap' }}>{r.notes||'—'}</td>
+                        <td style={{ padding:'5px 10px' }}>
+                          {r.errors.length ? <span style={{ color:'#f43f5e',fontSize:10 }}>✗ {r.errors.join(', ')}</span> : <span style={{ color:'#22c55e',fontWeight:600 }}>✓</span>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {credFinished&&(
+            <div style={{ marginBottom:16,padding:'12px 16px',borderRadius:8,background:'#22c55e12',border:'1px solid #22c55e40' }}>
+              <div style={{ fontWeight:700,color:'#22c55e' }}>✅ Import complete: {credDone} credential records saved.</div>
+              {credErrors.length>0&&credErrors.map((e,i)=><div key={i} style={{ fontSize:11,color:'#f43f5e',marginTop:4 }}>{e}</div>)}
+            </div>
+          )}
+
+          {credRows.filter(r=>r.errors.length===0).length>0&&!credFinished&&(
+            <button className="btn btn-primary" onClick={runCredImport} disabled={credSaving}>
+              {credSaving?`Saving… (${credDone})`:`🔐 Import ${credRows.filter(r=>r.errors.length===0).length} Credential Records`}
+            </button>
+          )}
+        </div>
+      )}
   )
 }
