@@ -176,6 +176,12 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
   return (
     <div className="fade-up" style={{ padding:'24px 28px',maxWidth:1000 }}>
       <button className="btn btn-ghost btn-sm" onClick={onBack} style={{ marginBottom:16 }}>← Back</button>
+      <div style={{ display:'flex',gap:4,marginBottom:20 }}>
+        {[['clients','👥 Clients'],['credentials','🔐 Credentials']].map(([v,l])=>(
+          <button key={v} onClick={()=>setTab(v)} style={{ padding:'6px 16px',borderRadius:8,fontSize:12,fontWeight:600,cursor:'pointer',border:'1px solid var(--border2)',background:tab===v?'var(--surface3)':'transparent',color:tab===v?'var(--text)':'var(--text3)' }}>{l}</button>
+        ))}
+      </div>
+      {tab==='clients' && <div>
       <div style={{ display:'flex',alignItems:'center',gap:16,marginBottom:24 }}>
         <div>
           <div style={{ fontSize:20,fontWeight:800,color:'var(--text)' }}>📥 Bulk Client Import</div>
@@ -289,9 +295,7 @@ export const BulkImportPage = ({ users, clients, onBack }) => {
           <button className="btn btn-primary" onClick={onBack}>← Back to Clients</button>
         </div>
       )}
-    </div>
-
-      </>}
+      </div>}
       {tab==='credentials' && (
         <div>
           <div style={{ fontSize:16,fontWeight:700,color:'var(--text)',marginBottom:4 }}>🔐 Bulk Credentials Upload</div>
