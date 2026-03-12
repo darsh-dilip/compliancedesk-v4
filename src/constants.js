@@ -10,7 +10,7 @@ export const ROLE_CLR   = {
 }
 
 // ── FINANCIAL YEARS ──────────────────────────────────────────
-export const FINANCIAL_YEARS = ['2026-27','2027-28']
+export const FINANCIAL_YEARS = ['2026-27','2027-28','2028-29','2029-30']
 
 // ── CLIENT-LEVEL STATUS ──────────────────────────────────────
 export const CLIENT_STATUS = {
