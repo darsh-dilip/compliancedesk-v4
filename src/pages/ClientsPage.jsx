@@ -19,7 +19,7 @@ const ClientStatusControl = ({ client, currentUser }) => {
   return (
     <div style={{ display:'flex',alignItems:'center',gap:6,flexWrap:'wrap' }}>
       <span style={{ fontSize:11,color:'var(--text3)' }}>Client Status:</span>
-      {[{v:'active',l:'Active',c:'#22c55e'},{v:'on_hold',l:'On Hold',c:'#f59e0b'},{v:'discontinued',l:'Discontinued',c:'#f43f5e'}].map(o=>(
+      {[{v:'active',l:'Active',c:'#22c55e'},{v:'on_hold',l:'On Hold',c:'#f59e0b'},{v:'discontinued',l:'Discontinued',c:'#f43f5e'},{v:'closure',l:'Closure',c:'#eab308'},{v:'struck_off',l:'Struck Off',c:'#6b7280'}].map(o=>(
         <button key={o.v} onClick={()=>change(o.v)} disabled={saving} style={{ padding:'4px 12px',borderRadius:20,fontSize:11,fontWeight:700,cursor:'pointer',border:`1px solid ${o.c}50`,background:cur===o.v?`${o.c}20`:'transparent',color:cur===o.v?o.c:'var(--text3)',outline:cur===o.v?`1px solid ${o.c}`:'none',transition:'all .15s' }}>{o.l}</button>
       ))}
     </div>
@@ -74,7 +74,7 @@ const ClientRow = ({ client, users, tasks, onClick, memberMeta={} }) => {
   const cst=client.clientStatus||'active'
   const comps=[client.gstApplicable&&`GST(${client.gstFreq==='monthly'?'M':'Q'})`,client.tdsApplicable&&'TDS',client.ptMH&&'PT-MH',client.ptKA&&'PT-KA',client.itApplicable&&'IT',client.advanceTax&&'AdvTax',client.accounting&&'Accts'].filter(Boolean)
   return (
-    <div onClick={onClick} className="hover-lift" style={{ background:'var(--surface)',borderRadius:12,cursor:'pointer',border:`1px solid ${cst==='discontinued'?'#f43f5e40':cst==='on_hold'?'#f59e0b40':'var(--border)'}`,padding:'14px 18px',display:'grid',gridTemplateColumns:'2fr 1fr auto auto',alignItems:'center',gap:16,opacity:cst==='discontinued'?.7:1 }}>
+    <div onClick={onClick} className="hover-lift" style={{ background:'var(--surface)',borderRadius:12,cursor:'pointer',border:`1px solid ${cst==='discontinued'?'#f43f5e40':cst==='struck_off'?'#6b728040':cst==='on_hold'?'#f59e0b40':cst==='closure'?'#eab30850':'var(--border)'}`,padding:'14px 18px',display:'grid',gridTemplateColumns:'2fr 1fr auto auto',alignItems:'center',gap:16,opacity:cst==='discontinued'||cst==='struck_off'?.7:1,boxShadow:cst==='closure'?'inset 0 0 0 1px #eab30830':cst==='struck_off'?'inset 0 0 0 1px #6b728030':'none' }}>
       <div>
         <div style={{ display:'flex',alignItems:'center',gap:8,marginBottom:4 }}>
           <div style={{ fontWeight:700,fontSize:14,color:'var(--text)' }}>{client.name}</div>
@@ -186,8 +186,8 @@ const ClientDetail = ({ client, tasks, users, currentUser, onTask, onBack, onAdd
       <div className="card" style={{ padding:'12px 16px',marginBottom:16 }}>
         <ClientStatusControl client={client} currentUser={currentUser}/>
         {cst!=='active'&&(
-          <div style={{ marginTop:8,fontSize:12,color:cst==='discontinued'?'var(--danger)':'var(--warn)' }}>
-            {cst==='on_hold'?'⚠️ All tasks show ON HOLD badge. Internal statuses preserved.':'🛑 All tasks show STOP SERVICE badge.'}
+          <div style={{ marginTop:8,fontSize:12,color:cst==='discontinued'?'var(--danger)':cst==='struck_off'?'#6b7280':cst==='closure'?'#eab308':'var(--warn)' }}>
+            {cst==='on_hold'?'⚠️ All tasks show ON HOLD badge. Internal statuses preserved.':cst==='discontinued'?'🛑 All tasks show STOP SERVICE badge.':cst==='closure'?'🟡 Client is winding down. Tasks continue normally — marked as Closure.':'⬛ Business struck off. Tasks show STRUCK OFF badge.'}
           </div>
         )}
       </div>
@@ -284,7 +284,7 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
     />
   )
 
-  const counts={ all:visibleClients.length, active:visibleClients.filter(c=>(c.clientStatus||'active')==='active').length, on_hold:visibleClients.filter(c=>c.clientStatus==='on_hold').length, discontinued:visibleClients.filter(c=>c.clientStatus==='discontinued').length }
+  const counts={ all:visibleClients.length, active:visibleClients.filter(c=>(c.clientStatus||'active')==='active').length, on_hold:visibleClients.filter(c=>c.clientStatus==='on_hold').length, discontinued:visibleClients.filter(c=>c.clientStatus==='discontinued').length, closure:visibleClients.filter(c=>c.clientStatus==='closure').length, struck_off:visibleClients.filter(c=>c.clientStatus==='struck_off').length }
   const filtered = visibleClients.filter(c=>{
     const ms=c.name.toLowerCase().includes(search.toLowerCase())||(c.gstin||'').includes(search)||(c.pan||'').includes(search)
     const mf=filter==='all'||(c.clientStatus||'active')===filter
@@ -307,7 +307,7 @@ export const ClientsPage = ({ clients, users, tasks, currentUser, onAdd, onTask,
           {CLIENT_CATEGORIES.map(x=><option key={x} value={x}>Category {x}</option>)}
         </select>
         <div style={{ display:'flex',gap:4 }}>
-          {[['all','All'],['active','Active'],['on_hold','On Hold'],['discontinued','Discontinued']].map(([v,l])=>(
+          {[['all','All'],['active','Active'],['on_hold','On Hold'],['discontinued','Discontinued'],['closure','Closure'],['struck_off','Struck Off']].map(([v,l])=>(
             <button key={v} onClick={()=>setFilter(v)} style={{ padding:'6px 12px',borderRadius:20,fontSize:12,fontWeight:600,cursor:'pointer',border:'1px solid var(--border2)',background:filter===v?'var(--surface3)':'transparent',color:filter===v?'var(--text)':'var(--text3)' }}>{l} ({counts[v]})</button>
           ))}
         </div>

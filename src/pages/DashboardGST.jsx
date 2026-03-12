@@ -33,7 +33,7 @@ export const DashboardGST = ({ clients, tasks, users, onTask }) => {
   const [search,  setSearch]  = useState('')
   const [view,    setView]    = useState('matrix')
 
-  const gstClients = clients.filter(c=>c.gstApplicable&&(c.clientStatus||'active')!=='discontinued')
+  const gstClients = clients.filter(c=>c.gstApplicable&&!['discontinued','struck_off'].includes(c.clientStatus||'active'))
   const filtered   = gstClients.filter(c=>{
     if (fFreq && c.gstFreq!==fFreq) return false
     if (fUser && c.assignedTo!==fUser) return false
