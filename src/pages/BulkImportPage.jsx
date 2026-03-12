@@ -29,15 +29,6 @@ const COLS = [
 
 
 const CRED_COLS = [
-  { k:'clientName', h:'Client Name *',  eg:'Sharma Enterprises Pvt Ltd' },
-  { k:'service',    h:'Service / Portal *', eg:'GST Portal' },
-  { k:'username',   h:'Username / ID',   eg:'27AAAA0000A1Z5' },
-  { k:'password',   h:'Password',        eg:'Pass@1234' },
-  { k:'pin',        h:'PIN',             eg:'123456' },
-  { k:'notes',      h:'Notes',           eg:'Registered mobile: 9876543210' },
-]
-
-const CRED_COLS = [
   { k:'clientName', h:'Client Name *',       eg:'Sharma Enterprises Pvt Ltd' },
   { k:'service',    h:'Service / Portal *',  eg:'GST Portal' },
   { k:'username',   h:'Username / ID',       eg:'27AAAA0000A1Z5' },
